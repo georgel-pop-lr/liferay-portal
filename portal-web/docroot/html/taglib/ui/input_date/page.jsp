@@ -69,6 +69,7 @@ if (!BrowserSnifferUtil.isMobile(request)) {
 	mask = simpleDateFormatPattern;
 
 	mask = mask.replaceAll("yyyy", "%Y");
+	mask = mask.replaceAll("y", "%y");
 	mask = mask.replaceAll("MM", "%m");
 	mask = mask.replaceAll("dd", "%d");
 }
