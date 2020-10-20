@@ -3,7 +3,6 @@
 exports[`Field DocumentLibrary has a helptext 1`] = `
 <div>
   <div
-    aria-labelledby="textField_fieldDetails"
     class="form-group hide"
     data-field-name="textField"
     tabindex="0"
@@ -18,7 +17,9 @@ exports[`Field DocumentLibrary has a helptext 1`] = `
           class="input-group-item input-group-prepend"
         >
           <input
-            aria-label="file"
+            aria-errormessage="textField_fieldError"
+            aria-invalid="true"
+            aria-labelledby="textField_fieldLabel"
             class="form-control field"
             disabled=""
             id="textFieldinputFile"
@@ -30,6 +31,7 @@ exports[`Field DocumentLibrary has a helptext 1`] = `
           class="input-group-item input-group-append input-group-item-shrink"
         >
           <button
+            aria-labelledby="textField_selectLabel textField_fieldLabel"
             class="select-button btn btn-secondary"
             type="button"
           >
@@ -47,20 +49,40 @@ exports[`Field DocumentLibrary has a helptext 1`] = `
         type="hidden"
         value="{}"
       />
+      <span
+        class="sr-only"
+        id="textField_unselectFileLabel"
+      >
+        unselect-file
+      </span>
+      <span
+        class="sr-only"
+        id="textField_selectLabel"
+      >
+        select
+      </span>
+      <span
+        class="sr-only"
+        id="textField_selectedLabel"
+      >
+        selected
+      </span>
+      <span
+        class="sr-only"
+        id="textField_fileNameLabel"
+      >
+        file-name
+      </span>
+      <span
+        class="sr-only"
+        id="textField_fileName"
+      />
     </div>
     <span
-      aria-hidden="true"
       class="form-text"
+      id="textField_fieldTip"
     >
       Type something
-    </span>
-    <span
-      aria-hidden="false"
-      hidden=""
-      id="textField_fieldDetails"
-    >
-      Type something
-      <br />
     </span>
   </div>
 </div>
@@ -73,8 +95,9 @@ exports[`Field DocumentLibrary has a label 1`] = `
     data-field-name="textField"
   >
     <label
-      aria-labelledby="textField_fieldDetails"
+      aria-labelledby="textField_fieldOnlyLabel"
       class="ddm-label"
+      id="textField_fieldLabel"
       tabindex="0"
     >
       label
@@ -89,7 +112,9 @@ exports[`Field DocumentLibrary has a label 1`] = `
           class="input-group-item input-group-prepend"
         >
           <input
-            aria-label="file"
+            aria-errormessage="textField_fieldError"
+            aria-invalid="true"
+            aria-labelledby="textField_fieldLabel"
             class="form-control field"
             disabled=""
             id="textFieldinputFile"
@@ -101,6 +126,7 @@ exports[`Field DocumentLibrary has a label 1`] = `
           class="input-group-item input-group-append input-group-item-shrink"
         >
           <button
+            aria-labelledby="textField_selectLabel textField_fieldLabel"
             class="select-button btn btn-secondary"
             type="button"
           >
@@ -118,14 +144,40 @@ exports[`Field DocumentLibrary has a label 1`] = `
         type="hidden"
         value="{}"
       />
+      <span
+        class="sr-only"
+        id="textField_unselectFileLabel"
+      >
+        unselect-file
+      </span>
+      <span
+        class="sr-only"
+        id="textField_selectLabel"
+      >
+        select
+      </span>
+      <span
+        class="sr-only"
+        id="textField_selectedLabel"
+      >
+        selected
+      </span>
+      <span
+        class="sr-only"
+        id="textField_fileNameLabel"
+      >
+        file-name
+      </span>
+      <span
+        class="sr-only"
+        id="textField_fileName"
+      />
     </div>
     <span
-      aria-hidden="false"
-      hidden=""
-      id="textField_fieldDetails"
+      class="sr-only"
+      id="textField_fieldOnlyLabel"
     >
       label
-      <br />
     </span>
   </div>
 </div>
@@ -134,7 +186,6 @@ exports[`Field DocumentLibrary has a label 1`] = `
 exports[`Field DocumentLibrary has a placeholder 1`] = `
 <div>
   <div
-    aria-labelledby="textField_fieldDetails"
     class="form-group hide"
     data-field-name="textField"
     tabindex="0"
@@ -149,7 +200,9 @@ exports[`Field DocumentLibrary has a placeholder 1`] = `
           class="input-group-item input-group-prepend"
         >
           <input
-            aria-label="file"
+            aria-errormessage="textField_fieldError"
+            aria-invalid="true"
+            aria-labelledby="textField_fieldLabel"
             class="form-control field"
             disabled=""
             id="textFieldinputFile"
@@ -161,6 +214,7 @@ exports[`Field DocumentLibrary has a placeholder 1`] = `
           class="input-group-item input-group-append input-group-item-shrink"
         >
           <button
+            aria-labelledby="textField_selectLabel textField_fieldLabel"
             class="select-button btn btn-secondary"
             type="button"
           >
@@ -179,8 +233,35 @@ exports[`Field DocumentLibrary has a placeholder 1`] = `
         type="hidden"
         value="{}"
       />
+      <span
+        class="sr-only"
+        id="textField_unselectFileLabel"
+      >
+        unselect-file
+      </span>
+      <span
+        class="sr-only"
+        id="textField_selectLabel"
+      >
+        select
+      </span>
+      <span
+        class="sr-only"
+        id="textField_selectedLabel"
+      >
+        selected
+      </span>
+      <span
+        class="sr-only"
+        id="textField_fileNameLabel"
+      >
+        file-name
+      </span>
+      <span
+        class="sr-only"
+        id="textField_fileName"
+      />
     </div>
-    
   </div>
 </div>
 `;
@@ -188,7 +269,6 @@ exports[`Field DocumentLibrary has a placeholder 1`] = `
 exports[`Field DocumentLibrary has a spritemap 1`] = `
 <div>
   <div
-    aria-labelledby="textField_fieldDetails"
     class="form-group hide"
     data-field-name="textField"
     tabindex="0"
@@ -203,7 +283,9 @@ exports[`Field DocumentLibrary has a spritemap 1`] = `
           class="input-group-item input-group-prepend"
         >
           <input
-            aria-label="file"
+            aria-errormessage="textField_fieldError"
+            aria-invalid="true"
+            aria-labelledby="textField_fieldLabel"
             class="form-control field"
             disabled=""
             id="textFieldinputFile"
@@ -215,6 +297,7 @@ exports[`Field DocumentLibrary has a spritemap 1`] = `
           class="input-group-item input-group-append input-group-item-shrink"
         >
           <button
+            aria-labelledby="textField_selectLabel textField_fieldLabel"
             class="select-button btn btn-secondary"
             type="button"
           >
@@ -232,8 +315,35 @@ exports[`Field DocumentLibrary has a spritemap 1`] = `
         type="hidden"
         value="{}"
       />
+      <span
+        class="sr-only"
+        id="textField_unselectFileLabel"
+      >
+        unselect-file
+      </span>
+      <span
+        class="sr-only"
+        id="textField_selectLabel"
+      >
+        select
+      </span>
+      <span
+        class="sr-only"
+        id="textField_selectedLabel"
+      >
+        selected
+      </span>
+      <span
+        class="sr-only"
+        id="textField_fileNameLabel"
+      >
+        file-name
+      </span>
+      <span
+        class="sr-only"
+        id="textField_fileName"
+      />
     </div>
-    
   </div>
 </div>
 `;
@@ -241,7 +351,6 @@ exports[`Field DocumentLibrary has a spritemap 1`] = `
 exports[`Field DocumentLibrary has a value 1`] = `
 <div>
   <div
-    aria-labelledby="textField_fieldDetails"
     class="form-group hide"
     data-field-name="textField"
     tabindex="0"
@@ -256,7 +365,9 @@ exports[`Field DocumentLibrary has a value 1`] = `
           class="input-group-item input-group-prepend"
         >
           <input
-            aria-label="file"
+            aria-errormessage="textField_fieldError"
+            aria-invalid="true"
+            aria-labelledby="textField_fieldLabel"
             class="form-control field"
             disabled=""
             id="textFieldinputFile"
@@ -268,6 +379,7 @@ exports[`Field DocumentLibrary has a value 1`] = `
           class="input-group-item input-group-append input-group-item-shrink"
         >
           <button
+            aria-labelledby="textField_selectLabel textField_fieldLabel"
             class="select-button btn btn-secondary"
             type="button"
           >
@@ -285,8 +397,35 @@ exports[`Field DocumentLibrary has a value 1`] = `
         type="hidden"
         value="{\\"id\\":\\"123\\"}"
       />
+      <span
+        class="sr-only"
+        id="textField_unselectFileLabel"
+      >
+        unselect-file
+      </span>
+      <span
+        class="sr-only"
+        id="textField_selectLabel"
+      >
+        select
+      </span>
+      <span
+        class="sr-only"
+        id="textField_selectedLabel"
+      >
+        selected
+      </span>
+      <span
+        class="sr-only"
+        id="textField_fileNameLabel"
+      >
+        file-name
+      </span>
+      <span
+        class="sr-only"
+        id="textField_fileName"
+      />
     </div>
-    
   </div>
 </div>
 `;
@@ -294,7 +433,6 @@ exports[`Field DocumentLibrary has a value 1`] = `
 exports[`Field DocumentLibrary has an id 1`] = `
 <div>
   <div
-    aria-labelledby="textField_fieldDetails"
     class="form-group hide"
     data-field-name="textField"
     tabindex="0"
@@ -309,7 +447,9 @@ exports[`Field DocumentLibrary has an id 1`] = `
           class="input-group-item input-group-prepend"
         >
           <input
-            aria-label="file"
+            aria-errormessage="textField_fieldError"
+            aria-invalid="true"
+            aria-labelledby="textField_fieldLabel"
             class="form-control field"
             disabled=""
             id="textFieldinputFile"
@@ -321,6 +461,7 @@ exports[`Field DocumentLibrary has an id 1`] = `
           class="input-group-item input-group-append input-group-item-shrink"
         >
           <button
+            aria-labelledby="textField_selectLabel textField_fieldLabel"
             class="select-button btn btn-secondary"
             type="button"
           >
@@ -339,8 +480,35 @@ exports[`Field DocumentLibrary has an id 1`] = `
         type="hidden"
         value="{}"
       />
+      <span
+        class="sr-only"
+        id="textField_unselectFileLabel"
+      >
+        unselect-file
+      </span>
+      <span
+        class="sr-only"
+        id="textField_selectLabel"
+      >
+        select
+      </span>
+      <span
+        class="sr-only"
+        id="textField_selectedLabel"
+      >
+        selected
+      </span>
+      <span
+        class="sr-only"
+        id="textField_fileNameLabel"
+      >
+        file-name
+      </span>
+      <span
+        class="sr-only"
+        id="textField_fileName"
+      />
     </div>
-    
   </div>
 </div>
 `;
@@ -348,7 +516,6 @@ exports[`Field DocumentLibrary has an id 1`] = `
 exports[`Field DocumentLibrary is not readOnly 1`] = `
 <div>
   <div
-    aria-labelledby="textField_fieldDetails"
     class="form-group hide"
     data-field-name="textField"
     tabindex="0"
@@ -363,7 +530,9 @@ exports[`Field DocumentLibrary is not readOnly 1`] = `
           class="input-group-item input-group-prepend"
         >
           <input
-            aria-label="file"
+            aria-errormessage="textField_fieldError"
+            aria-invalid="true"
+            aria-labelledby="textField_fieldLabel"
             class="form-control field"
             disabled=""
             id="textFieldinputFile"
@@ -375,6 +544,7 @@ exports[`Field DocumentLibrary is not readOnly 1`] = `
           class="input-group-item input-group-append input-group-item-shrink"
         >
           <button
+            aria-labelledby="textField_selectLabel textField_fieldLabel"
             class="select-button btn btn-secondary"
             type="button"
           >
@@ -392,8 +562,35 @@ exports[`Field DocumentLibrary is not readOnly 1`] = `
         type="hidden"
         value="{}"
       />
+      <span
+        class="sr-only"
+        id="textField_unselectFileLabel"
+      >
+        unselect-file
+      </span>
+      <span
+        class="sr-only"
+        id="textField_selectLabel"
+      >
+        select
+      </span>
+      <span
+        class="sr-only"
+        id="textField_selectedLabel"
+      >
+        selected
+      </span>
+      <span
+        class="sr-only"
+        id="textField_fileNameLabel"
+      >
+        file-name
+      </span>
+      <span
+        class="sr-only"
+        id="textField_fileName"
+      />
     </div>
-    
   </div>
 </div>
 `;
@@ -401,7 +598,6 @@ exports[`Field DocumentLibrary is not readOnly 1`] = `
 exports[`Field DocumentLibrary is not required 1`] = `
 <div>
   <div
-    aria-labelledby="textField_fieldDetails"
     class="form-group hide"
     data-field-name="textField"
     tabindex="0"
@@ -416,7 +612,10 @@ exports[`Field DocumentLibrary is not required 1`] = `
           class="input-group-item input-group-prepend"
         >
           <input
-            aria-label="file"
+            aria-errormessage="textField_fieldError"
+            aria-invalid="true"
+            aria-labelledby="textField_fieldLabel"
+            aria-required="false"
             class="form-control field"
             disabled=""
             id="textFieldinputFile"
@@ -428,6 +627,7 @@ exports[`Field DocumentLibrary is not required 1`] = `
           class="input-group-item input-group-append input-group-item-shrink"
         >
           <button
+            aria-labelledby="textField_selectLabel textField_fieldLabel"
             class="select-button btn btn-secondary"
             type="button"
           >
@@ -445,8 +645,35 @@ exports[`Field DocumentLibrary is not required 1`] = `
         type="hidden"
         value="{}"
       />
+      <span
+        class="sr-only"
+        id="textField_unselectFileLabel"
+      >
+        unselect-file
+      </span>
+      <span
+        class="sr-only"
+        id="textField_selectLabel"
+      >
+        select
+      </span>
+      <span
+        class="sr-only"
+        id="textField_selectedLabel"
+      >
+        selected
+      </span>
+      <span
+        class="sr-only"
+        id="textField_fileNameLabel"
+      >
+        file-name
+      </span>
+      <span
+        class="sr-only"
+        id="textField_fileName"
+      />
     </div>
-    
   </div>
 </div>
 `;
@@ -458,8 +685,9 @@ exports[`Field DocumentLibrary renders Label if showLabel is true 1`] = `
     data-field-name="textField"
   >
     <label
-      aria-labelledby="textField_fieldDetails"
+      aria-labelledby="textField_fieldOnlyLabel"
       class="ddm-label"
+      id="textField_fieldLabel"
       tabindex="0"
     >
       text
@@ -474,7 +702,9 @@ exports[`Field DocumentLibrary renders Label if showLabel is true 1`] = `
           class="input-group-item input-group-prepend"
         >
           <input
-            aria-label="file"
+            aria-errormessage="textField_fieldError"
+            aria-invalid="true"
+            aria-labelledby="textField_fieldLabel"
             class="form-control field"
             disabled=""
             id="textFieldinputFile"
@@ -486,6 +716,7 @@ exports[`Field DocumentLibrary renders Label if showLabel is true 1`] = `
           class="input-group-item input-group-append input-group-item-shrink"
         >
           <button
+            aria-labelledby="textField_selectLabel textField_fieldLabel"
             class="select-button btn btn-secondary"
             type="button"
           >
@@ -503,14 +734,40 @@ exports[`Field DocumentLibrary renders Label if showLabel is true 1`] = `
         type="hidden"
         value="{}"
       />
+      <span
+        class="sr-only"
+        id="textField_unselectFileLabel"
+      >
+        unselect-file
+      </span>
+      <span
+        class="sr-only"
+        id="textField_selectLabel"
+      >
+        select
+      </span>
+      <span
+        class="sr-only"
+        id="textField_selectedLabel"
+      >
+        selected
+      </span>
+      <span
+        class="sr-only"
+        id="textField_fileNameLabel"
+      >
+        file-name
+      </span>
+      <span
+        class="sr-only"
+        id="textField_fileName"
+      />
     </div>
     <span
-      aria-hidden="false"
-      hidden=""
-      id="textField_fieldDetails"
+      class="sr-only"
+      id="textField_fieldOnlyLabel"
     >
       text
-      <br />
     </span>
   </div>
 </div>
