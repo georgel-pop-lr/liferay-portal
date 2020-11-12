@@ -230,29 +230,41 @@ const DropdownItem = ({
 );
 
 const DropdownList = ({
+	alphabeticalOrder,
 	currentValue,
 	expand,
 	handleSelect,
 	multiple,
 	options,
-}) => (
-	<ClayDropDown.ItemList>
-		{options.map((option, index) => (
-			<DropdownItem
-				currentValue={currentValue}
-				expand={expand}
-				index={index}
-				key={`${option.value}-${index}`}
-				multiple={multiple}
-				onSelect={handleSelect}
-				option={option}
-				options={options}
-			/>
-		))}
-	</ClayDropDown.ItemList>
-);
+}) => <ClayDropDown.ItemList>
+	if (alphabeticalOrder) {
+		options = options.sort((a, b) => {
+			if(a.label < b.label) {
+				return -1;
+			}
+
+			if(a.label > b.label) {
+				return 1;
+			}
+
+			return 0;
+		})
+	}
+
+	{options.map((option, index) => <DropdownItem
+			currentValue={currentValue}
+			expand={expand}
+			index={index}
+			key={`${option.value}-${index}`}
+			multiple={multiple}
+			onSelect={handleSelect}
+			option={option}
+			options={options}
+		/>)}
+</ClayDropDown.ItemList>;
 
 const DropdownListWithSearch = ({
+	alphabeticalOrder,
 	currentValue,
 	expand,
 	handleSelect,
@@ -291,6 +303,7 @@ const DropdownListWithSearch = ({
 			/>
 			{filteredOptions.length > 1 ? (
 				<DropdownList
+					alphabeticalOrder={alphabeticalOrder}
 					currentValue={currentValue}
 					expand={expand}
 					handleSelect={handleSelect}
@@ -338,6 +351,7 @@ const Trigger = forwardRef(
 );
 
 const Select = ({
+	alphabeticalOrder,
 	multiple,
 	onCloseButtonClicked,
 	onDropdownItemClicked,
@@ -495,6 +509,7 @@ const Select = ({
 			>
 				{options.length > MAX_ITEMS ? (
 					<DropdownListWithSearch
+						alphabeticalOrder={alphabeticalOrder}
 						currentValue={currentValue}
 						expand={expand}
 						handleSelect={handleSelect}
@@ -517,6 +532,7 @@ const Select = ({
 };
 
 const Main = ({
+  	alphabeticalOrder,
 	fixedOptions = [],
 	label,
 	localizedValue = {},
@@ -567,6 +583,7 @@ const Main = ({
 			{...otherProps}
 		>
 			<Select
+				alphabeticalOrder={alphabeticalOrder}
 				multiple={multiple}
 				name={name}
 				onCloseButtonClicked={({event, value}) =>
