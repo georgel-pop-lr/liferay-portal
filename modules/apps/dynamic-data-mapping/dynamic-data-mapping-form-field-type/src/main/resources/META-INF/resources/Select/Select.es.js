@@ -229,6 +229,20 @@ const DropdownItem = ({
 	</>
 );
 
+const sortAlphabetically = (sortAlphabetically, options) =>
+	sortAlphabetically
+		? options.sort((a, b) => {
+				if (a.label < b.label) {
+					return -1;
+				}
+				if (a.label > b.label) {
+					return 1;
+				}
+
+				return 0;
+		  })
+		: options;
+
 const DropdownList = ({
 	alphabeticalOrder,
 	currentValue,
@@ -236,32 +250,22 @@ const DropdownList = ({
 	handleSelect,
 	multiple,
 	options,
-}) => <ClayDropDown.ItemList>
-	if (alphabeticalOrder) {
-		options = options.sort((a, b) => {
-			if(a.label < b.label) {
-				return -1;
-			}
-
-			if(a.label > b.label) {
-				return 1;
-			}
-
-			return 0;
-		})
-	}
-
-	{options.map((option, index) => <DropdownItem
-			currentValue={currentValue}
-			expand={expand}
-			index={index}
-			key={`${option.value}-${index}`}
-			multiple={multiple}
-			onSelect={handleSelect}
-			option={option}
-			options={options}
-		/>)}
-</ClayDropDown.ItemList>;
+}) => (
+	<ClayDropDown.ItemList>
+		{options.map((option, index) => (
+			<DropdownItem
+				currentValue={currentValue}
+				expand={expand}
+				index={index}
+				key={`${option.value}-${index}`}
+				multiple={multiple}
+				onSelect={handleSelect}
+				option={option}
+				options={sortAlphabetically(alphabeticalOrder, options)}
+			/>
+		))}
+	</ClayDropDown.ItemList>
+);
 
 const DropdownListWithSearch = ({
 	alphabeticalOrder,
@@ -290,6 +294,8 @@ const DropdownListWithSearch = ({
 
 			result = [emptyOption, ...result];
 		}
+
+		result = sortAlphabetically(alphabeticalOrder, result);
 
 		setFilteredOptions(result);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -532,7 +538,7 @@ const Select = ({
 };
 
 const Main = ({
-  	alphabeticalOrder,
+	alphabeticalOrder,
 	fixedOptions = [],
 	label,
 	localizedValue = {},
