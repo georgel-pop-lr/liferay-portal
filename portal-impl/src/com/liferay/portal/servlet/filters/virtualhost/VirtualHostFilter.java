@@ -354,6 +354,8 @@ public class VirtualHostFilter extends BasePortalFilter {
 				forwardURLString = sb.toString();
 			}
 
+			forwardURLString = HttpUtil.decodePath(forwardURLString);
+
 			if (_log.isDebugEnabled()) {
 				_log.debug("Forward to " + forwardURLString);
 			}
