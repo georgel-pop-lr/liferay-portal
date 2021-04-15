@@ -19,7 +19,7 @@ import ClayIcon from '@clayui/icon';
 import ClayMultiSelect from '@clayui/multi-select';
 import classNames from 'classnames';
 import {usePrevious} from 'frontend-js-react-web';
-import {ItemSelectorDialog} from 'frontend-js-web';
+import {openSelectionModal} from 'frontend-js-web';
 import PropTypes from 'prop-types';
 import React, {useEffect, useState} from 'react';
 
@@ -140,7 +140,37 @@ function AssetVocabulariesCategoriesSelector({
 			vocabularyIds: sourceItemsVocabularyIds.concat(),
 		});
 
-		const itemSelectorDialog = new ItemSelectorDialog({
+		openSelectionModal({
+			buttonAddLabel: Liferay.Language.get('done'),
+			multiple: true,
+			onSelect: (dialogSelectedItems) => {
+				if (dialogSelectedItems && dialogSelectedItems.items.length) {
+					const newValues = Object.keys(dialogSelectedItems).reduce(
+						(acc, itemKey) => {
+							const item = dialogSelectedItems[itemKey];
+							if (!item.unchecked) {
+								acc.push({
+									label: item.value,
+									value: item.categoryId,
+								});
+							}
+
+							return acc;
+						},
+						[]
+					);
+
+					onSelectedItemsChange(newValues);
+				}
+			},
+			selectEventName: eventName,
+			title: label
+				? Liferay.Util.sub(Liferay.Language.get('select-x'), label)
+				: Liferay.Language.get('select-categories'),
+			url,
+		});
+
+		/*const itemSelectorDialog = new ItemSelectorDialog({
 			buttonAddLabel: Liferay.Language.get('done'),
 			dialogClasses: 'modal-lg',
 			eventName,
@@ -173,7 +203,7 @@ function AssetVocabulariesCategoriesSelector({
 
 				onSelectedItemsChange(newValues);
 			}
-		});
+		});*/
 	};
 
 	return (
