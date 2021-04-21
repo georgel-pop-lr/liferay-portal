@@ -525,7 +525,7 @@ AUI.add(
 
 				instance._bindDOMWinResizeIfNeeded();
 
-				modal.render();
+				modal.render('body > div:last-child');
 
 				instance._setWindowDefaultSizeIfNeeded(modal);
 
