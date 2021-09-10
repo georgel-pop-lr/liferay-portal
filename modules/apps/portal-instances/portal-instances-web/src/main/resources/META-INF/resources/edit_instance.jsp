@@ -49,6 +49,7 @@ renderResponse.setTitle((selCompany == null) ? LanguageUtil.get(request, "new-in
 	<liferay-ui:error exception="<%= CompanyWebIdException.class %>" message="please-enter-a-valid-web-id" />
 
 	<aui:model-context bean="<%= selCompany %>" model="<%= Company.class %>" />
+	<aui:input name="active" type="hidden" value="<%= (selCompany != null) ? selCompany.isActive() : true %>" />
 
 	<aui:fieldset-group>
 		<aui:fieldset>
