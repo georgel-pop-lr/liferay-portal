@@ -20,6 +20,9 @@
 				combine: Liferay.AUI.getCombine(),
 				filter: Liferay.AUI.getFilterConfig(),
 				modules: {
+					'liferay-calendar-base-override': {
+						path: 'calendar_base_override.js',
+					},
 					'liferay-calendar-container': {
 						path: 'calendar_container.js',
 						requires: [
@@ -121,6 +124,7 @@
 							'aui-datatype',
 							'aui-scheduler',
 							'dd-plugin',
+							'liferay-calendar-base-override',
 							'liferay-calendar-message-util',
 							'liferay-calendar-recurrence-converter',
 							'liferay-calendar-recurrence-util',
