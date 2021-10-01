@@ -57,6 +57,10 @@ AUI.add(
 			Liferay.Language.get('today') +
 			'</button>';
 
+		var TPL_SCHEDULER_VIEWS = 
+		'<div aria-label="{ariaLabel}" class="col-xs-5 form-inline scheduler-base-views yui3-widget btn-group btn-group-content" role="listbox">' +	
+		'</div>';
+
 		var WEEKLY = 'WEEKLY';
 
 		var Time = Liferay.Time;
@@ -175,6 +179,18 @@ AUI.add(
 						);
 					},
 				},
+
+				viewsNode: {
+					valueFn() {
+						var instance = this;
+
+						return A.Node.create(
+							A.Lang.sub(TPL_SCHEDULER_VIEWS, {
+								ariaLabel: instance.getAriaLabel('calendar'),
+							})
+						);
+					},
+				},
 			},
 
 			AUGMENTS: [Liferay.RecurrenceConverter],
@@ -265,6 +281,9 @@ AUI.add(
 
 					if (viewName == 'agenda') {
 						schedulerViewText = Liferay.Language.get('agenda-view');
+					}
+					else if (viewName == 'calendar') {
+						schedulerViewText = Liferay.Language.get('calendar-views');
 					}
 					else if (viewName == 'day') {
 						schedulerViewText = Liferay.Language.get('day-view');
