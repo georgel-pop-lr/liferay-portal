@@ -224,7 +224,8 @@ td.lfr-name-column {
 .portlet-forms {
 	.form-group
 		.alloy-editor-container.input-group
-		.alloy-editor-placeholder.ae-placeholder {
+		.ae-placeholder
+		~ .alloy-editor-placeholder {
 		border-left: 0;
 		padding-left: 0;
 		width: inherit;
@@ -302,12 +303,9 @@ td.lfr-name-column {
 			margin: 0;
 		}
 
-		.ae-placeholder:empty:before {
-			content: attr(data-placeholder);
-		}
-
 		.alloy-editor-container
-			.alloy-editor.alloy-editor-placeholder.ae-placeholder:not(:focus):not(.form-control),
+			.alloy-editor.ae-placeholder:not(.form-control)
+			~ .alloy-editor-placeholder:not(:focus),
 		.ddm-form-name,
 		.ddm-form-description {
 			border-width: 0;
@@ -328,7 +326,7 @@ td.lfr-name-column {
 			font-weight: 500;
 		}
 
-		.alloy-editor.alloy-editor-placeholder:empty:not(:focus) {
+		.alloy-editor ~ .alloy-editor-placeholder:empty:not(:focus) {
 			color: #c0ccd3;
 		}
 

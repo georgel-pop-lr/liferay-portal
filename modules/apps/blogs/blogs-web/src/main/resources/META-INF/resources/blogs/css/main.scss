@@ -226,9 +226,10 @@ html#{$cadmin-selector} {
 	}
 
 	.edit-entry {
-		.alloy-editor-placeholder:before {
+		.alloy-editor.ae-placeholder ~ .alloy-editor-placeholder {
 			display: block;
 			text-align: inherit;
+			top: 0.15rem;
 			width: 100%;
 		}
 
@@ -236,18 +237,8 @@ html#{$cadmin-selector} {
 			padding-left: 0;
 			text-align: center;
 
-			&.alloy-editor-placeholder.ae-placeholder:not(:focus):not(.form-control) {
+			&.ae-placeholder:not(:focus):not(.form-control) {
 				border-left-width: 0;
-			}
-
-			&.alloy-editor-placeholder:before {
-				border-color: inherit;
-				border-left: 2px solid;
-				display: inline-block;
-				margin: 0 auto;
-				padding-left: 0.5rem;
-				text-align: center;
-				width: auto;
 			}
 		}
 
