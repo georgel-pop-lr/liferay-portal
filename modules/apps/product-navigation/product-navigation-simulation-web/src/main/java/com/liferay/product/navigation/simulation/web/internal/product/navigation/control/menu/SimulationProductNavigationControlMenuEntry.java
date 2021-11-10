@@ -233,6 +233,7 @@ public class SimulationProductNavigationControlMenuEntry
 
 			IconTag iconTag = new IconTag();
 
+			iconTag.setAriaLabel("Close");
 			iconTag.setCssClass("close sidenav-close");
 			iconTag.setImage("times");
 			iconTag.setMarkupView("lexicon");
