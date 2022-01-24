@@ -16,7 +16,16 @@
 
 		entryTitle = htmlUtil.escape(assetRenderer.getTitle(locale))
 
-		viewURL = assetPublisherHelper.getAssetViewURL(renderRequest, renderResponse, assetRenderer, entry, !stringUtil.equals(assetLinkBehavior, "showFullContent"))
+		hasDisplayPage = assetRenderer.hasDisplayPage(renderRequest)
+
+		isAssetLinkBehaviorShowFullContent = stringUtil.equals(assetLinkBehavior, "showFullContent")
+
+		viewURL = assetPublisherHelper.getAssetViewURL(renderRequest, renderResponse, assetRenderer, entry, !isAssetLinkBehaviorShowFullContent)
+
+		friendlyURL = assetPublisherHelper.getAssetViewURL(renderRequest, renderResponse, assetRenderer, entry, !isAssetLinkBehaviorShowFullContent, false)
+
+		hasPortletFriendlyURL = assetPublisherHelper.hasPortletFriendlyURL(portalUtil.getCurrentURL(
+		renderRequest), friendlyURL, false, isAssetLinkBehaviorShowFullContent)
 	/>
 
 	<div class="asset-abstract">
@@ -177,19 +186,32 @@
 	<#if getterUtil.getBoolean(enableRelatedAssets)>
 		<@liferay_asset["asset-links"]
 			assetEntryId=entry.getEntryId()
-			viewInContext=!stringUtil.equals(assetLinkBehavior, "showFullContent")
+			viewInContext=!isAssetLinkBehaviorShowFullContent
 		/>
 	</#if>
 </#macro>
 
 <#macro getSocialBookmarks>
-	<@liferay_social_bookmarks["bookmarks"]
-		className=entry.getClassName()
-		classPK=entry.getClassPK()
-		displayStyle="${socialBookmarksDisplayStyle}"
-		target="_blank"
-		title=entry.getTitle(locale)
-		types="${socialBookmarksTypes}"
-		url=viewURL
-	/>
+	<#if hasDisplayPage && hasPortletFriendlyURL>
+		<@liferay_social_bookmarks["bookmarks"]
+			className=entry.getClassName()
+			classPK=entry.getClassPK()
+			displayStyle="${socialBookmarksDisplayStyle}"
+			target="_blank"
+			title=entry.getTitle(locale)
+			types="${socialBookmarksTypes}"
+			url=friendlyURL
+			urlImpl=assetPublisherHelper.getBaseAssetViewURL(renderRequest, renderResponse, assetRenderer, entry)
+		/>
+	<#else>
+		<@liferay_social_bookmarks["bookmarks"]
+			className=entry.getClassName()
+			classPK=entry.getClassPK()
+			displayStyle="${socialBookmarksDisplayStyle}"
+			target="_blank"
+			title=entry.getTitle(locale)
+			types="${socialBookmarksTypes}"
+			urlImpl=assetPublisherHelper.getBaseAssetViewURL(renderRequest, renderResponse, assetRenderer, entry)
+		/>
+	</#if>
 </#macro>

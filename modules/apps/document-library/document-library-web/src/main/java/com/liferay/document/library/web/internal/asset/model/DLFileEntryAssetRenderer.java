@@ -15,6 +15,8 @@
 package com.liferay.document.library.web.internal.asset.model;
 
 import com.liferay.asset.display.page.portlet.AssetDisplayPageFriendlyURLProvider;
+import com.liferay.asset.display.page.util.AssetDisplayPageUtil;
+import com.liferay.asset.kernel.model.AssetEntry;
 import com.liferay.asset.kernel.model.AssetRendererFactory;
 import com.liferay.asset.kernel.model.BaseJSPAssetRenderer;
 import com.liferay.asset.kernel.model.DDMFormValuesReader;
@@ -348,6 +350,17 @@ public class DLFileEntryAssetRenderer
 	}
 
 	@Override
+	public boolean hasDisplayPage(LiferayPortletRequest liferayPortletRequest)
+		throws Exception {
+
+		ThemeDisplay themeDisplay =
+			(ThemeDisplay)liferayPortletRequest.getAttribute(
+				WebKeys.THEME_DISPLAY);
+
+		return _isShowDisplayPage(themeDisplay.getScopeGroupId(), _fileEntry);
+	}
+
+	@Override
 	public boolean hasEditPermission(PermissionChecker permissionChecker)
 		throws PortalException {
 
@@ -481,6 +494,25 @@ public class DLFileEntryAssetRenderer
 
 			return false;
 		}
+	}
+
+	private boolean _isShowDisplayPage(long groupId, FileEntry fileEntry)
+		throws Exception {
+
+		AssetRendererFactory<FileEntry> assetRendererFactory =
+			getAssetRendererFactory();
+
+		AssetEntry assetEntry = assetRendererFactory.getAssetEntry(
+			DLFileEntry.class.getName(), fileEntry.getFileEntryId());
+
+		if (!AssetDisplayPageUtil.hasAssetDisplayPage(
+				groupId, PortalUtil.getClassNameId(FileEntry.class.getName()),
+				assetEntry.getClassPK(), assetEntry.getClassTypeId())) {
+
+			return false;
+		}
+
+		return true;
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(

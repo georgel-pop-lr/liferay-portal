@@ -315,6 +315,10 @@ for (AssetEntry assetEntry : assetEntryResult.getAssetEntries()) {
 						</clay:content-col>
 					</c:if>
 
+					<%
+					String friendlyURL = assetPublisherHelper.getAssetViewURL(liferayPortletRequest, liferayPortletResponse, assetRenderer, assetEntry, true, false);
+					%>
+
 					<clay:content-col>
 						<liferay-social-bookmarks:bookmarks
 							className="<%= assetEntry.getClassName() %>"
@@ -323,6 +327,9 @@ for (AssetEntry assetEntry : assetEntryResult.getAssetEntries()) {
 							target="_blank"
 							title="<%= title %>"
 							types="<%= assetPublisherDisplayContext.getSocialBookmarksTypes() %>"
+							url="<%=
+								(assetRenderer.hasDisplayPage(liferayPortletRequest) && assetPublisherHelper.hasPortletFriendlyURL(PortalUtil.getCurrentURL(liferayPortletRequest), friendlyURL, false, assetPublisherDisplayContext.isAssetLinkBehaviorShowFullContent())) ? friendlyURL : null
+							%>"
 							urlImpl="<%= assetPublisherHelper.getBaseAssetViewURL(liferayPortletRequest, liferayPortletResponse, assetRenderer, assetEntry) %>"
 						/>
 					</clay:content-col>

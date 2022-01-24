@@ -59,6 +59,8 @@ if (print) {
 
 String viewInContextURL = assetRenderer.getURLViewInContext(liferayPortletRequest, liferayPortletResponse, HttpUtil.setParameter(viewFullContentURL.toString(), "redirect", currentURL));
 
+String friendlyURL = assetPublisherHelper.getAssetViewURL(liferayPortletRequest, liferayPortletResponse, assetRenderer, assetEntry, true, false);
+
 Map<String, Object> fragmentsEditorData = HashMapBuilder.<String, Object>put(
 	"fragments-editor-item-id", PortalUtil.getClassNameId(assetRenderer.getClassName()) + "-" + assetRenderer.getClassPK()
 ).put(
@@ -390,6 +392,9 @@ Map<String, Object> fragmentsEditorData = HashMapBuilder.<String, Object>put(
 						target="_blank"
 						title="<%= title %>"
 						types="<%= assetPublisherDisplayContext.getSocialBookmarksTypes() %>"
+						url="<%=
+							(assetRenderer.hasDisplayPage(liferayPortletRequest) && assetPublisherHelper.hasPortletFriendlyURL(PortalUtil.getCurrentURL(liferayPortletRequest), friendlyURL, viewSingleAsset, assetPublisherDisplayContext.isAssetLinkBehaviorShowFullContent())) ? friendlyURL : null
+						%>"
 						urlImpl="<%= viewFullContentURL %>"
 					/>
 				</clay:content-col>
