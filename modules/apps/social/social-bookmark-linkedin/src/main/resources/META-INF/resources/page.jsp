@@ -26,7 +26,7 @@ String url = GetterUtil.getString((String)request.getAttribute("liferay-social-b
 	additionalProps='<%= (HashMap)request.getAttribute("liferay-social-bookmarks:bookmark:additionalProps") %>'
 	aria-label="<%= socialBookmark.getName(request.getLocale()) %>"
 	borderless="<%= true %>"
-	cssClass="lfr-portal-tooltip"
+	cssClass="btn btn-monospaced btn-outline-borderless btn-outline-secondary btn-sm lfr-portal-tooltip"
 	displayType="secondary"
 	href="<%= socialBookmark.getPostURL(title, url) %>"
 	icon="social-linkedin"
