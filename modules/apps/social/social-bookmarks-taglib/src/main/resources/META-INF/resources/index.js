@@ -1,4 +1,3 @@
-<%--
 /**
  * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
@@ -12,11 +11,5 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
---%>
 
-<%@ taglib uri="http://liferay.com/tld/clay" prefix="clay" %>
-
-<%@ page import="com.liferay.portal.kernel.util.GetterUtil" %><%@
-page import="com.liferay.social.bookmarks.SocialBookmark" %>
-
-<%@ page import="java.util.HashMap" %>
+export {default as OpenSocialBookmarkPropsTransformer} from './js/OpenSocialBookmarkPropsTransformer';
