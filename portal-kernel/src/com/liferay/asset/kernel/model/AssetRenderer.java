@@ -179,6 +179,13 @@ public interface AssetRenderer<T> extends Renderer {
 
 	public String getViewInContextMessage();
 
+	public default boolean hasDisplayPage(
+			LiferayPortletRequest liferayPortletRequest)
+		throws Exception {
+
+		return false;
+	}
+
 	public boolean hasEditPermission(PermissionChecker permissionChecker)
 		throws PortalException;
 

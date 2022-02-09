@@ -15,6 +15,8 @@
 package com.liferay.blogs.web.internal.asset.model;
 
 import com.liferay.asset.display.page.portlet.AssetDisplayPageFriendlyURLProvider;
+import com.liferay.asset.display.page.util.AssetDisplayPageUtil;
+import com.liferay.asset.kernel.model.AssetEntry;
 import com.liferay.asset.kernel.model.AssetRendererFactory;
 import com.liferay.asset.kernel.model.BaseJSPAssetRenderer;
 import com.liferay.asset.util.AssetHelper;
@@ -270,6 +272,17 @@ public class BlogsEntryAssetRenderer
 	}
 
 	@Override
+	public boolean hasDisplayPage(LiferayPortletRequest liferayPortletRequest)
+		throws Exception {
+
+		ThemeDisplay themeDisplay =
+			(ThemeDisplay)liferayPortletRequest.getAttribute(
+				WebKeys.THEME_DISPLAY);
+
+		return _isShowDisplayPage(themeDisplay.getScopeGroupId(), _entry);
+	}
+
+	@Override
 	public boolean hasEditPermission(PermissionChecker permissionChecker)
 		throws PortalException {
 
@@ -333,6 +346,22 @@ public class BlogsEntryAssetRenderer
 
 			return false;
 		}
+	}
+
+	private boolean _isShowDisplayPage(long groupId, BlogsEntry entry)
+		throws Exception {
+
+		AssetRendererFactory<BlogsEntry> assetRendererFactory =
+			getAssetRendererFactory();
+
+		AssetEntry assetEntry = assetRendererFactory.getAssetEntry(
+			BlogsEntry.class.getName(), entry.getEntryId());
+
+		if (!AssetDisplayPageUtil.hasAssetDisplayPage(groupId, assetEntry)) {
+			return false;
+		}
+
+		return true;
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
