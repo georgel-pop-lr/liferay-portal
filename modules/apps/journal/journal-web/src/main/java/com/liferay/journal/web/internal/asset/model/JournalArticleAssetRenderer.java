@@ -430,6 +430,17 @@ public class JournalArticleAssetRenderer
 	}
 
 	@Override
+	public boolean hasDisplayPage(LiferayPortletRequest liferayPortletRequest)
+		throws Exception {
+
+		ThemeDisplay themeDisplay =
+			(ThemeDisplay)liferayPortletRequest.getAttribute(
+				WebKeys.THEME_DISPLAY);
+
+		return _isShowDisplayPage(themeDisplay.getScopeGroupId(), _article);
+	}
+
+	@Override
 	public boolean hasEditPermission(PermissionChecker permissionChecker)
 		throws PortalException {
 
