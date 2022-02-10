@@ -24,7 +24,7 @@
 
 		friendlyURL = assetPublisherHelper.getAssetViewURL(renderRequest, renderResponse, assetRenderer, entry, !isAssetLinkBehaviorShowFullContent, false)
 
-		hasPortletFriendlyURL = assetPublisherHelper.hasPortletFriendlyURL(portalUtil.getCurrentURL(
+		hasDisplayPageFriendlyURL = assetPublisherHelper.hasDisplayPageFriendlyURL(portalUtil.getCurrentURL(
 		renderRequest), friendlyURL, false, isAssetLinkBehaviorShowFullContent)
 	/>
 
@@ -192,7 +192,7 @@
 </#macro>
 
 <#macro getSocialBookmarks>
-	<#if hasDisplayPage && hasPortletFriendlyURL>
+	<#if hasDisplayPage && hasDisplayPageFriendlyURL>
 		<@liferay_social_bookmarks["bookmarks"]
 			className=entry.getClassName()
 			classPK=entry.getClassPK()

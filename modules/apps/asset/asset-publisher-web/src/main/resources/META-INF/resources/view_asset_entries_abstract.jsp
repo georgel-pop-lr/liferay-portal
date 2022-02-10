@@ -328,7 +328,7 @@ for (AssetEntry assetEntry : assetEntryResult.getAssetEntries()) {
 							title="<%= title %>"
 							types="<%= assetPublisherDisplayContext.getSocialBookmarksTypes() %>"
 							url="<%=
-								(assetRenderer.hasDisplayPage(liferayPortletRequest) && assetPublisherHelper.hasPortletFriendlyURL(PortalUtil.getCurrentURL(liferayPortletRequest), friendlyURL, false, assetPublisherDisplayContext.isAssetLinkBehaviorShowFullContent())) ? friendlyURL : null
+								(assetRenderer.hasDisplayPage(liferayPortletRequest) && assetPublisherHelper.hasDisplayPageFriendlyURL(PortalUtil.getCurrentURL(liferayPortletRequest), friendlyURL, false, assetPublisherDisplayContext.isAssetLinkBehaviorShowFullContent())) ? friendlyURL : null
 							%>"
 							urlImpl="<%= assetPublisherHelper.getBaseAssetViewURL(liferayPortletRequest, liferayPortletResponse, assetRenderer, assetEntry) %>"
 						/>
