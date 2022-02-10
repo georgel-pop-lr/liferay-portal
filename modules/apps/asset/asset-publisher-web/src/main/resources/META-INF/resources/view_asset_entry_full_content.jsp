@@ -393,7 +393,7 @@ Map<String, Object> fragmentsEditorData = HashMapBuilder.<String, Object>put(
 						title="<%= title %>"
 						types="<%= assetPublisherDisplayContext.getSocialBookmarksTypes() %>"
 						url="<%=
-							(assetRenderer.hasDisplayPage(liferayPortletRequest) && assetPublisherHelper.hasPortletFriendlyURL(PortalUtil.getCurrentURL(liferayPortletRequest), friendlyURL, viewSingleAsset, assetPublisherDisplayContext.isAssetLinkBehaviorShowFullContent())) ? friendlyURL : null
+							(assetRenderer.hasDisplayPage(liferayPortletRequest) && assetPublisherHelper.hasDisplayPageFriendlyURL(PortalUtil.getCurrentURL(liferayPortletRequest), friendlyURL, viewSingleAsset, assetPublisherDisplayContext.isAssetLinkBehaviorShowFullContent())) ? friendlyURL : null
 						%>"
 						urlImpl="<%= viewFullContentURL %>"
 					/>
