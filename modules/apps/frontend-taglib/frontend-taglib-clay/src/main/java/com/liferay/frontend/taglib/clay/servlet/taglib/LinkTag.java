@@ -183,6 +183,7 @@ public class LinkTag extends BaseContainerTag {
 		props.put("borderless", _borderless);
 		props.put("button", _type.equals("button"));
 		props.put("displayType", _displayType);
+		props.put("download", _download);
 		props.put("icon", _icon);
 
 		if (Validator.isNotNull(_label)) {
