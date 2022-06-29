@@ -63,7 +63,6 @@ import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.kernel.workflow.permission.WorkflowPermission;
 
@@ -76,7 +75,6 @@ import java.util.Optional;
 import javax.portlet.WindowState;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -157,12 +155,7 @@ public class DefaultAssetDisplayPageFriendlyURLResolver
 		JournalArticle journalArticle = _getJournalArticle(
 			groupId, friendlyURL);
 
-		HttpServletRequest httpServletRequest =
-			(HttpServletRequest)requestContext.get("request");
-
-		HttpSession httpSession = httpServletRequest.getSession();
-
-		Locale locale = (Locale)httpSession.getAttribute(WebKeys.LOCALE);
+		Locale locale = getLocale(requestContext);
 
 		if (locale != null) {
 			Map<Locale, String> friendlyURLMap =
