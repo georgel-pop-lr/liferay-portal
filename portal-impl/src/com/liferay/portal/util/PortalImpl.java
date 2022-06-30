@@ -8246,14 +8246,11 @@ public class PortalImpl implements Portal {
 						httpServletRequest.getParameterMap();
 
 					try {
-						LayoutFriendlyURLComposite
-							layoutFriendlyURLComposite =
-							friendlyURLResolver.
-								getLayoutFriendlyURLComposite(
-									themeDisplay.getCompanyId(),
-									themeDisplay.getScopeGroupId(), false,
-									canonicalURLSuffix, params, requestContext);
-
+						LayoutFriendlyURLComposite layoutFriendlyURLComposite =
+							friendlyURLResolver.getLayoutFriendlyURLComposite(
+								themeDisplay.getCompanyId(),
+								themeDisplay.getScopeGroupId(), false,
+								canonicalURLSuffix, params, requestContext);
 
 						alternateURLSuffix =
 							layoutFriendlyURLComposite.getFriendlyURL();
