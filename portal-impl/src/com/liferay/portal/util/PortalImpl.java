@@ -8166,10 +8166,10 @@ public class PortalImpl implements Portal {
 
 		String currentURL = canonicalURL.substring(pos);
 
-		int[] friendlyURLIndex = getGroupFriendlyURLIndex(currentURL);
+		int[] groupFriendlyURLIndex = getGroupFriendlyURLIndex(currentURL);
 
-		if (friendlyURLIndex != null) {
-			int y = friendlyURLIndex[1];
+		if (groupFriendlyURLIndex != null) {
+			int y = groupFriendlyURLIndex[1];
 
 			currentURL = currentURL.substring(y);
 
@@ -8201,7 +8201,6 @@ public class PortalImpl implements Portal {
 		}
 
 		String canonicalURLPrefix = canonicalURL.substring(0, pos);
-
 		String canonicalURLSuffix = canonicalURL.substring(pos);
 
 		if (PropsValues.LOCALE_PREPEND_FRIENDLY_URL_STYLE == 2) {
@@ -8214,6 +8213,13 @@ public class PortalImpl implements Portal {
 			}
 		}
 
+		String groupFriendlyURL = StringPool.BLANK;
+
+		if (!currentURL.equals(canonicalURLSuffix)) {
+			groupFriendlyURL = canonicalURLSuffix.substring(
+				0, groupFriendlyURLIndex[1]);
+		}
+
 		for (Locale locale : availableLocales) {
 			String alternateURL = canonicalURL;
 			String alternateURLSuffix = null;
@@ -8224,7 +8230,7 @@ public class PortalImpl implements Portal {
 					FriendlyURLResolverRegistryUtil.getURLSeparators();
 
 				for (String urlSeparator : urlSeparators) {
-					if (!canonicalURLSuffix.startsWith(urlSeparator)) {
+					if (!currentURL.startsWith(urlSeparator)) {
 						continue;
 					}
 
@@ -8250,10 +8256,11 @@ public class PortalImpl implements Portal {
 							friendlyURLResolver.getLayoutFriendlyURLComposite(
 								themeDisplay.getCompanyId(),
 								themeDisplay.getScopeGroupId(), false,
-								canonicalURLSuffix, params, requestContext);
+								currentURL, params, requestContext);
 
 						alternateURLSuffix =
-							layoutFriendlyURLComposite.getFriendlyURL();
+							groupFriendlyURL +
+								layoutFriendlyURLComposite.getFriendlyURL();
 
 						break;
 					}
