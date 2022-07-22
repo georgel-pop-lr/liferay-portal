@@ -1122,7 +1122,7 @@ AUI.add(
 
 					const inputNode = instance.getInputNode();
 
-					if (Lang.isValue(value)) {
+					if (inputNode && Lang.isValue(value)) {
 						inputNode.val(value);
 					}
 				},
@@ -3383,35 +3383,53 @@ AUI.add(
 						'input[name=' + instance.getInputName() + 'Alt]'
 					);
 
-					altNode.attr('disabled', !notEmpty);
+					if (altNode) {
+						altNode.attr('disabled', !notEmpty);
+					}
 
 					const titleNode = A.one(
 						'input[name=' + instance.getInputName() + 'Title]'
 					);
 
 					if (notEmpty) {
-						altNode.val(parsedValue.alt || '');
-						titleNode.val(parsedValue.title || '');
+						if (altNode) {
+							altNode.val(parsedValue.alt || '');
+						}
+						if (titleNode) {
+							titleNode.val(parsedValue.title || '');
+						}
 					}
 					else {
-						altNode.val('');
-						titleNode.val('');
+						if (altNode) {
+							altNode.val('');
+						}
+						if (titleNode) {
+							titleNode.val('');
+						}
 					}
 
-					instance._validateField(altNode);
-					instance._validateField(titleNode);
+					if (altNode) {
+						instance._validateField(altNode);
+					}
+					if (titleNode) {
+						instance._validateField(titleNode);
+					}
 
 					const clearButtonNode = A.one(
 						'#' + instance.getInputName() + 'ClearButton'
 					);
 
-					clearButtonNode.toggle(notEmpty);
+					if (clearButtonNode) {
+						clearButtonNode.toggle(notEmpty);
+					}
 
 					const previewButtonNode = A.one(
 						'#' + instance.getInputName() + 'PreviewButton'
 					);
 
-					previewButtonNode.toggle(notEmpty);
+					if (previewButtonNode) {
+						previewButtonNode.toggle(notEmpty);
+					}
 				},
 			},
 		});
