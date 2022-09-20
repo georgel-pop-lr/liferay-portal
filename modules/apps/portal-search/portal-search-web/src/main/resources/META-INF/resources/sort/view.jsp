@@ -89,25 +89,74 @@ SortPortletInstanceConfiguration sortPortletInstanceConfiguration = sortDisplayC
 </c:choose>
 
 <aui:script use="liferay-search-sort-util">
-	AUI().ready('aui-base', 'node', 'event', (A) => {
-		A.one('#<portlet:namespace />sortSelection').on('change', () => {
-			var selections = [];
+	var keyCodeEnter = 13;
+	var keyCodeArrowLeft = 37;
+	var keyCodeArrowUp = 38;
+	var keyCodeArrowRight = 39;
+	var keyCodeArrowDown = 40;
+	var allowExecuteSelection = true;
 
-			var sortSelect = A.one('#<portlet:namespace />sortSelection').get(
-				'value'
-			);
+	var sortSelectionInput = A.one('#<portlet:namespace />sortSelection');
 
-			selections.push(sortSelect);
+	var sortSelectionInputValueOld = sortSelectionInput.get('value');
 
-			var key = A.one('#<portlet:namespace />sort-parameter-name').get(
-				'value'
-			);
+	var sortSelectionFunction = function () {
+		var selections = [];
 
-			document.location.search = Liferay.Search.SortUtil.updateQueryString(
-				key,
-				selections,
-				document.location.search
-			);
-		});
+		var sortSelectionInputValue = sortSelectionInput.get('value');
+
+		selections.push(sortSelectionInputValue);
+
+		var sortParameterNameKey = A.one(
+			'#<portlet:namespace />sort-parameter-name'
+		).get('value');
+
+		document.location.search = Liferay.Search.SortUtil.updateQueryString(
+			sortParameterNameKey,
+			selections,
+			document.location.search
+		);
+	};
+
+	sortSelectionInput.on('change', () => {
+		if (allowExecuteSelection) {
+			sortSelectionFunction();
+		}
+	});
+
+	sortSelectionInput.on('keydown', (event) => {
+		allowExecuteSelection = ![
+			keyCodeArrowLeft,
+			keyCodeArrowUp,
+			keyCodeArrowRight,
+			keyCodeArrowDown,
+		].includes(event.keyCode);
+
+		var sortSelectionInputValueNow = sortSelectionInput.get('value');
+
+		var isSortSelectionInputChanged =
+			sortSelectionInputValueOld !== sortSelectionInputValueNow;
+
+		if (event.keyCode === keyCodeEnter && isSortSelectionInputChanged) {
+			event._event.preventDefault();
+		}
+	});
+
+	sortSelectionInput.on('keyup', (event) => {
+		allowExecuteSelection = ![
+			keyCodeArrowLeft,
+			keyCodeArrowUp,
+			keyCodeArrowRight,
+			keyCodeArrowDown,
+		].includes(event.keyCode);
+
+		var sortSelectionInputValueNow = sortSelectionInput.get('value');
+
+		var isSortSelectionInputChanged =
+			sortSelectionInputValueOld !== sortSelectionInputValueNow;
+
+		if (event.keyCode === keyCodeEnter && isSortSelectionInputChanged) {
+			sortSelectionFunction();
+		}
 	});
 </aui:script>
