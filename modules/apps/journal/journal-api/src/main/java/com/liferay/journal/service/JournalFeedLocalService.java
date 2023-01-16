@@ -388,6 +388,11 @@ public interface JournalFeedLocalService
 		long companyId, long groupId, String feedId, String name,
 		String description, boolean andOperator);
 
+	public void updateAsset(
+			long userId, JournalFeed feed, long[] assetCategoryIds,
+			String[] assetTagNames, long[] assetLinkEntryIds, Double priority)
+		throws PortalException;
+
 	public JournalFeed updateFeed(
 			long groupId, String feedId, String name, String description,
 			String ddmStructureKey, String ddmTemplateKey,

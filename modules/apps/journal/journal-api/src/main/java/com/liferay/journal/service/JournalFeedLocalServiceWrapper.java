@@ -527,6 +527,17 @@ public class JournalFeedLocalServiceWrapper
 	}
 
 	@Override
+	public void updateAsset(
+			long userId, JournalFeed feed, long[] assetCategoryIds,
+			String[] assetTagNames, long[] assetLinkEntryIds, Double priority)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		_journalFeedLocalService.updateAsset(
+			userId, feed, assetCategoryIds, assetTagNames, assetLinkEntryIds,
+			priority);
+	}
+
+	@Override
 	public JournalFeed updateFeed(
 			long groupId, String feedId, String name, String description,
 			String ddmStructureKey, String ddmTemplateKey,

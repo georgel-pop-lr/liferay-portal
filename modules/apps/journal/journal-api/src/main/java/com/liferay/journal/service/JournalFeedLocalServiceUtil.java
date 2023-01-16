@@ -461,6 +461,16 @@ public class JournalFeedLocalServiceUtil {
 			companyId, groupId, feedId, name, description, andOperator);
 	}
 
+	public static void updateAsset(
+			long userId, JournalFeed feed, long[] assetCategoryIds,
+			String[] assetTagNames, long[] assetLinkEntryIds, Double priority)
+		throws PortalException {
+
+		getService().updateAsset(
+			userId, feed, assetCategoryIds, assetTagNames, assetLinkEntryIds,
+			priority);
+	}
+
 	public static JournalFeed updateFeed(
 			long groupId, String feedId, String name, String description,
 			String ddmStructureKey, String ddmTemplateKey,
