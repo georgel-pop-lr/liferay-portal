@@ -29,6 +29,12 @@ String newFeedId = ParamUtil.getString(request, "newFeedId");
 
 String ddmStructureKey = ParamUtil.getString(request, "ddmStructureKey");
 
+long classPK = (feed != null) ? feed.getId() : 0;
+
+String className = JournalFeed.class.getName();
+
+List<AssetCategory> selectedAssetCategories = AssetCategoryServiceUtil.getCategories(className, classPK);
+
 if (Validator.isNull(ddmStructureKey) && (feed != null)) {
 	ddmStructureKey = feed.getDDMStructureKey();
 }
@@ -182,7 +188,7 @@ renderResponse.setTitle((feed == null) ? LanguageUtil.get(request, "new-feed") :
 				label="permissions"
 			>
 				<liferay-ui:input-permissions
-					modelName="<%= JournalFeed.class.getName() %>"
+					modelName="<%= className %>"
 				/>
 			</liferay-frontend:fieldset>
 		</c:if>
@@ -220,6 +226,44 @@ renderResponse.setTitle((feed == null) ? LanguageUtil.get(request, "new-feed") :
 						%>
 
 					</aui:select>
+
+					<%
+					long groupIdGlobal = company.getGroupId();
+
+					long[] groupsIds = {groupId, groupIdGlobal};
+
+					List<Map<String, Object>> selectedItems = new ArrayList<>();
+
+					for (AssetCategory category : selectedAssetCategories) {
+						selectedItems.add(
+							HashMapBuilder.<String, Object>put(
+								"label", category.getTitle(themeDisplay.getLocale())
+							).put(
+								"value", category.getCategoryId()
+							).build());
+					}
+					%>
+
+					<div>
+						<react:component
+							module="js/components/AssetFeedCategories/index"
+							props='<%=
+								HashMapBuilder.<String, Object>put(
+									"allSelectedItems", selectedItems
+								).put(
+									"categorySelectorURL", JournalUtil.getJournalFeedCategorySelectorURL(request, renderResponse)
+								).put(
+									"groupIds", ListUtil.fromArray(groupsIds)
+								).put(
+									"namespace", liferayPortletResponse.getNamespace()
+								).put(
+									"pathThemeImages", themeDisplay.getPathThemeImages()
+								).put(
+									"vocabularyIds", JournalUtil.getVocabularyIds(groupsIds)
+								).build()
+							%>'
+						/>
+					</div>
 				</c:otherwise>
 			</c:choose>
 		</liferay-frontend:fieldset>

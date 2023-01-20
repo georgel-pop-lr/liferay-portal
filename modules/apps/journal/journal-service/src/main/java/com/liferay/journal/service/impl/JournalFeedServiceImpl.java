@@ -23,6 +23,7 @@ import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
 import com.liferay.portal.kernel.security.permission.resource.PortletResourcePermission;
 import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.util.GetterUtil;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -51,6 +52,8 @@ public class JournalFeedServiceImpl extends JournalFeedServiceBaseImpl {
 
 		_portletResourcePermission.check(
 			getPermissionChecker(), groupId, ActionKeys.ADD_FEED);
+
+		_addAssetCategoryId(serviceContext);
 
 		return journalFeedLocalService.addFeed(
 			getUserId(), groupId, feedId, autoFeedId, name, description,
@@ -114,11 +117,20 @@ public class JournalFeedServiceImpl extends JournalFeedServiceBaseImpl {
 		_journalFeedModelResourcePermission.check(
 			getPermissionChecker(), feed, ActionKeys.UPDATE);
 
+		_addAssetCategoryId(serviceContext);
+
 		return journalFeedLocalService.updateFeed(
 			groupId, feedId, name, description, ddmStructureKey, ddmTemplateKey,
 			ddmRendererTemplateKey, delta, orderByCol, orderByType,
 			targetLayoutFriendlyUrl, targetPortletId, contentField, feedType,
 			feedVersion, serviceContext);
+	}
+
+	private void _addAssetCategoryId(ServiceContext serviceContext) {
+		long queryAssetCategoryId = GetterUtil.getLong(
+			serviceContext.getAttribute("queryCategoryId"));
+
+		serviceContext.setAssetCategoryIds(new long[] {queryAssetCategoryId});
 	}
 
 	@Reference(
