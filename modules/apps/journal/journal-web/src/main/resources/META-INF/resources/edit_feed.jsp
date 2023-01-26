@@ -33,6 +33,8 @@ long classPK = (feed != null) ? feed.getId() : 0;
 
 String className = JournalFeed.class.getName();
 
+long queryAssetCategoryId = ParamUtil.getLong(request, "queryCategoryId");
+
 List<AssetCategory> selectedAssetCategories = AssetCategoryServiceUtil.getCategories(className, classPK);
 
 if (Validator.isNull(ddmStructureKey) && (feed != null)) {
@@ -234,12 +236,24 @@ renderResponse.setTitle((feed == null) ? LanguageUtil.get(request, "new-feed") :
 
 					List<Map<String, Object>> selectedItems = new ArrayList<>();
 
-					for (AssetCategory category : selectedAssetCategories) {
+					if (queryAssetCategoryId == 0) {
+						for (AssetCategory category : selectedAssetCategories) {
+							selectedItems.add(
+								HashMapBuilder.<String, Object>put(
+									"label", category.getTitle(themeDisplay.getLocale())
+								).put(
+									"value", category.getCategoryId()
+								).build());
+						}
+					}
+					else {
+						AssetCategory assetCategory = AssetCategoryServiceUtil.getCategory(queryAssetCategoryId);
+
 						selectedItems.add(
 							HashMapBuilder.<String, Object>put(
-								"label", category.getTitle(themeDisplay.getLocale())
+								"label", assetCategory.getTitle(themeDisplay.getLocale())
 							).put(
-								"value", category.getCategoryId()
+								"value", assetCategory.getCategoryId()
 							).build());
 					}
 					%>
