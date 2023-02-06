@@ -1,6 +1,6 @@
 {
 	"dependencies": {
-		"recharts": "1.8.5"
+		"recharts": "2.3.2"
 	},
 	"devDependencies": {
 		"@liferay/npm-bundler": "3.1.0"
