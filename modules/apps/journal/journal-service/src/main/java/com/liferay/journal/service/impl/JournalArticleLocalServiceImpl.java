@@ -4698,8 +4698,21 @@ public class JournalArticleLocalServiceImpl
 		if (friendlyURLMap == null) {
 			friendlyURLMap = new HashMap<>();
 
+			Locale articleDefaultLocale = LocaleUtil.fromLanguageId(
+				latestArticle.getDefaultLanguageId());
+
 			for (Map.Entry<Locale, String> entry : titleMap.entrySet()) {
-				String title = entry.getValue();
+				Locale locale = entry.getKey();
+
+				String title = latestArticle.getUrlTitle(locale);
+
+				if (Validator.isNull(title) ||
+					(!locale.equals(articleDefaultLocale) &&
+					 title.equals(
+						 latestArticle.getUrlTitle(articleDefaultLocale)))) {
+
+					title = entry.getValue();
+				}
 
 				if (Validator.isNull(title)) {
 					continue;
@@ -4711,9 +4724,9 @@ public class JournalArticleLocalServiceImpl
 						_classNameLocalService.getClassNameId(
 							JournalArticle.class),
 						article.getResourcePrimKey(), title,
-						_language.getLanguageId(entry.getKey()));
+						_language.getLanguageId(locale));
 
-				friendlyURLMap.put(entry.getKey(), urlTitle);
+				friendlyURLMap.put(locale, urlTitle);
 			}
 		}
 
