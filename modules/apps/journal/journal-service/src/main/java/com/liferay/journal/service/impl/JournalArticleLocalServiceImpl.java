@@ -4704,27 +4704,26 @@ public class JournalArticleLocalServiceImpl
 			for (Map.Entry<Locale, String> entry : titleMap.entrySet()) {
 				Locale locale = entry.getKey();
 
-				String title = latestArticle.getUrlTitle(locale);
+				String urlTitle = latestArticle.getUrlTitle(locale);
 
-				if (Validator.isNull(title) ||
+				if (Validator.isNull(urlTitle) ||
 					(!locale.equals(articleDefaultLocale) &&
-					 title.equals(
+					 urlTitle.equals(
 						 latestArticle.getUrlTitle(articleDefaultLocale)))) {
 
-					title = entry.getValue();
-				}
+					String title = entry.getValue();
 
-				if (Validator.isNull(title)) {
-					continue;
-				}
+					if (Validator.isNull(title)) {
+						continue;
+					}
 
-				String urlTitle =
-					friendlyURLEntryLocalService.getUniqueUrlTitle(
+					urlTitle = friendlyURLEntryLocalService.getUniqueUrlTitle(
 						groupId,
 						_classNameLocalService.getClassNameId(
 							JournalArticle.class),
 						article.getResourcePrimKey(), title,
 						_language.getLanguageId(locale));
+				}
 
 				friendlyURLMap.put(locale, urlTitle);
 			}
