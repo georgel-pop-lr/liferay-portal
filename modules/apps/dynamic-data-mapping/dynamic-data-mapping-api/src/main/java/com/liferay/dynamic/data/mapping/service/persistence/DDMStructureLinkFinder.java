@@ -16,6 +16,10 @@ public interface DDMStructureLinkFinder {
 
 	public int countByKeywords(long classNameId, long classPK, String keywords);
 
+	public int countByKeywords(
+		long classNameId, long classPK, String keywords, long[] groupIds,
+		boolean inlineSQLHelper);
+
 	public java.util.List
 		<com.liferay.dynamic.data.mapping.model.DDMStructureLink>
 			findByKeywords(
@@ -24,5 +28,15 @@ public interface DDMStructureLinkFinder {
 				com.liferay.portal.kernel.util.OrderByComparator
 					<com.liferay.dynamic.data.mapping.model.DDMStructureLink>
 						orderByComparator);
+
+	public java.util.List
+		<com.liferay.dynamic.data.mapping.model.DDMStructureLink>
+			findByKeywords(
+				long classNameId, long classPK, String keywords, int start,
+				int end,
+				com.liferay.portal.kernel.util.OrderByComparator
+					<com.liferay.dynamic.data.mapping.model.DDMStructureLink>
+						orderByComparator,
+				long[] groupIds, boolean inlineSQLHelper);
 
 }

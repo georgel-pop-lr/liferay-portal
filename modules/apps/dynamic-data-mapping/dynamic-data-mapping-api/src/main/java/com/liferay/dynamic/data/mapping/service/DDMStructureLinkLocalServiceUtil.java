@@ -394,11 +394,30 @@ public class DDMStructureLinkLocalServiceUtil {
 			classNameId, classPK, keywords, start, end, orderByComparator);
 	}
 
+	public static List<com.liferay.dynamic.data.mapping.model.DDMStructure>
+			getStructureLinkStructures(
+				long classNameId, long classPK, String keywords, int start,
+				int end, OrderByComparator<DDMStructureLink> orderByComparator,
+				long[] groupIds)
+		throws PortalException {
+
+		return getService().getStructureLinkStructures(
+			classNameId, classPK, keywords, start, end, orderByComparator,
+			groupIds);
+	}
+
 	public static int getStructureLinkStructuresCount(
 		long classNameId, long classPK, String keywords) {
 
 		return getService().getStructureLinkStructuresCount(
 			classNameId, classPK, keywords);
+	}
+
+	public static int getStructureLinkStructuresCount(
+		long classNameId, long classPK, String keywords, long[] groupIds) {
+
+		return getService().getStructureLinkStructuresCount(
+			classNameId, classPK, keywords, groupIds);
 	}
 
 	public static DDMStructureLink getUniqueStructureLink(

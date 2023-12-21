@@ -462,11 +462,34 @@ public class DDMStructureLinkLocalServiceWrapper
 	}
 
 	@Override
+	public java.util.List<com.liferay.dynamic.data.mapping.model.DDMStructure>
+			getStructureLinkStructures(
+				long classNameId, long classPK, String keywords, int start,
+				int end,
+				com.liferay.portal.kernel.util.OrderByComparator
+					<DDMStructureLink> orderByComparator,
+				long[] groupIds)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		return _ddmStructureLinkLocalService.getStructureLinkStructures(
+			classNameId, classPK, keywords, start, end, orderByComparator,
+			groupIds);
+	}
+
+	@Override
 	public int getStructureLinkStructuresCount(
 		long classNameId, long classPK, String keywords) {
 
 		return _ddmStructureLinkLocalService.getStructureLinkStructuresCount(
 			classNameId, classPK, keywords);
+	}
+
+	@Override
+	public int getStructureLinkStructuresCount(
+		long classNameId, long classPK, String keywords, long[] groupIds) {
+
+		return _ddmStructureLinkLocalService.getStructureLinkStructuresCount(
+			classNameId, classPK, keywords, groupIds);
 	}
 
 	@Override

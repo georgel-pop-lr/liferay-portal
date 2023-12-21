@@ -326,8 +326,19 @@ public interface DDMStructureLinkLocalService
 		throws PortalException;
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public List<DDMStructure> getStructureLinkStructures(
+			long classNameId, long classPK, String keywords, int start, int end,
+			OrderByComparator<DDMStructureLink> orderByComparator,
+			long[] groupIds)
+		throws PortalException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public int getStructureLinkStructuresCount(
 		long classNameId, long classPK, String keywords);
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public int getStructureLinkStructuresCount(
+		long classNameId, long classPK, String keywords, long[] groupIds);
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public DDMStructureLink getUniqueStructureLink(
