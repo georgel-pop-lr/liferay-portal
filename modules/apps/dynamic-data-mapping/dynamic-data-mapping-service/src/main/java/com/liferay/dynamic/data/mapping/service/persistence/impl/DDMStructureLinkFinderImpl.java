@@ -5,9 +5,11 @@
 
 package com.liferay.dynamic.data.mapping.service.persistence.impl;
 
+import com.liferay.dynamic.data.mapping.model.DDMStructure;
 import com.liferay.dynamic.data.mapping.model.DDMStructureLink;
 import com.liferay.dynamic.data.mapping.model.impl.DDMStructureLinkImpl;
 import com.liferay.dynamic.data.mapping.service.persistence.DDMStructureLinkFinder;
+import com.liferay.journal.model.JournalArticle;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.dao.orm.custom.sql.CustomSQL;
 import com.liferay.portal.kernel.dao.orm.QueryPos;
@@ -16,6 +18,7 @@ import com.liferay.portal.kernel.dao.orm.SQLQuery;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.dao.orm.Type;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.security.permission.InlineSQLHelperUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.Validator;
 
@@ -42,6 +45,14 @@ public class DDMStructureLinkFinderImpl
 	public int countByKeywords(
 		long classNameId, long classPK, String keywords) {
 
+		return countByKeywords(classNameId, classPK, keywords, null, false);
+	}
+
+	@Override
+	public int countByKeywords(
+		long classNameId, long classPK, String keywords, long[] groupIds,
+		boolean inlineSQLHelper) {
+
 		String[] names = null;
 		String[] descriptions = null;
 		boolean andOperator = false;
@@ -55,13 +66,25 @@ public class DDMStructureLinkFinderImpl
 		}
 
 		return doCountByC_C_N_D(
-			classNameId, classPK, names, descriptions, andOperator);
+			classNameId, classPK, names, descriptions, andOperator, groupIds,
+			inlineSQLHelper);
 	}
 
 	@Override
 	public List<DDMStructureLink> findByKeywords(
 		long classNameId, long classPK, String keywords, int start, int end,
 		OrderByComparator<DDMStructureLink> orderByComparator) {
+
+		return findByKeywords(
+			classNameId, classPK, keywords, start, end, orderByComparator, null,
+			false);
+	}
+
+	@Override
+	public List<DDMStructureLink> findByKeywords(
+		long classNameId, long classPK, String keywords, int start, int end,
+		OrderByComparator<DDMStructureLink> orderByComparator, long[] groupIds,
+		boolean inlineSQLHelper) {
 
 		String[] names = null;
 		String[] descriptions = null;
@@ -77,12 +100,12 @@ public class DDMStructureLinkFinderImpl
 
 		return doFindByC_C_N_D(
 			classNameId, classPK, names, descriptions, andOperator, start, end,
-			orderByComparator);
+			orderByComparator, groupIds, inlineSQLHelper);
 	}
 
 	protected int doCountByC_C_N_D(
 		long classNameId, long classPK, String[] names, String[] descriptions,
-		boolean andOperator) {
+		boolean andOperator, long[] groupIds, boolean inlineSQLHelper) {
 
 		names = _customSQL.keywords(names);
 		descriptions = _customSQL.keywords(descriptions, false);
@@ -103,6 +126,10 @@ public class DDMStructureLinkFinderImpl
 				descriptions);
 
 			sql = _customSQL.replaceAndOperator(sql, andOperator);
+
+			if (inlineSQLHelper) {
+				sql = _getSQLResourcePermission(sql, groupIds);
+			}
 
 			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
 
@@ -138,7 +165,8 @@ public class DDMStructureLinkFinderImpl
 	protected List<DDMStructureLink> doFindByC_C_N_D(
 		long classNameId, long classPK, String[] names, String[] descriptions,
 		boolean andOperator, int start, int end,
-		OrderByComparator<DDMStructureLink> orderByComparator) {
+		OrderByComparator<DDMStructureLink> orderByComparator, long[] groupIds,
+		boolean inlineSQLHelper) {
 
 		names = _customSQL.keywords(names);
 		descriptions = _customSQL.keywords(descriptions, false);
@@ -162,6 +190,10 @@ public class DDMStructureLinkFinderImpl
 				sql = _customSQL.replaceOrderBy(sql, orderByComparator);
 			}
 
+			if (inlineSQLHelper) {
+				sql = _getSQLResourcePermission(sql, groupIds);
+			}
+
 			SQLQuery sqlQuery = session.createSynchronizedSQLQuery(sql);
 
 			sqlQuery.addEntity("DDMStructureLink", DDMStructureLinkImpl.class);
@@ -182,6 +214,13 @@ public class DDMStructureLinkFinderImpl
 		finally {
 			closeSession(session);
 		}
+	}
+
+	private String _getSQLResourcePermission(String sql, long[] groupIds) {
+		return InlineSQLHelperUtil.replacePermissionCheck(
+			sql,
+			DDMStructure.class.getName() + "-" + JournalArticle.class.getName(),
+			"DDMStructure.structureId", groupIds);
 	}
 
 	@Reference

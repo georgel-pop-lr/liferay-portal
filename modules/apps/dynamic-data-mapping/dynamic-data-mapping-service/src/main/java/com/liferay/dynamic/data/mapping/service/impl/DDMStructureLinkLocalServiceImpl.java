@@ -160,16 +160,8 @@ public class DDMStructureLinkLocalServiceImpl
 			long classNameId, long classPK)
 		throws PortalException {
 
-		List<DDMStructure> structures = new ArrayList<>();
-
-		List<DDMStructureLink> structureLinks = getStructureLinks(
-			classNameId, classPK);
-
-		for (DDMStructureLink structureLink : structureLinks) {
-			structures.add(structureLink.getStructure());
-		}
-
-		return structures;
+		return _getStructureLinkStructures(
+			getStructureLinks(classNameId, classPK));
 	}
 
 	@Override
@@ -177,16 +169,8 @@ public class DDMStructureLinkLocalServiceImpl
 			long classNameId, long classPK, int start, int end)
 		throws PortalException {
 
-		List<DDMStructure> structures = new ArrayList<>();
-
-		List<DDMStructureLink> structureLinks = getStructureLinks(
-			classNameId, classPK, start, end);
-
-		for (DDMStructureLink structureLink : structureLinks) {
-			structures.add(structureLink.getStructure());
-		}
-
-		return structures;
+		return _getStructureLinkStructures(
+			getStructureLinks(classNameId, classPK, start, end));
 	}
 
 	@Override
@@ -214,17 +198,23 @@ public class DDMStructureLinkLocalServiceImpl
 			OrderByComparator<DDMStructureLink> orderByComparator)
 		throws PortalException {
 
-		List<DDMStructure> structures = new ArrayList<>();
-
-		List<DDMStructureLink> structureLinks =
+		return _getStructureLinkStructures(
 			ddmStructureLinkFinder.findByKeywords(
-				classNameId, classPK, keywords, start, end, orderByComparator);
+				classNameId, classPK, keywords, start, end, orderByComparator,
+				null, false));
+	}
 
-		for (DDMStructureLink structureLink : structureLinks) {
-			structures.add(structureLink.getStructure());
-		}
+	@Override
+	public List<DDMStructure> getStructureLinkStructures(
+			long classNameId, long classPK, String keywords, int start, int end,
+			OrderByComparator<DDMStructureLink> orderByComparator,
+			long[] groupIds)
+		throws PortalException {
 
-		return structures;
+		return _getStructureLinkStructures(
+			ddmStructureLinkFinder.findByKeywords(
+				classNameId, classPK, keywords, start, end, orderByComparator,
+				groupIds, true));
 	}
 
 	@Override
@@ -233,6 +223,14 @@ public class DDMStructureLinkLocalServiceImpl
 
 		return ddmStructureLinkFinder.countByKeywords(
 			classNameId, classPK, keywords);
+	}
+
+	@Override
+	public int getStructureLinkStructuresCount(
+		long classNameId, long classPK, String keywords, long[] groupIds) {
+
+		return ddmStructureLinkFinder.countByKeywords(
+			classNameId, classPK, keywords, groupIds, true);
 	}
 
 	@Override
@@ -267,6 +265,21 @@ public class DDMStructureLinkLocalServiceImpl
 		structureLink.setStructureId(structureId);
 
 		return ddmStructureLinkPersistence.update(structureLink);
+	}
+
+	private List<DDMStructure> _getStructureLinkStructures(
+			List<DDMStructureLink> ddmStructureLinkFinder)
+		throws PortalException {
+
+		List<DDMStructure> structures = new ArrayList<>();
+
+		List<DDMStructureLink> structureLinks = ddmStructureLinkFinder;
+
+		for (DDMStructureLink structureLink : structureLinks) {
+			structures.add(structureLink.getStructure());
+		}
+
+		return structures;
 	}
 
 }
