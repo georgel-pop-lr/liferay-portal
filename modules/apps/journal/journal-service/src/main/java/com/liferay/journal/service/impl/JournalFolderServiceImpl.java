@@ -418,18 +418,20 @@ public class JournalFolderServiceImpl extends JournalFolderServiceBaseImpl {
 				JournalFolderConstants.
 					RESTRICTION_TYPE_DDM_STRUCTURES_AND_WORKFLOW) {
 
-			return _ddmStructureLinkLocalService.getStructureLinkStructures(
-				_classNameLocalService.getClassNameId(JournalFolder.class),
-				folderId, keywords, start, end);
+			return _filterStructures(
+				_ddmStructureLinkLocalService.getStructureLinkStructures(
+					_classNameLocalService.getClassNameId(JournalFolder.class),
+					folderId, keywords, start, end));
 		}
 
 		folderId = journalFolderLocalService.getOverridedDDMStructuresFolderId(
 			folderId);
 
 		if (folderId != JournalFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
-			return _ddmStructureLinkLocalService.getStructureLinkStructures(
-				_classNameLocalService.getClassNameId(JournalFolder.class),
-				folderId, keywords, start, end);
+			return _filterStructures(
+				_ddmStructureLinkLocalService.getStructureLinkStructures(
+					_classNameLocalService.getClassNameId(JournalFolder.class),
+					folderId, keywords, start, end));
 		}
 
 		return _ddmStructureService.search(
@@ -449,20 +451,22 @@ public class JournalFolderServiceImpl extends JournalFolderServiceBaseImpl {
 				JournalFolderConstants.
 					RESTRICTION_TYPE_DDM_STRUCTURES_AND_WORKFLOW) {
 
-			return _ddmStructureService.searchCount(
-				companyId, groupIds,
-				_classNameLocalService.getClassNameId(JournalFolder.class),
-				folderId, keywords, WorkflowConstants.STATUS_ANY);
+			return _filterStructures(
+				_ddmStructureLinkLocalService.getStructureLinkStructures(
+					_classNameLocalService.getClassNameId(JournalFolder.class),
+					folderId, keywords)
+			).size();
 		}
 
 		folderId = journalFolderLocalService.getOverridedDDMStructuresFolderId(
 			folderId);
 
 		if (folderId != JournalFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
-			return _ddmStructureService.searchCount(
-				companyId, groupIds,
-				_classNameLocalService.getClassNameId(JournalFolder.class),
-				folderId, keywords, WorkflowConstants.STATUS_ANY);
+			return _filterStructures(
+				_ddmStructureLinkLocalService.getStructureLinkStructures(
+					_classNameLocalService.getClassNameId(JournalFolder.class),
+					folderId, keywords)
+			).size();
 		}
 
 		return _ddmStructureService.searchCount(
