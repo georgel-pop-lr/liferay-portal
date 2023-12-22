@@ -421,22 +421,20 @@ public class JournalFolderServiceImpl extends JournalFolderServiceBaseImpl {
 				JournalFolderConstants.
 					RESTRICTION_TYPE_DDM_STRUCTURES_AND_WORKFLOW) {
 
-			return _filterStructures(
-				_ddmStructureLinkLocalService.getStructureLinkStructures(
-					_classNameLocalService.getClassNameId(JournalFolder.class),
-					folderId, keywords, start, end,
-					ddmStructureLinkOrderByComparator));
+			return _ddmStructureLinkLocalService.getStructureLinkStructures(
+				_classNameLocalService.getClassNameId(JournalFolder.class),
+				folderId, keywords, start, end,
+				ddmStructureLinkOrderByComparator, groupIds);
 		}
 
 		folderId = journalFolderLocalService.getOverridedDDMStructuresFolderId(
 			folderId);
 
 		if (folderId != JournalFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
-			return _filterStructures(
-				_ddmStructureLinkLocalService.getStructureLinkStructures(
-					_classNameLocalService.getClassNameId(JournalFolder.class),
-					folderId, keywords, start, end,
-					ddmStructureLinkOrderByComparator));
+			return _ddmStructureLinkLocalService.getStructureLinkStructures(
+				_classNameLocalService.getClassNameId(JournalFolder.class),
+				folderId, keywords, start, end,
+				ddmStructureLinkOrderByComparator, groupIds);
 		}
 
 		return _ddmStructureService.search(
@@ -456,22 +454,20 @@ public class JournalFolderServiceImpl extends JournalFolderServiceBaseImpl {
 				JournalFolderConstants.
 					RESTRICTION_TYPE_DDM_STRUCTURES_AND_WORKFLOW) {
 
-			return _filterStructures(
-				_ddmStructureLinkLocalService.getStructureLinkStructures(
+			return _ddmStructureLinkLocalService.
+				getStructureLinkStructuresCount(
 					_classNameLocalService.getClassNameId(JournalFolder.class),
-					folderId, keywords)
-			).size();
+					folderId, keywords, groupIds);
 		}
 
 		folderId = journalFolderLocalService.getOverridedDDMStructuresFolderId(
 			folderId);
 
 		if (folderId != JournalFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
-			return _filterStructures(
-				_ddmStructureLinkLocalService.getStructureLinkStructures(
+			return _ddmStructureLinkLocalService.
+				getStructureLinkStructuresCount(
 					_classNameLocalService.getClassNameId(JournalFolder.class),
-					folderId, keywords)
-			).size();
+					folderId, keywords, groupIds);
 		}
 
 		return _ddmStructureService.searchCount(
