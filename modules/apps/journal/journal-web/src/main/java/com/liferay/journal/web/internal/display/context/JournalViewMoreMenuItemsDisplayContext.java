@@ -7,6 +7,9 @@ package com.liferay.journal.web.internal.display.context;
 
 import com.liferay.depot.util.SiteConnectedGroupGroupProviderUtil;
 import com.liferay.dynamic.data.mapping.model.DDMStructure;
+import com.liferay.dynamic.data.mapping.model.DDMStructureLink;
+import com.liferay.dynamic.data.mapping.util.comparator.StructureLinkStructureModifiedDateComparator;
+import com.liferay.dynamic.data.mapping.util.comparator.StructureLinkStructureNameComparator;
 import com.liferay.dynamic.data.mapping.util.comparator.StructureModifiedDateComparator;
 import com.liferay.dynamic.data.mapping.util.comparator.StructureNameComparator;
 import com.liferay.journal.constants.JournalPortletKeys;
@@ -92,7 +95,8 @@ public class JournalViewMoreMenuItemsDisplayContext {
 			_renderRequest, getPortletURL(), null, "no-results-were-found");
 
 		searchContainer.setOrderByCol(getOrderByCol());
-		searchContainer.setOrderByComparator(_getOrderByComparator());
+		searchContainer.setOrderByComparator(
+			_getOrderByComparatorDDMStructure());
 		searchContainer.setOrderByType(getOrderByType());
 
 		long[] currentAndAncestorSiteAndDepotGroupIds =
@@ -108,9 +112,12 @@ public class JournalViewMoreMenuItemsDisplayContext {
 							_themeDisplay.getCompanyId(),
 							currentAndAncestorSiteAndDepotGroupIds, _folderId,
 							_restrictionType, _getKeywords(), QueryUtil.ALL_POS,
-							QueryUtil.ALL_POS, _getOrderByComparator());
+							QueryUtil.ALL_POS,
+							_getOrderByComparatorDDMStructure(),
+							_getOrderByComparatorDDMStructureLink());
 
-					Collections.sort(ddmStructures, _getOrderByComparator());
+					Collections.sort(
+						ddmStructures, _getOrderByComparatorDDMStructure());
 
 					int end = searchContainer.getEnd();
 
@@ -127,7 +134,8 @@ public class JournalViewMoreMenuItemsDisplayContext {
 					currentAndAncestorSiteAndDepotGroupIds, _folderId,
 					_restrictionType, _getKeywords(),
 					searchContainer.getStart(), searchContainer.getEnd(),
-					_getOrderByComparator());
+					_getOrderByComparatorDDMStructure(),
+					_getOrderByComparatorDDMStructureLink());
 			},
 			JournalFolderServiceUtil.searchDDMStructuresCount(
 				_themeDisplay.getCompanyId(),
@@ -207,7 +215,9 @@ public class JournalViewMoreMenuItemsDisplayContext {
 		return _keywords;
 	}
 
-	private OrderByComparator<DDMStructure> _getOrderByComparator() {
+	private OrderByComparator<DDMStructure>
+		_getOrderByComparatorDDMStructure() {
+
 		boolean orderByAsc = false;
 
 		if (Objects.equals(getOrderByType(), "asc")) {
@@ -221,6 +231,29 @@ public class JournalViewMoreMenuItemsDisplayContext {
 		}
 		else if (_orderByCol.equals("name")) {
 			orderByComparator = new StructureNameComparator(
+				orderByAsc, _themeDisplay.getLocale());
+		}
+
+		return orderByComparator;
+	}
+
+	private OrderByComparator<DDMStructureLink>
+		_getOrderByComparatorDDMStructureLink() {
+
+		boolean orderByAsc = false;
+
+		if (Objects.equals(getOrderByType(), "asc")) {
+			orderByAsc = true;
+		}
+
+		OrderByComparator<DDMStructureLink> orderByComparator = null;
+
+		if (_orderByCol.equals("modified-date")) {
+			orderByComparator =
+				new StructureLinkStructureModifiedDateComparator(orderByAsc);
+		}
+		else if (_orderByCol.equals("name")) {
+			orderByComparator = new StructureLinkStructureNameComparator(
 				orderByAsc, _themeDisplay.getLocale());
 		}
 
