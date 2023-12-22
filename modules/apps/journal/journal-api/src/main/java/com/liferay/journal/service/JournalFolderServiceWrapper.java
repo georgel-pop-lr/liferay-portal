@@ -311,12 +311,16 @@ public class JournalFolderServiceWrapper
 				int restrictionType, String keywords, int start, int end,
 				com.liferay.portal.kernel.util.OrderByComparator
 					<com.liferay.dynamic.data.mapping.model.DDMStructure>
-						orderByComparator)
+						ddmStructureOrderByComparator,
+				com.liferay.portal.kernel.util.OrderByComparator
+					<com.liferay.dynamic.data.mapping.model.DDMStructureLink>
+						ddmStructureLinkOrderByComparator)
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		return _journalFolderService.searchDDMStructures(
 			companyId, groupIds, folderId, restrictionType, keywords, start,
-			end, orderByComparator);
+			end, ddmStructureOrderByComparator,
+			ddmStructureLinkOrderByComparator);
 	}
 
 	@Override

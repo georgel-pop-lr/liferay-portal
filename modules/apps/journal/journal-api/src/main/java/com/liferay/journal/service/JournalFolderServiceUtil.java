@@ -272,12 +272,16 @@ public class JournalFolderServiceUtil {
 				int restrictionType, String keywords, int start, int end,
 				OrderByComparator
 					<com.liferay.dynamic.data.mapping.model.DDMStructure>
-						orderByComparator)
+						ddmStructureOrderByComparator,
+				OrderByComparator
+					<com.liferay.dynamic.data.mapping.model.DDMStructureLink>
+						ddmStructureLinkOrderByComparator)
 		throws PortalException {
 
 		return getService().searchDDMStructures(
 			companyId, groupIds, folderId, restrictionType, keywords, start,
-			end, orderByComparator);
+			end, ddmStructureOrderByComparator,
+			ddmStructureLinkOrderByComparator);
 	}
 
 	public static int searchDDMStructuresCount(

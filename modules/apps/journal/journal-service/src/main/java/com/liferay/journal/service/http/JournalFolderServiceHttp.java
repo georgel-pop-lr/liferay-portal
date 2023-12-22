@@ -1211,7 +1211,10 @@ public class JournalFolderServiceHttp {
 					String keywords, int start, int end,
 					com.liferay.portal.kernel.util.OrderByComparator
 						<com.liferay.dynamic.data.mapping.model.DDMStructure>
-							orderByComparator)
+							ddmStructureOrderByComparator,
+					com.liferay.portal.kernel.util.OrderByComparator
+						<com.liferay.dynamic.data.mapping.model.
+							DDMStructureLink> ddmStructureLinkOrderByComparator)
 			throws com.liferay.portal.kernel.exception.PortalException {
 
 		try {
@@ -1221,7 +1224,8 @@ public class JournalFolderServiceHttp {
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, companyId, groupIds, folderId, restrictionType,
-				keywords, start, end, orderByComparator);
+				keywords, start, end, ddmStructureOrderByComparator,
+				ddmStructureLinkOrderByComparator);
 
 			Object returnObj = null;
 
@@ -1578,6 +1582,7 @@ public class JournalFolderServiceHttp {
 		new Class[] {
 			long.class, long[].class, long.class, int.class, String.class,
 			int.class, int.class,
+			com.liferay.portal.kernel.util.OrderByComparator.class,
 			com.liferay.portal.kernel.util.OrderByComparator.class
 		};
 	private static final Class<?>[] _searchDDMStructuresCountParameterTypes33 =

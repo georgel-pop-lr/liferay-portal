@@ -6,6 +6,7 @@
 package com.liferay.journal.service;
 
 import com.liferay.dynamic.data.mapping.model.DDMStructure;
+import com.liferay.dynamic.data.mapping.model.DDMStructureLink;
 import com.liferay.journal.model.JournalFolder;
 import com.liferay.portal.kernel.change.tracking.CTAware;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -186,7 +187,9 @@ public interface JournalFolderService extends BaseService {
 	public List<DDMStructure> searchDDMStructures(
 			long companyId, long[] groupIds, long folderId, int restrictionType,
 			String keywords, int start, int end,
-			OrderByComparator<DDMStructure> orderByComparator)
+			OrderByComparator<DDMStructure> ddmStructureOrderByComparator,
+			OrderByComparator<DDMStructureLink>
+				ddmStructureLinkOrderByComparator)
 		throws PortalException;
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
