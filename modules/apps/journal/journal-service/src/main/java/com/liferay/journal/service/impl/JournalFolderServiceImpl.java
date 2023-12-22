@@ -6,6 +6,7 @@
 package com.liferay.journal.service.impl;
 
 import com.liferay.dynamic.data.mapping.model.DDMStructure;
+import com.liferay.dynamic.data.mapping.model.DDMStructureLink;
 import com.liferay.dynamic.data.mapping.service.DDMStructureLinkLocalService;
 import com.liferay.dynamic.data.mapping.service.DDMStructureService;
 import com.liferay.journal.constants.JournalFolderConstants;
@@ -411,7 +412,9 @@ public class JournalFolderServiceImpl extends JournalFolderServiceBaseImpl {
 	public List<DDMStructure> searchDDMStructures(
 			long companyId, long[] groupIds, long folderId, int restrictionType,
 			String keywords, int start, int end,
-			OrderByComparator<DDMStructure> orderByComparator)
+			OrderByComparator<DDMStructure> ddmStructureOrderByComparator,
+			OrderByComparator<DDMStructureLink>
+				ddmStructureLinkOrderByComparator)
 		throws PortalException {
 
 		if (restrictionType ==
@@ -421,7 +424,8 @@ public class JournalFolderServiceImpl extends JournalFolderServiceBaseImpl {
 			return _filterStructures(
 				_ddmStructureLinkLocalService.getStructureLinkStructures(
 					_classNameLocalService.getClassNameId(JournalFolder.class),
-					folderId, keywords, start, end));
+					folderId, keywords, start, end,
+					ddmStructureLinkOrderByComparator));
 		}
 
 		folderId = journalFolderLocalService.getOverridedDDMStructuresFolderId(
@@ -431,14 +435,15 @@ public class JournalFolderServiceImpl extends JournalFolderServiceBaseImpl {
 			return _filterStructures(
 				_ddmStructureLinkLocalService.getStructureLinkStructures(
 					_classNameLocalService.getClassNameId(JournalFolder.class),
-					folderId, keywords, start, end));
+					folderId, keywords, start, end,
+					ddmStructureLinkOrderByComparator));
 		}
 
 		return _ddmStructureService.search(
 			companyId, groupIds,
 			_classNameLocalService.getClassNameId(JournalArticle.class),
 			keywords, WorkflowConstants.STATUS_ANY, start, end,
-			orderByComparator);
+			ddmStructureOrderByComparator);
 	}
 
 	@Override
