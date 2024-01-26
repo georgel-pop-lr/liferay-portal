@@ -90,90 +90,25 @@ public class ContainerStyledLayoutStructureItem
 	public JSONObject getItemConfigJSONObject() {
 		JSONObject jsonObject = super.getItemConfigJSONObject();
 
-		jsonObject.put(
-			"align",
-			() -> {
-				if (Validator.isBlank(_align)) {
-					return null;
-				}
-
-				return _align;
-			}
+		return jsonObject.put(
+			"align", _align
 		).put(
-			"contentDisplay",
-			() -> {
-				if (Validator.isBlank(_contentDisplay)) {
-					return null;
-				}
-
-				return _contentDisplay;
-			}
+			"contentDisplay", _contentDisplay
 		).put(
-			"contentVisibility",
-			() -> {
-				if (Validator.isBlank(_contentVisibility)) {
-					return null;
-				}
-
-				return _contentVisibility;
-			}
+			"contentVisibility", _contentVisibility
 		).put(
-			"flexWrap",
-			() -> {
-				if (Validator.isBlank(_flexWrap)) {
-					return null;
-				}
-
-				return _flexWrap;
-			}
+			"flexWrap", _flexWrap
 		).put(
-			"htmlTag",
-			() -> {
-				if (Validator.isBlank(_htmlTag)) {
-					return null;
-				}
-
-				return _htmlTag;
-			}
+			"htmlTag", _htmlTag
 		).put(
-			"indexed",
-			() -> {
-				if (_indexed) {
-					return null;
-				}
-
-				return false;
-			}
+			"indexed", _indexed
 		).put(
-			"justify",
-			() -> {
-				if (Validator.isBlank(_justify)) {
-					return null;
-				}
-
-				return _justify;
-			}
+			"justify", _justify
 		).put(
-			"link",
-			() -> {
-				if (_linkJSONObject.length() == 0) {
-					return null;
-				}
-
-				return _linkJSONObject;
-			}
+			"link", _linkJSONObject
 		).put(
-			"widthType",
-			() -> {
-				if (Objects.equals(_widthType, "fluid")) {
-					return null;
-				}
-
-				return _widthType;
-			}
+			"widthType", _widthType
 		);
-
-		return jsonObject;
 	}
 
 	@Override
