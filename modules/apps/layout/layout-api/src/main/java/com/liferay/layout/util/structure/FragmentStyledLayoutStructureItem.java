@@ -85,14 +85,7 @@ public class FragmentStyledLayoutStructureItem
 		return jsonObject.put(
 			"fragmentEntryLinkId", String.valueOf(_fragmentEntryLinkId)
 		).put(
-			"indexed",
-			() -> {
-				if (_indexed) {
-					return null;
-				}
-
-				return false;
-			}
+			"indexed", _indexed
 		).put(
 			"styles", stylesJSONObject
 		);
