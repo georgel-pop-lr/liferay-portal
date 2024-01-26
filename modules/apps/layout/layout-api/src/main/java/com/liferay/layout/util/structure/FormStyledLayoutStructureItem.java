@@ -9,7 +9,6 @@ import com.liferay.layout.util.constants.LayoutDataItemTypeConstants;
 import com.liferay.layout.util.constants.StyledLayoutStructureConstants;
 import com.liferay.petra.lang.HashUtil;
 import com.liferay.portal.kernel.json.JSONObject;
-import com.liferay.portal.kernel.util.Validator;
 
 import java.util.Objects;
 
@@ -89,67 +88,25 @@ public class FormStyledLayoutStructureItem extends StyledLayoutStructureItem {
 		JSONObject jsonObject = super.getItemConfigJSONObject();
 
 		return jsonObject.put(
-			"align",
-			() -> {
-				if (Validator.isBlank(_align)) {
-					return null;
-				}
-
-				return _align;
-			}
+			"align", _align
 		).put(
 			"classNameId", _classNameId
 		).put(
 			"classTypeId", _classTypeId
 		).put(
-			"contentDisplay",
-			() -> {
-				if (Validator.isBlank(_contentDisplay)) {
-					return null;
-				}
-
-				return _contentDisplay;
-			}
+			"contentDisplay", _contentDisplay
 		).put(
-			"flexWrap",
-			() -> {
-				if (Validator.isBlank(_flexWrap)) {
-					return null;
-				}
-
-				return _flexWrap;
-			}
+			"flexWrap", _flexWrap
 		).put(
 			"formConfig", _formConfig
 		).put(
-			"indexed",
-			() -> {
-				if (_indexed) {
-					return null;
-				}
-
-				return false;
-			}
+			"indexed", _indexed
 		).put(
-			"justify",
-			() -> {
-				if (Validator.isBlank(_justify)) {
-					return null;
-				}
-
-				return _justify;
-			}
+			"justify", _justify
 		).put(
 			"successMessage", _successMessageJSONObject
 		).put(
-			"widthType",
-			() -> {
-				if (Objects.equals(_widthType, "fluid")) {
-					return null;
-				}
-
-				return _widthType;
-			}
+			"widthType", _widthType
 		);
 	}
 
