@@ -13,7 +13,6 @@ import com.liferay.layout.util.structure.collection.EmptyCollectionOptions;
 import com.liferay.petra.lang.HashUtil;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
-import com.liferay.portal.kernel.util.Validator;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -116,14 +115,7 @@ public class CollectionStyledLayoutStructureItem
 		JSONObject jsonObject = super.getItemConfigJSONObject();
 
 		jsonObject = jsonObject.put(
-			"align",
-			() -> {
-				if (Validator.isBlank(_align)) {
-					return null;
-				}
-
-				return _align;
-			}
+			"align", _align
 		).put(
 			"collection", _collectionJSONObject
 		).put(
@@ -140,25 +132,11 @@ public class CollectionStyledLayoutStructureItem
 				return _emptyCollectionOptions.toJSONObject();
 			}
 		).put(
-			"flexWrap",
-			() -> {
-				if (Validator.isBlank(_flexWrap)) {
-					return null;
-				}
-
-				return _flexWrap;
-			}
+			"flexWrap", _flexWrap
 		).put(
 			"gutters", _gutters
 		).put(
-			"justify",
-			() -> {
-				if (Validator.isBlank(_justify)) {
-					return null;
-				}
-
-				return _justify;
-			}
+			"justify", _justify
 		).put(
 			"listItemStyle", _listItemStyle
 		).put(
@@ -180,14 +158,7 @@ public class CollectionStyledLayoutStructureItem
 		).put(
 			"templateKey", _templateKey
 		).put(
-			"verticalAlignment",
-			() -> {
-				if (Objects.equals(_verticalAlignment, "start")) {
-					return null;
-				}
-
-				return _verticalAlignment;
-			}
+			"verticalAlignment", _verticalAlignment
 		);
 
 		for (ViewportSize viewportSize : _viewportSizes) {
