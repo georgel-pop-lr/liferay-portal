@@ -794,39 +794,63 @@ public class FragmentEntryConfigurationParserImpl
 	}
 
 	private Object _getURLValue(String value) {
-		JSONObject jsonObject = (JSONObject)_getFieldValue(
-			FragmentConfigurationFieldDataType.OBJECT, value);
+		if (_isValidJSON(value)) {
+			JSONObject jsonObject = (JSONObject)_getFieldValue(
+				FragmentConfigurationFieldDataType.OBJECT, value);
 
-		JSONObject layoutJSONObject = jsonObject.getJSONObject("layout");
+			JSONObject layoutJSONObject = jsonObject.getJSONObject("layout");
 
-		if (layoutJSONObject == null) {
-			return jsonObject.getString("href");
-		}
-
-		long groupId = layoutJSONObject.getLong("groupId");
-		boolean privateLayout = layoutJSONObject.getBoolean("privateLayout");
-		long layoutId = layoutJSONObject.getLong("layoutId");
-
-		Layout layout = _layoutLocalService.fetchLayout(
-			groupId, privateLayout, layoutId);
-
-		if (layout == null) {
-			return StringPool.POUND;
-		}
-
-		ServiceContext serviceContext =
-			ServiceContextThreadLocal.getServiceContext();
-
-		try {
-			return _portal.getLayoutFullURL(
-				layout, serviceContext.getThemeDisplay());
-		}
-		catch (Exception exception) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(exception);
+			if (layoutJSONObject == null) {
+				return jsonObject.getString("href");
 			}
 
-			return null;
+			long groupId = layoutJSONObject.getLong("groupId");
+			boolean privateLayout = layoutJSONObject.getBoolean(
+				"privateLayout");
+			long layoutId = layoutJSONObject.getLong("layoutId");
+
+			Layout layout = _layoutLocalService.fetchLayout(
+				groupId, privateLayout, layoutId);
+
+			if (layout == null) {
+				return StringPool.POUND;
+			}
+
+			ServiceContext serviceContext =
+				ServiceContextThreadLocal.getServiceContext();
+
+			try {
+				return _portal.getLayoutFullURL(
+					layout, serviceContext.getThemeDisplay());
+			}
+			catch (Exception exception) {
+				if (_log.isDebugEnabled()) {
+					_log.debug(exception);
+				}
+
+				return null;
+			}
+		}
+		else {
+			return _getFieldValue(
+				FragmentConfigurationFieldDataType.STRING, value);
+		}
+	}
+
+	private boolean _isValidJSON(String jsonTestString) {
+		try {
+			_jsonFactory.createJSONObject(jsonTestString);
+
+			return true;
+		}
+		catch (JSONException jsonException) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(
+					"Unable to parse configuration JSON: " + jsonTestString,
+					jsonException);
+			}
+
+			return false;
 		}
 	}
 
