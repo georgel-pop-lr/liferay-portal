@@ -236,8 +236,8 @@ export function SelectLayoutTree({
 						return (
 							<SearchResults
 								checkDisplayPage={checkDisplayPage}
-								config={config}
 								filter={filter}
+								findLayoutsURL={config.findLayoutsURL}
 								groupId={groupId}
 								itemSelectorReturnType={itemSelectorReturnType}
 								multiSelection={multiSelection}
@@ -448,38 +448,29 @@ export function SelectLayoutTree({
 
 function SearchResults({
 	checkDisplayPage,
-	config,
 	filter,
+	findLayoutsURL,
 	groupId,
 	itemSelectorReturnType,
 	multiSelection,
 	onSelect,
 	selection,
 }) {
-	const {findLayoutsURL, maxPageSize} = config;
 	const [results, setResults] = useState([]);
-	const [start, setStart] = useState(0);
 	const [loadMore, setLoadMore] = useState(false);
 	const [loading, setLoading] = useState(false);
 
-	const onFindLayouts = useCallback(
-		(layouts, hasMoreElements) => {
-			setLoading(false);
+	const onFindLayouts = useCallback((layouts, hasMoreElements) => {
+		setLoading(false);
 
-			setResults((prevResults) => prevResults.concat(layouts));
+		setResults((prevResults) => prevResults.concat(layouts));
 
-			setLoadMore(hasMoreElements);
-
-			setStart((prevStart) =>
-				hasMoreElements ? prevStart + maxPageSize : prevStart
-			);
-		},
-		[maxPageSize]
-	);
+		setLoadMore(hasMoreElements);
+	}, []);
 
 	const onLoadMore = useCallback(
-		(start) => {
-			return debouncedFindLayouts(
+		(start) =>
+			debouncedFindLayouts(
 				findLayoutsURL,
 				checkDisplayPage,
 				groupId,
@@ -487,8 +478,7 @@ function SearchResults({
 				filter,
 				onFindLayouts,
 				start
-			);
-		},
+			),
 		[
 			checkDisplayPage,
 			filter,
@@ -502,17 +492,8 @@ function SearchResults({
 	useEffect(() => {
 		setLoading(true);
 		setResults([]);
-		setStart(0);
 		onLoadMore(0);
-	}, [
-		checkDisplayPage,
-		filter,
-		findLayoutsURL,
-		groupId,
-		itemSelectorReturnType,
-		onFindLayouts,
-		onLoadMore,
-	]);
+	}, [onLoadMore]);
 
 	if (loading) {
 		return <ClayLoadingIndicator displayType="secondary" />;
@@ -535,7 +516,7 @@ function SearchResults({
 				<ClayButton
 					className="mb-5"
 					displayType="secondary"
-					onClick={() => onLoadMore(start)}
+					onClick={() => onLoadMore(results.length)}
 				>
 					{Liferay.Language.get('load-more-results')}
 				</ClayButton>
