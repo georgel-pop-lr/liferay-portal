@@ -6,8 +6,14 @@
 package com.liferay.layout.service.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
+import com.liferay.fragment.constants.FragmentConstants;
+import com.liferay.fragment.model.FragmentCollection;
+import com.liferay.fragment.model.FragmentEntry;
+import com.liferay.fragment.service.FragmentCollectionLocalService;
+import com.liferay.fragment.service.FragmentEntryLocalService;
 import com.liferay.friendly.url.service.FriendlyURLEntryLocalServiceUtil;
 import com.liferay.layout.helper.LayoutCopyHelper;
+import com.liferay.layout.test.util.ContentLayoutTestUtil;
 import com.liferay.layout.test.util.LayoutTestUtil;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
@@ -19,6 +25,7 @@ import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.ClassNameLocalServiceUtil;
 import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
@@ -38,6 +45,7 @@ import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
 import java.util.Collections;
 import java.util.List;
 
+import com.liferay.segments.service.SegmentsExperienceLocalService;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -62,6 +70,10 @@ public class LayoutLocalServiceTest {
 	@Before
 	public void setUp() throws Exception {
 		_group = GroupTestUtil.addGroup();
+
+		_serviceContext = _getServiceContext(_group);
+
+		ServiceContextThreadLocal.pushServiceContext(_serviceContext);
 	}
 
 	@After
@@ -136,13 +148,13 @@ public class LayoutLocalServiceTest {
 			).build(),
 			false, null, layout1.getStyleBookEntryId(),
 			layout1.getFaviconFileEntryId(), layout1.getMasterLayoutPlid(),
-			new ServiceContext());
+			_serviceContext);
 
 		Layout layout2 = _layoutLocalService.addLayout(
 			TestPropsValues.getUserId(), _group.getGroupId(), false,
 			LayoutConstants.DEFAULT_PARENT_LAYOUT_ID, "friendly url 1", null,
 			RandomTestUtil.randomString(), LayoutConstants.TYPE_PORTLET, false,
-			false, null, new ServiceContext());
+			false, null, _serviceContext);
 
 		Assert.assertEquals(
 			layout1,
@@ -152,6 +164,102 @@ public class LayoutLocalServiceTest {
 			layout2,
 			_layoutLocalService.fetchLayoutByFriendlyURL(
 				_group.getGroupId(), false, friendlyURL1));
+	}
+
+	@Test
+	public void testSearchLayoutOnlyByTitle()
+		throws Exception {
+
+		String pageTitle = "Page title 1";
+		String keyword = "SearchThisWord";
+
+		Layout layout = _layoutLocalService.addLayout(
+			TestPropsValues.getUserId(), _group.getGroupId(), false,
+			LayoutConstants.DEFAULT_PARENT_LAYOUT_ID, pageTitle, "pageTitle",
+			RandomTestUtil.randomString(), LayoutConstants.TYPE_CONTENT, false,
+			false, null, _serviceContext);
+
+		FragmentCollection fragmentCollection =
+			_fragmentCollectionLocalService.addFragmentCollection(
+				TestPropsValues.getUserId(), _group.getGroupId(),
+				RandomTestUtil.randomString(), StringPool.BLANK,
+				_serviceContext);
+
+		FragmentEntry fragmentEntry = _fragmentEntryLocalService.addFragmentEntry(
+			TestPropsValues.getUserId(), _group.getGroupId(),
+			fragmentCollection.getFragmentCollectionId(), "fragment-entry-key",
+			RandomTestUtil.randomString(), StringPool.BLANK,
+			"<div data-lfr-styles><span>Test</span>Fragment " + keyword +
+			"</div>",
+			StringPool.BLANK, false, StringPool.BLANK, null, 0, false,
+			FragmentConstants.TYPE_COMPONENT, null,
+			WorkflowConstants.STATUS_APPROVED, _serviceContext);
+
+		ContentLayoutTestUtil.addFragmentEntryLinkToLayout(
+			null, fragmentEntry.getCss(), fragmentEntry.getConfiguration(),
+			fragmentEntry.getFragmentEntryId(), fragmentEntry.getHtml(),
+			fragmentEntry.getJs(), layout, fragmentEntry.getFragmentEntryKey(),
+			_segmentsExperienceLocalService.fetchDefaultSegmentsExperienceId(
+				layout.getPlid()), fragmentEntry.getType());
+
+		_layoutLocalService.updateStatus(
+			TestPropsValues.getUserId(), layout.getPlid(),
+			WorkflowConstants.STATUS_APPROVED, _serviceContext);
+
+		int count = _layoutLocalService.searchCount(
+			_group, false, keyword, true,
+			new String[] {
+				LayoutConstants.TYPE_COLLECTION,
+				LayoutConstants.TYPE_CONTENT, LayoutConstants.TYPE_EMBEDDED,
+				LayoutConstants.TYPE_FULL_PAGE_APPLICATION,
+				LayoutConstants.TYPE_LINK_TO_LAYOUT,
+				LayoutConstants.TYPE_PANEL, LayoutConstants.TYPE_PORTLET,
+				LayoutConstants.TYPE_URL
+			});
+
+		Assert.assertEquals(0, count);
+
+		count = _layoutLocalService.searchCount(
+			_group, false, pageTitle, true,
+			new String[] {
+				LayoutConstants.TYPE_COLLECTION,
+				LayoutConstants.TYPE_CONTENT, LayoutConstants.TYPE_EMBEDDED,
+				LayoutConstants.TYPE_FULL_PAGE_APPLICATION,
+				LayoutConstants.TYPE_LINK_TO_LAYOUT,
+				LayoutConstants.TYPE_PANEL, LayoutConstants.TYPE_PORTLET,
+				LayoutConstants.TYPE_URL
+			});
+
+		Assert.assertEquals(1, count);
+
+		List<Layout> layouts = _layoutLocalService.search(
+			_group.getGroupId(), false, keyword, true,
+			new String[] {
+				LayoutConstants.TYPE_COLLECTION,
+				LayoutConstants.TYPE_CONTENT, LayoutConstants.TYPE_EMBEDDED,
+				LayoutConstants.TYPE_FULL_PAGE_APPLICATION,
+				LayoutConstants.TYPE_LINK_TO_LAYOUT,
+				LayoutConstants.TYPE_PANEL, LayoutConstants.TYPE_PORTLET,
+				LayoutConstants.TYPE_URL
+			}, -1, -1, null);
+
+
+		Assert.assertEquals(0, layouts.size());
+
+		layouts = _layoutLocalService.search(
+			_group.getGroupId(), false, pageTitle, true,
+			new String[] {
+				LayoutConstants.TYPE_COLLECTION,
+				LayoutConstants.TYPE_CONTENT, LayoutConstants.TYPE_EMBEDDED,
+				LayoutConstants.TYPE_FULL_PAGE_APPLICATION,
+				LayoutConstants.TYPE_LINK_TO_LAYOUT,
+				LayoutConstants.TYPE_PANEL, LayoutConstants.TYPE_PORTLET,
+				LayoutConstants.TYPE_URL
+			}, -1, -1, null);
+
+
+		Assert.assertEquals(1, layouts.size());
+		Assert.assertEquals(pageTitle, layouts.get(0).getTitle());
 	}
 
 	@Test
@@ -362,7 +470,7 @@ public class LayoutLocalServiceTest {
 			).build(),
 			false, null, layout.getStyleBookEntryId(),
 			layout.getFaviconFileEntryId(), layout.getMasterLayoutPlid(),
-			new ServiceContext());
+			_serviceContext);
 
 		Layout draftLayout = layout.fetchDraftLayout();
 
@@ -375,7 +483,7 @@ public class LayoutLocalServiceTest {
 			draftLayout.isHidden(), draftLayout.getFriendlyURLMap(), false,
 			null, draftLayout.getStyleBookEntryId(),
 			draftLayout.getFaviconFileEntryId(),
-			draftLayout.getMasterLayoutPlid(), new ServiceContext());
+			draftLayout.getMasterLayoutPlid(), _serviceContext);
 	}
 
 	@Test
@@ -427,7 +535,7 @@ public class LayoutLocalServiceTest {
 			layout.isHidden(), layout.getFriendlyURLMap(),
 			layout.getIconImage(), null, layout.getStyleBookEntryId(),
 			layout.getFaviconFileEntryId(), layout.getPlid(),
-			new ServiceContext());
+			_serviceContext);
 	}
 
 	private void _testDeleteLayouts(boolean system) throws Exception {
@@ -435,12 +543,17 @@ public class LayoutLocalServiceTest {
 		LayoutTestUtil.addTypeContentLayout(_group, true, system);
 
 		_layoutLocalService.deleteLayouts(
-			_group.getGroupId(), true, new ServiceContext());
+			_group.getGroupId(), true, _serviceContext);
 		_layoutLocalService.deleteLayouts(
-			_group.getGroupId(), false, new ServiceContext());
+			_group.getGroupId(), false, _serviceContext);
 
 		Assert.assertEquals(
 			0, _layoutLocalService.getLayoutsCount(_group.getGroupId()));
+	}
+
+	private ServiceContext _getServiceContext(Group group) throws Exception {
+		return ServiceContextTestUtil.getServiceContext(
+			group, TestPropsValues.getUserId());
 	}
 
 	@DeleteAfterTestRun
@@ -454,5 +567,16 @@ public class LayoutLocalServiceTest {
 
 	@Inject
 	private Portal _portal;
+
+	private ServiceContext _serviceContext;
+
+	@Inject
+	private FragmentEntryLocalService _fragmentEntryLocalService;
+
+	@Inject
+	private FragmentCollectionLocalService _fragmentCollectionLocalService;
+
+	@Inject
+	private SegmentsExperienceLocalService _segmentsExperienceLocalService;
 
 }
