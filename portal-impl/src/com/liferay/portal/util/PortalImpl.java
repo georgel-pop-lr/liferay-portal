@@ -1050,7 +1050,7 @@ public class PortalImpl implements Portal {
 			PermissionChecker permissionChecker =
 				PermissionCheckerFactoryUtil.create(user);
 
-			layout = _getLayout(groupId, privateLayout, permissionChecker);
+			layout = _getFirstLayout(groupId, privateLayout, permissionChecker);
 
 			if (layout == null) {
 				throw new NoSuchLayoutException(
@@ -7462,15 +7462,18 @@ public class PortalImpl implements Portal {
 		return _LOCALHOST;
 	}
 
-	private Layout _getFirstPublishedLayout(
-		long groupId, boolean privateLayout,
-		PermissionChecker permissionChecker) {
+	private Layout _getFirstLayout(
+			long groupId, boolean privateLayout,
+			PermissionChecker permissionChecker)
+		throws PortalException {
 
 		boolean hasNext = true;
 
-		int start = 1;
+		int start = 0;
 		int end = 0;
 		int interval = 20;
+
+		Layout returnLayout = null;
 
 		while (hasNext) {
 			end = start + interval;
@@ -7479,9 +7482,16 @@ public class PortalImpl implements Portal {
 				groupId, privateLayout,
 				LayoutConstants.DEFAULT_PARENT_LAYOUT_ID, true, start, end);
 
+			if (layouts.isEmpty()) {
+				return null;
+			}
+
+			returnLayout = layouts.get(0);
+
 			for (Layout layout : layouts) {
 				if (layout.isPublished() &&
-					_hasViewPermission(layout, permissionChecker)) {
+					LayoutPermissionUtil.contains(
+						permissionChecker, layout, ActionKeys.VIEW)) {
 
 					return layout;
 				}
@@ -7494,7 +7504,7 @@ public class PortalImpl implements Portal {
 			}
 		}
 
-		return null;
+		return returnLayout;
 	}
 
 	private String _getGroupFriendlyURL(
@@ -7676,36 +7686,6 @@ public class PortalImpl implements Portal {
 		}
 
 		return sb.toString();
-	}
-
-	private Layout _getLayout(
-		long groupId, boolean privateLayout,
-		PermissionChecker permissionChecker) {
-
-		// We need to ensure that virtual layouts are merged
-
-		List<Layout> layouts = LayoutLocalServiceUtil.getLayouts(
-			groupId, privateLayout, LayoutConstants.DEFAULT_PARENT_LAYOUT_ID,
-			true, 0, 1);
-
-		if (layouts.isEmpty()) {
-			return null;
-		}
-
-		Layout layout = layouts.get(0);
-
-		if (!layout.isPublished() ||
-			!_hasViewPermission(layout, permissionChecker)) {
-
-			Layout firstPublishedLayout = _getFirstPublishedLayout(
-				groupId, privateLayout, permissionChecker);
-
-			if (firstPublishedLayout != null) {
-				return firstPublishedLayout;
-			}
-		}
-
-		return layout;
 	}
 
 	private String _getPortalURL(
@@ -8060,25 +8040,6 @@ public class PortalImpl implements Portal {
 		}
 
 		return virtualHostnames.firstKey();
-	}
-
-	private boolean _hasViewPermission(
-		Layout layout, PermissionChecker permissionChecker) {
-
-		try {
-			if (LayoutPermissionUtil.contains(
-					permissionChecker, layout, ActionKeys.VIEW)) {
-
-				return true;
-			}
-		}
-		catch (PortalException portalException) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(portalException);
-			}
-		}
-
-		return false;
 	}
 
 	private boolean _layoutContainsPortletId(Layout layout, String portletId) {
