@@ -8,7 +8,9 @@ package com.liferay.fragment.internal.exportimport.data.handler.test;
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.document.library.kernel.exception.NoSuchFileEntryException;
 import com.liferay.exportimport.kernel.lar.ExportImportThreadLocal;
+import com.liferay.exportimport.kernel.lar.StagedModelDataHandlerUtil;
 import com.liferay.exportimport.test.util.lar.BaseStagedModelDataHandlerTestCase;
+import com.liferay.fragment.configuration.FragmentServiceConfiguration;
 import com.liferay.fragment.constants.FragmentConstants;
 import com.liferay.fragment.constants.FragmentPortletKeys;
 import com.liferay.fragment.model.FragmentCollection;
@@ -17,9 +19,12 @@ import com.liferay.fragment.model.FragmentEntryLink;
 import com.liferay.fragment.service.FragmentEntryLinkLocalService;
 import com.liferay.fragment.service.FragmentEntryLocalService;
 import com.liferay.fragment.test.util.FragmentTestUtil;
+import com.liferay.layout.content.LayoutContentProvider;
 import com.liferay.layout.test.util.LayoutTestUtil;
+import com.liferay.layout.util.LayoutServiceContextHelper;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporarySwapper;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Layout;
@@ -28,18 +33,23 @@ import com.liferay.portal.kernel.model.StagedModel;
 import com.liferay.portal.kernel.portletfilerepository.PortletFileRepositoryUtil;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.FileUtil;
+import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.segments.service.SegmentsExperienceLocalService;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.junit.Assert;
@@ -162,6 +172,128 @@ public class FragmentEntryStagedModelDataHandlerTest
 	}
 
 	@Test
+	public void testImportExistingFragmentEntryPropagatingChanges()
+		throws Exception {
+
+		try (CompanyConfigurationTemporarySwapper
+				companyConfigurationTemporarySwapper =
+					new CompanyConfigurationTemporarySwapper(
+						TestPropsValues.getCompanyId(),
+						FragmentServiceConfiguration.class.getName(),
+						HashMapDictionaryBuilder.<String, Object>put(
+							"propagate-fragment-changes-automatically-" +
+								"description",
+							true
+						).build())) {
+
+			ServiceContext serviceContext =
+				ServiceContextTestUtil.getServiceContext(
+					stagingGroup.getGroupId(), TestPropsValues.getUserId());
+
+			FragmentCollection fragmentCollection =
+				FragmentTestUtil.addFragmentCollection(
+					stagingGroup.getGroupId());
+
+			String configuration = _read(
+				"configuration-test-propagation-changes.json");
+			String html = _read("html-test-propagation-changes.html");
+
+			StagedModel stagedModel =
+				_fragmentEntryLocalService.addFragmentEntry(
+					TestPropsValues.getUserId(), stagingGroup.getGroupId(),
+					fragmentCollection.getFragmentCollectionId(),
+					RandomTestUtil.randomString(),
+					RandomTestUtil.randomString(),
+					RandomTestUtil.randomString(), html,
+					RandomTestUtil.randomString(), false, configuration, null,
+					0, false, FragmentConstants.TYPE_COMPONENT, null,
+					WorkflowConstants.STATUS_APPROVED,
+					ServiceContextTestUtil.getServiceContext(
+						stagingGroup.getGroupId(),
+						TestPropsValues.getUserId()));
+
+			FragmentEntry fragmentEntry = (FragmentEntry)stagedModel;
+
+			FragmentEntryLink fragmentEntryLink =
+				_fragmentEntryLinkLocalService.addFragmentEntryLink(
+					TestPropsValues.getUserId(), stagingGroup.getGroupId(), 0,
+					fragmentEntry.getFragmentEntryId(),
+					_segmentsExperienceLocalService.
+						fetchDefaultSegmentsExperienceId(_layout.getPlid()),
+					stagingGroup.getDefaultPublicPlid(), fragmentEntry.getCss(),
+					fragmentEntry.getHtml(), fragmentEntry.getJs(),
+					fragmentEntry.getConfiguration(), StringPool.BLANK,
+					StringPool.BLANK, 0, StringPool.BLANK,
+					fragmentEntry.getType(), serviceContext);
+
+			Locale locale = _portal.getSiteDefaultLocale(stagingGroup);
+
+			try {
+				exportImportStagedModel(stagedModel);
+			}
+			finally {
+				ExportImportThreadLocal.setPortletImportInProcess(false);
+			}
+
+			String content = _getLayoutContent(_layout, locale);
+
+			Assert.assertEquals("", content);
+
+			String htmlUpdate = _read(
+				"html-update-test-propagation-changes.html");
+
+			try {
+				initExport();
+
+				StagedModelDataHandlerUtil.exportStagedModel(
+					portletDataContext, stagedModel);
+
+				stagedModel = _fragmentEntryLocalService.updateFragmentEntry(
+					TestPropsValues.getUserId(),
+					fragmentEntry.getFragmentEntryId(),
+					fragmentEntry.getFragmentCollectionId(),
+					fragmentEntry.getName(), fragmentEntry.getCss(), htmlUpdate,
+					fragmentEntry.getJs(), false, configuration,
+					StringPool.BLANK, fragmentEntry.getPreviewFileEntryId(),
+					false, fragmentEntry.getTypeOptions(),
+					WorkflowConstants.STATUS_APPROVED);
+
+				initImport();
+
+				StagedModel exportedStagedModel = readExportedStagedModel(
+					stagedModel);
+
+				Assert.assertNotNull(exportedStagedModel);
+
+				StagedModelDataHandlerUtil.importStagedModel(
+					portletDataContext, exportedStagedModel);
+
+				content = _getLayoutContent(_layout, locale);
+
+				Assert.assertEquals("", content);
+			}
+			finally {
+				ExportImportThreadLocal.setPortletImportInProcess(false);
+			}
+
+			StagedModel importedStagedModel = getStagedModel(
+				stagedModel.getUuid(), liveGroup);
+
+			FragmentEntry importedFragmentEntry =
+				(FragmentEntry)importedStagedModel;
+
+			Assert.assertNotNull(importedStagedModel);
+
+			Assert.assertEquals(
+				fragmentEntryLink.getCss(), importedFragmentEntry.getCss());
+			Assert.assertEquals(htmlUpdate, importedFragmentEntry.getHtml());
+			Assert.assertEquals(
+				fragmentEntryLink.getJs(), importedFragmentEntry.getJs());
+			validateImportedStagedModel(stagedModel, importedStagedModel);
+		}
+	}
+
+	@Test
 	public void testUpdateFragmentEntryWithFragmentEntryLink()
 		throws Exception {
 
@@ -276,6 +408,24 @@ public class FragmentEntryStagedModelDataHandlerTest
 			fragmentEntry.getConfiguration());
 	}
 
+	private String _getLayoutContent(Layout layout, Locale locale)
+		throws Exception {
+
+		try (AutoCloseable autoCloseable =
+				_layoutServiceContextHelper.getServiceContextAutoCloseable(
+					layout)) {
+
+			ServiceContext serviceContext =
+				ServiceContextThreadLocal.getServiceContext();
+
+			ThemeDisplay themeDisplay = serviceContext.getThemeDisplay();
+
+			return _layoutContentProvider.getLayoutContent(
+				themeDisplay.getRequest(), themeDisplay.getResponse(), layout,
+				locale);
+		}
+	}
+
 	private String _read(String fileName) throws Exception {
 		return new String(
 			FileUtil.getBytes(getClass(), "dependencies/" + fileName));
@@ -288,6 +438,15 @@ public class FragmentEntryStagedModelDataHandlerTest
 	private FragmentEntryLocalService _fragmentEntryLocalService;
 
 	private Layout _layout;
+
+	@Inject
+	private LayoutContentProvider _layoutContentProvider;
+
+	@Inject
+	private LayoutServiceContextHelper _layoutServiceContextHelper;
+
+	@Inject
+	private Portal _portal;
 
 	@Inject
 	private SegmentsExperienceLocalService _segmentsExperienceLocalService;
