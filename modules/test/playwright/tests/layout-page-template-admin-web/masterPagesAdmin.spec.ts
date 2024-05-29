@@ -39,7 +39,7 @@ test('This is a test for LPS-102566, LPS-109594, LPS-119634 and LPS-104629. Add 
 	await test.step('Create and publish new custom master page', async () => {
 		await masterPagesPage.goto(site.friendlyUrlPath);
 
-		masterPagesPage.createNewMaster(masterName);
+		await masterPagesPage.createNewMaster(masterName);
 
 		const templateCard = masterPagesPage.getMasterCard(masterName);
 
@@ -53,7 +53,7 @@ test('This is a test for LPS-102566, LPS-109594, LPS-119634 and LPS-104629. Add 
 	});
 
 	await test.step('Assert header of Drop Zone is inside body by default', async () => {
-		masterPagesPage.editMaster(masterName);
+		await masterPagesPage.editMaster(masterName);
 
 		await expect(page.locator('.page-editor__drop-zone')).toBeVisible();
 
