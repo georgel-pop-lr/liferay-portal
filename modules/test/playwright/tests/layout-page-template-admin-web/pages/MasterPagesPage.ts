@@ -25,11 +25,7 @@ export class MasterPagesPage {
 		);
 	}
 
-	getTemplateCard(name: string) {
-		return this.page.locator('.card-page-item').filter({hasText: name});
-	}
-
-	async publishNewMasterTemplate(name: string) {
+	async createNewMaster(name: string) {
 		await this.newButton.click();
 		await this.page.getByLabel('Name').fill(name);
 		await this.page.getByRole('button', {name: 'Save'}).click();
@@ -37,11 +33,17 @@ export class MasterPagesPage {
 		await this.publishButton.click();
 	}
 
-	async clickMoreActions(name: string) {
-		await this.getTemplateCard(name).getByLabel('More actions').click();
+	async editMaster(name: string) {
+		await this.getMasterCard(name).getByLabel(name).click();
+
+		await this.page.getByText('Configure Allowed Fragments').waitFor();
 	}
 
-	async clickAndEdit(name: string) {
-		await this.getTemplateCard(name).getByLabel(name).click();
+	async openMasterActionsMenu(name: string) {
+		await this.getMasterCard(name).getByLabel('More actions').click();
+	}
+
+	getMasterCard(name: string) {
+		return this.page.locator('.card-page-item').filter({hasText: name});
 	}
 }

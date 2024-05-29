@@ -17,7 +17,7 @@ test('This is for LPS-102202. Validate if the Blank page template can not be edi
 }) => {
 	await masterPagesPage.goto(site.friendlyUrlPath);
 
-	const templateCard = masterPagesPage.getTemplateCard('Blank');
+	const templateCard = masterPagesPage.getMasterCard('Blank');
 
 	await expect(templateCard).toBeVisible();
 
@@ -34,14 +34,14 @@ test('This is a test for LPS-102566, LPS-109594, LPS-119634 and LPS-104629. Add 
 	pageEditorPage,
 	site,
 }) => {
-	const nameNewMasterPage = 'New Master Page';
+	const masterName = 'New Master Page';
 
 	await test.step('Create and publish new custom master page', async () => {
 		await masterPagesPage.goto(site.friendlyUrlPath);
 
-		masterPagesPage.publishNewMasterTemplate(nameNewMasterPage);
+		masterPagesPage.createNewMaster(masterName);
 
-		const templateCard = masterPagesPage.getTemplateCard(nameNewMasterPage);
+		const templateCard = masterPagesPage.getMasterCard(masterName);
 
 		await expect(templateCard).toBeVisible();
 
@@ -53,7 +53,7 @@ test('This is a test for LPS-102566, LPS-109594, LPS-119634 and LPS-104629. Add 
 	});
 
 	await test.step('Assert header of Drop Zone is inside body by default', async () => {
-		masterPagesPage.clickAndEdit(nameNewMasterPage);
+		masterPagesPage.editMaster(masterName);
 
 		await expect(page.locator('.page-editor__drop-zone')).toBeVisible();
 
