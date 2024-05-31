@@ -319,12 +319,12 @@ test('correct viewport configuration is set when adding a Grid', async ({
 			.replace('lfr-layout-structure-item-topper-', '')
 	);
 
-	await pageEditorPage.changeFragmentConfiguration(
-		gridId,
-		'General',
-		'Number of Modules',
-		'6'
-	);
+	await pageEditorPage.changeFragmentConfiguration({
+		fieldLabel: 'Number of Modules',
+		fragmentId: gridId,
+		tab: 'General',
+		value: '6',
+	});
 
 	// Check columns have size 2 in desktop
 
@@ -346,13 +346,13 @@ test('correct viewport configuration is set when adding a Grid', async ({
 
 	// Change to 2 modules per row and check size is 6
 
-	await pageEditorPage.changeFragmentConfiguration(
-		gridId,
-		'General',
-		'Layout',
-		'2 Modules per Row',
-		false
-	);
+	await pageEditorPage.changeFragmentConfiguration({
+		fieldLabel: 'Layout',
+		fragmentId: gridId,
+		isDesktop: false,
+		tab: 'General',
+		value: '2 Modules per Row',
+	});
 
 	await expect(globalFrame.locator('.page-editor__col.col-6')).toHaveCount(6);
 });
