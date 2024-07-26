@@ -6,13 +6,27 @@
 import {act, render, screen} from '@testing-library/react';
 import React from 'react';
 
-import {SWITCH_SIDEBAR_PANEL} from '../../../../src/main/resources/META-INF/resources/page_editor/app/actions/types';
+import {
+	SELECT_FRAGMENT_FOR_NAME_EDITING,
+	SWITCH_SIDEBAR_PANEL,
+	UPDATE_ITEM_CONFIG,
+} from '../../../../src/main/resources/META-INF/resources/page_editor/app/actions/types';
 import ShortcutManager from '../../../../src/main/resources/META-INF/resources/page_editor/app/components/ShortcutManager';
 import StoreMother from '../../../../src/main/resources/META-INF/resources/page_editor/test_utils/StoreMother';
 
 const DEFAULT_STATE = {
+	layoutData: {
+		items: {
+			fragmentItemId1: {
+				itemId: 'fragmentItemId1',
+			},
+		},
+	},
 	permissions: {
 		UPDATE: true,
+	},
+	selectFragmentForNameEditing: {
+		itemId: 'fragmentItemId1',
 	},
 	sidebar: {},
 };
@@ -98,7 +112,6 @@ describe('ShortcutManager', () => {
 			document.body.dispatchEvent(
 				new KeyboardEvent('keydown', {
 					key: '?',
-					metaKey: false,
 					shiftKey: true,
 				})
 			);
@@ -109,5 +122,61 @@ describe('ShortcutManager', () => {
 		});
 
 		screen.getByText('keyboard-shortcuts');
+	});
+
+	it('triggers rename fragment action when pressing ctrl + alt + R', () => {
+		const mockDispatch = jest.fn((a) => {
+			if (typeof a === 'function') {
+				return a(mockDispatch);
+			}
+		});
+
+		renderComponent({
+			dispatch: mockDispatch,
+			state: {
+				...DEFAULT_STATE,
+			},
+		});
+
+		document.body.dispatchEvent(
+			new KeyboardEvent('keydown', {
+				altKey: true,
+				ctrlKey: true,
+				key: 'R',
+			})
+		);
+
+		expect(mockDispatch).toBeCalledWith(
+			expect.objectContaining({
+				itemId: 'fragmentItemId1',
+				type: SELECT_FRAGMENT_FOR_NAME_EDITING,
+			})
+		);
+	});
+
+	it('triggers hide fragment action when pressing ctrl + H', () => {
+		const mockDispatch = jest.fn((a) => {
+			if (typeof a === 'function') {
+				return a(mockDispatch);
+			}
+		});
+
+		renderComponent({
+			dispatch: mockDispatch,
+			state: {
+				...DEFAULT_STATE,
+			},
+		});
+
+		document.body.dispatchEvent(
+			new KeyboardEvent('keydown', {
+				ctrlKey: true,
+				key: 'H',
+			})
+		);
+
+		expect(mockDispatch).toBeCalledWith(
+			expect.objectContaining({type: UPDATE_ITEM_CONFIG})
+		);
 	});
 });
