@@ -126,6 +126,10 @@ describe('ShortcutManager', () => {
 		};
 	});
 
+	beforeEach(() => {
+		jest.clearAllMocks();
+	});
+
 	it('triggers hide sidebar action when pressing cmd + shift + .', () => {
 		const mockDispatch = jest.fn((a) => {
 			if (typeof a === 'function') {
@@ -202,7 +206,7 @@ describe('ShortcutManager', () => {
 		screen.getByText('keyboard-shortcuts');
 	});
 
-	it('sets the node id to be renamed when pressing ctrl + alt + R', () => {
+	it('sets the item id to be renamed when pressing ctrl + alt + R', () => {
 		const setEditedNodeId = useSetEditedNodeId();
 
 		renderComponent({
@@ -255,7 +259,7 @@ describe('ShortcutManager', () => {
 		);
 	});
 
-	it('sets the node id to be cut when pressing ctrl + X', () => {
+	it('sets the item id to be cut when pressing ctrl + X', () => {
 		Liferay.FeatureFlags['LPD-18221'] = true;
 
 		const setCopiedItemIds = useSetCopiedItemIds();
@@ -282,7 +286,7 @@ describe('ShortcutManager', () => {
 		Liferay.FeatureFlags['LPD-18221'] = false;
 	});
 
-	it('sets the node id to be copied when pressing ctrl + C', () => {
+	it('sets the item id to be copied when pressing ctrl + C', () => {
 		Liferay.FeatureFlags['LPD-18221'] = true;
 
 		const setCopiedItemIds = useSetCopiedItemIds();
@@ -303,7 +307,7 @@ describe('ShortcutManager', () => {
 		Liferay.FeatureFlags['LPD-18221'] = false;
 	});
 
-	it('sets the node id to be pasted when pressing ctrl + V', () => {
+	it('sets the item id to be pasted when pressing ctrl + V', () => {
 		Liferay.FeatureFlags['LPD-18221'] = true;
 
 		renderComponent({
@@ -317,6 +321,8 @@ describe('ShortcutManager', () => {
 			})
 		);
 
+		expect(pasteItem.mock.calls.length).toBe(1);
+
 		expect(pasteItem).toBeCalledWith(
 			expect.objectContaining({
 				copyItemIds: [],
@@ -327,7 +333,26 @@ describe('ShortcutManager', () => {
 		Liferay.FeatureFlags['LPD-18221'] = false;
 	});
 
-	it('sets the node id to be duplicated when pressing ctrl + alt + D', () => {
+	it('cannot paste the item id because multiple parents are selected', () => {
+		Liferay.FeatureFlags['LPD-18221'] = true;
+
+		renderComponent({
+			activeItemIds: ['fragment01', 'fragment02'],
+		});
+
+		document.body.dispatchEvent(
+			new KeyboardEvent('keydown', {
+				code: 'KeyV',
+				ctrlKey: true,
+			})
+		);
+
+		expect(pasteItem.mock.calls.length).toBe(0);
+
+		Liferay.FeatureFlags['LPD-18221'] = false;
+	});
+
+	it('sets the item id to be duplicated when pressing ctrl + alt + D', () => {
 		renderComponent({
 			activeItemIds: ['fragment01'],
 		});
