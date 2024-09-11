@@ -5,20 +5,17 @@
 
 import '@testing-library/jest-dom/extend-expect';
 import {render, screen} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
-import TopperItemActions
-	from "../../../../../src/main/resources/META-INF/resources/page_editor/app/components/topper/TopperItemActions";
+
+import TopperItemActions from '../../../../../src/main/resources/META-INF/resources/page_editor/app/components/topper/TopperItemActions';
+import {LAYOUT_DATA_ITEM_TYPES} from '../../../../../src/main/resources/META-INF/resources/page_editor/app/config/constants/layoutDataItemTypes';
 import {
-	ClipboardContextProvider, useSetCopiedItemIds
-} from "../../../../../src/main/resources/META-INF/resources/page_editor/app/contexts/ClipboardContext";
-import {
-	LAYOUT_DATA_ITEM_TYPES
-} from "../../../../../src/main/resources/META-INF/resources/page_editor/app/config/constants/layoutDataItemTypes";
-import userEvent from "@testing-library/user-event";
-import deleteItem
-	from "../../../../../src/main/resources/META-INF/resources/page_editor/app/thunks/deleteItem";
-import pasteItem
-	from "../../../../../src/main/resources/META-INF/resources/page_editor/app/thunks/pasteItem";
+	ClipboardContextProvider,
+	useSetCopiedItemIds,
+} from '../../../../../src/main/resources/META-INF/resources/page_editor/app/contexts/ClipboardContext';
+import deleteItem from '../../../../../src/main/resources/META-INF/resources/page_editor/app/thunks/deleteItem';
+import pasteItem from '../../../../../src/main/resources/META-INF/resources/page_editor/app/thunks/pasteItem';
 
 const LAYOUT_DATA = {
 	items: {
@@ -33,17 +30,15 @@ const LAYOUT_DATA = {
 };
 
 const renderTopperItemActions = ({
-						  isDisabled = false,
+	isDisabled = false,
 	itemId = 'itemId',
-									 layoutData = LAYOUT_DATA,
+	layoutData = LAYOUT_DATA,
 } = {}) => {
 	const item = layoutData.items[itemId];
 
 	return render(
 		<ClipboardContextProvider>
-			<TopperItemActions disabled={isDisabled}
-							   item={item}
-			/>
+			<TopperItemActions disabled={isDisabled} item={item} />
 		</ClipboardContextProvider>
 	);
 };
@@ -57,17 +52,16 @@ jest.mock(
 			...jest.requireActual(
 				'../../../../../src/main/resources/META-INF/resources/page_editor/app/contexts/ClipboardContext'
 			),
+			useCopiedItemIds: ['item-1'],
 			useSetCopiedItemIds: () => setCopiedItemIds,
 		};
 	}
 );
 
-
 jest.mock(
 	'../../../../../src/main/resources/META-INF/resources/page_editor/app/thunks/deleteItem',
 	() => jest.fn()
 );
-
 
 jest.mock(
 	'../../../../../src/main/resources/META-INF/resources/page_editor/app/thunks/pasteItem',
@@ -79,7 +73,9 @@ describe('TopperItemActions', () => {
 		const {baseElement} = renderTopperItemActions({isDisabled: true});
 
 		expect(baseElement.querySelector('.dropdown')).toBeInTheDocument();
-		expect(baseElement.querySelector('.dropdown-toggle')).toHaveAttribute('disabled');
+		expect(baseElement.querySelector('.dropdown-toggle')).toHaveAttribute(
+			'disabled'
+		);
 	});
 
 	it('opens TopperItemActions if not disabled', () => {
@@ -97,9 +93,7 @@ describe('TopperItemActions', () => {
 
 		const setCopiedItemIds = useSetCopiedItemIds();
 
-		const {baseElement} = renderTopperItemActions();
-
-		userEvent.click(baseElement.querySelector('.dropdown-toggle'));
+		renderTopperItemActions();
 
 		userEvent.click(screen.getByText('cut'));
 
@@ -121,13 +115,9 @@ describe('TopperItemActions', () => {
 
 		const setCopiedItemIds = useSetCopiedItemIds();
 
-		const {baseElement} = renderTopperItemActions();
+		renderTopperItemActions();
 
-		userEvent.click(baseElement.querySelector('.dropdown-toggle'));
-
-		userEvent.click(screen.getByRole('button', {
-			text: 'copy',
-		}));
+		userEvent.click(screen.getByText('copy'));
 
 		expect(setCopiedItemIds).toBeCalledWith(
 			expect.objectContaining(['itemId'])
@@ -139,22 +129,17 @@ describe('TopperItemActions', () => {
 	it('calls pasteItem when Paste action is pressed', () => {
 		Liferay.FeatureFlags['LPD-18221'] = true;
 
-		const {baseElement} = renderTopperItemActions();
+		renderTopperItemActions();
 
-		userEvent.click(baseElement.querySelector('.dropdown-toggle'));
-
-		userEvent.click(screen.getByRole('button', {
-			text: 'paste',
-		}));
+		userEvent.click(screen.getByText('paste'));
 
 		expect(pasteItem).toBeCalledWith(
 			expect.objectContaining({
-				copyItemIds: [],
+				copyItemIds: ['item-1'],
 				parentItemId: 'itemId',
 			})
 		);
 
 		Liferay.FeatureFlags['LPD-18221'] = false;
 	});
-
 });
