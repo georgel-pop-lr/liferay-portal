@@ -713,13 +713,13 @@ public class LayoutStructureTest {
 
 		_assertFragmentStyledLayoutStructureItem(
 			(FragmentStyledLayoutStructureItem)copiedLayoutStructureItems.get(
-				0),
+				1),
 			(FragmentStyledLayoutStructureItem)
 				fragmentStyledLayoutStructureItem1);
 
 		_assertFragmentStyledLayoutStructureItem(
 			(FragmentStyledLayoutStructureItem)copiedLayoutStructureItems.get(
-				1),
+				0),
 			(FragmentStyledLayoutStructureItem)
 				fragmentStyledLayoutStructureItem2);
 	}
