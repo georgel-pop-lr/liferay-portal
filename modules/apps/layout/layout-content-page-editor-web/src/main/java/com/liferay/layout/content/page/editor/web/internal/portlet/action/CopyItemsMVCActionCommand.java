@@ -107,7 +107,8 @@ public class CopyItemsMVCActionCommand
 							getFragmentEntryLinkId();
 
 					long fragmentEntryLinkId = duplicateFragmentEntryLink(
-						actionRequest, originalFragmentEntryLinkId);
+						actionRequest, originalFragmentEntryLinkId,
+						copiedLayoutStructureItem.getItemId(), layoutStructure);
 
 					layoutStructure.updateItemConfig(
 						JSONUtil.put(

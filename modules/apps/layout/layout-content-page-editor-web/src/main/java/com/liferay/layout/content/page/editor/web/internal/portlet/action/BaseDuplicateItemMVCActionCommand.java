@@ -13,7 +13,9 @@ import com.liferay.fragment.service.FragmentEntryLinkService;
 import com.liferay.layout.content.page.editor.web.internal.exception.NoninstanceablePortletException;
 import com.liferay.layout.content.page.editor.web.internal.manager.FragmentEntryLinkManager;
 import com.liferay.layout.content.page.editor.web.internal.util.layout.structure.LayoutStructureUtil;
+import com.liferay.layout.util.structure.FragmentStyledLayoutStructureItem;
 import com.liferay.layout.util.structure.LayoutStructure;
+import com.liferay.layout.util.structure.LayoutStructureItem;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.LockedLayoutException;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -44,6 +46,7 @@ import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.portlet.ActionRequest;
@@ -62,7 +65,8 @@ public abstract class BaseDuplicateItemMVCActionCommand
 	extends BaseContentPageEditorTransactionalMVCActionCommand {
 
 	protected long duplicateFragmentEntryLink(
-			ActionRequest actionRequest, long fragmentEntryLinkId)
+			ActionRequest actionRequest, long fragmentEntryLinkId,
+			String duplicatedItemId, LayoutStructure layoutStructure)
 		throws PortalException {
 
 		FragmentEntryLink fragmentEntryLink =
@@ -82,7 +86,9 @@ public abstract class BaseDuplicateItemMVCActionCommand
 		if (Validator.isNotNull(portletId)) {
 			Portlet portlet = portletLocalService.getPortletById(portletId);
 
-			if (!portlet.isInstanceable()) {
+			if (!_areAllNoninstantiablePortletsMarkedForDeletion(
+					portlet, duplicatedItemId, layoutStructure)) {
+
 				throw new NoninstanceablePortletException(portletId);
 			}
 
@@ -237,6 +243,55 @@ public abstract class BaseDuplicateItemMVCActionCommand
 
 	@Reference
 	protected RoleLocalService roleLocalService;
+
+	private boolean _areAllNoninstantiablePortletsMarkedForDeletion(
+			Portlet portlet, String duplicatedItemId,
+			LayoutStructure layoutStructure)
+		throws PortalException {
+
+		if (portlet.isInstanceable()) {
+			return true;
+		}
+
+		for (LayoutStructureItem layoutStructureItem :
+				layoutStructure.getLayoutStructureItems()) {
+
+			if (!(layoutStructureItem instanceof
+					FragmentStyledLayoutStructureItem)) {
+
+				continue;
+			}
+
+			FragmentStyledLayoutStructureItem
+				fragmentStyledLayoutStructureItem =
+					(FragmentStyledLayoutStructureItem)layoutStructureItem;
+
+			FragmentEntryLink fragmentEntryLink =
+				fragmentEntryLinkLocalService.getFragmentEntryLink(
+					fragmentStyledLayoutStructureItem.getFragmentEntryLinkId());
+
+			if (fragmentEntryLink == null) {
+				continue;
+			}
+
+			JSONObject editableValuesJSONObject = jsonFactory.createJSONObject(
+				fragmentEntryLink.getEditableValues());
+
+			String currentPortletId = editableValuesJSONObject.getString(
+				"portletId");
+
+			if (!Objects.equals(
+					layoutStructureItem.getItemId(), duplicatedItemId) &&
+				Objects.equals(currentPortletId, portlet.getPortletId()) &&
+				!layoutStructure.isItemMarkedForDeletion(
+					layoutStructureItem.getItemId())) {
+
+				return false;
+			}
+		}
+
+		return true;
+	}
 
 	private void _copyPortletPermissions(
 			long companyId, long groupId, String newInstanceId,
