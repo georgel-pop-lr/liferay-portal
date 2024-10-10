@@ -9,6 +9,7 @@ import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.fragment.constants.FragmentConstants;
 import com.liferay.fragment.model.FragmentEntry;
 import com.liferay.fragment.model.FragmentEntryLink;
+import com.liferay.fragment.processor.FragmentEntryProcessorRegistry;
 import com.liferay.fragment.service.FragmentEntryLinkLocalService;
 import com.liferay.fragment.service.FragmentEntryLocalService;
 import com.liferay.layout.test.util.LayoutTestUtil;
@@ -18,8 +19,11 @@ import com.liferay.layout.util.structure.LayoutStructure;
 import com.liferay.layout.util.structure.LayoutStructureItem;
 import com.liferay.layout.util.structure.RowStyledLayoutStructureItem;
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.model.Portlet;
+import com.liferay.portal.kernel.service.PortletLocalServiceUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
@@ -91,6 +95,60 @@ public class LayoutStructureTest {
 				_fragmentEntry.getJs(), _fragmentEntry.getConfiguration(), null,
 				StringPool.BLANK, 0, null, _fragmentEntry.getType(),
 				serviceContext);
+	}
+
+	@Test
+	public void testAreAllNoninstantiablePortletsMarkedForDeletion()
+		throws Exception {
+
+		LayoutStructure layoutStructure = new LayoutStructure();
+
+		LayoutStructureItem rootLayoutStructureItem =
+			layoutStructure.addRootLayoutStructureItem();
+
+		String portletId = "com_liferay_login_web_portlet_LoginPortlet";
+
+		JSONObject editableValueJSONObject =
+			_fragmentEntryProcessorRegistry.getDefaultEditableValuesJSONObject(
+				StringPool.BLANK, StringPool.BLANK);
+
+		editableValueJSONObject.put(
+			"instanceId", StringPool.BLANK
+		).put(
+			"portletId", portletId
+		);
+
+		FragmentEntryLink fragmentEntryLink = _addFragmentEntryLink(
+			editableValueJSONObject.toString());
+
+		LayoutStructureItem fragmentStyledLayoutStructureItem =
+			layoutStructure.addFragmentStyledLayoutStructureItem(
+				fragmentEntryLink.getFragmentEntryLinkId(),
+				rootLayoutStructureItem.getItemId(), 0);
+
+		layoutStructure.markLayoutStructureItemForDeletion(
+			Collections.singletonList(
+				fragmentStyledLayoutStructureItem.getItemId()),
+			Collections.singletonList(portletId));
+
+		Portlet portlet = PortletLocalServiceUtil.getPortletById(portletId);
+
+		Assert.assertTrue(
+			layoutStructure.areAllNoninstantiablePortletsMarkedForDeletion(
+				portlet));
+
+		fragmentStyledLayoutStructureItem =
+			layoutStructure.addFragmentStyledLayoutStructureItem(
+				fragmentEntryLink.getFragmentEntryLinkId(),
+				rootLayoutStructureItem.getItemId(), 0);
+
+		Assert.assertFalse(
+			layoutStructure.areAllNoninstantiablePortletsMarkedForDeletion(
+				portlet));
+
+		Assert.assertTrue(
+			layoutStructure.areAllNoninstantiablePortletsMarkedForDeletion(
+				portlet, fragmentStyledLayoutStructureItem.getItemId()));
 	}
 
 	@Test
@@ -185,7 +243,7 @@ public class LayoutStructureTest {
 		LayoutStructureItem rootLayoutStructureItem =
 			layoutStructure.addRootLayoutStructureItem();
 
-		FragmentEntryLink fragmentEntryLink = _addFragmentEntryLink();
+		FragmentEntryLink fragmentEntryLink = _addFragmentEntryLink(null);
 
 		LayoutStructureItem fragmentStyledLayoutStructureItem =
 			layoutStructure.addFragmentStyledLayoutStructureItem(
@@ -211,7 +269,7 @@ public class LayoutStructureTest {
 		LayoutStructureItem rootLayoutStructureItem =
 			layoutStructure.addRootLayoutStructureItem();
 
-		FragmentEntryLink fragmentEntryLink = _addFragmentEntryLink();
+		FragmentEntryLink fragmentEntryLink = _addFragmentEntryLink(null);
 
 		LayoutStructureItem fragmentStyledLayoutStructureItem =
 			layoutStructure.addFragmentStyledLayoutStructureItem(
@@ -268,7 +326,7 @@ public class LayoutStructureTest {
 			layoutStructure.addColumnLayoutStructureItem(
 				rowStyledLayoutStructureItem.getItemId(), 0);
 
-		FragmentEntryLink fragmentEntryLink = _addFragmentEntryLink();
+		FragmentEntryLink fragmentEntryLink = _addFragmentEntryLink(null);
 
 		layoutStructure.addFragmentStyledLayoutStructureItem(
 			fragmentEntryLink.getFragmentEntryLinkId(),
@@ -289,7 +347,7 @@ public class LayoutStructureTest {
 		LayoutStructureItem rootLayoutStructureItem =
 			layoutStructure.addRootLayoutStructureItem();
 
-		FragmentEntryLink fragmentEntryLink = _addFragmentEntryLink();
+		FragmentEntryLink fragmentEntryLink = _addFragmentEntryLink(null);
 
 		LayoutStructureItem fragmentStyledLayoutStructureItem =
 			layoutStructure.addFragmentStyledLayoutStructureItem(
@@ -335,7 +393,7 @@ public class LayoutStructureTest {
 			layoutStructure.addColumnLayoutStructureItem(
 				rowStyledLayoutStructureItem.getItemId(), 0);
 
-		FragmentEntryLink fragmentEntryLink = _addFragmentEntryLink();
+		FragmentEntryLink fragmentEntryLink = _addFragmentEntryLink(null);
 
 		LayoutStructureItem fragmentStyledLayoutStructureItem =
 			layoutStructure.addFragmentStyledLayoutStructureItem(
@@ -373,7 +431,7 @@ public class LayoutStructureTest {
 			layoutStructure.addColumnLayoutStructureItem(
 				rowStyledLayoutStructureItem.getItemId(), 0);
 
-		FragmentEntryLink fragmentEntryLink = _addFragmentEntryLink();
+		FragmentEntryLink fragmentEntryLink = _addFragmentEntryLink(null);
 
 		LayoutStructureItem fragmentStyledLayoutStructureItem =
 			layoutStructure.addFragmentStyledLayoutStructureItem(
@@ -404,7 +462,7 @@ public class LayoutStructureTest {
 			layoutStructure.addDropZoneLayoutStructureItem(
 				rootLayoutStructureItem.getItemId(), 0);
 
-		FragmentEntryLink fragmentEntryLink = _addFragmentEntryLink();
+		FragmentEntryLink fragmentEntryLink = _addFragmentEntryLink(null);
 
 		LayoutStructureItem fragmentStyledLayoutStructureItem =
 			layoutStructure.addFragmentStyledLayoutStructureItem(
@@ -442,7 +500,7 @@ public class LayoutStructureTest {
 			layoutStructure.addFormStepLayoutStructureItem(
 				formStepContainerStyledLayoutStructureItem.getItemId(), 0);
 
-		FragmentEntryLink fragmentEntryLink = _addFragmentEntryLink();
+		FragmentEntryLink fragmentEntryLink = _addFragmentEntryLink(null);
 
 		LayoutStructureItem fragmentStyledLayoutStructureItem =
 			layoutStructure.addFragmentStyledLayoutStructureItem(
@@ -472,7 +530,7 @@ public class LayoutStructureTest {
 			layoutStructure.addFormStyledLayoutStructureItem(
 				rootLayoutStructureItem.getItemId(), 0);
 
-		FragmentEntryLink fragmentEntryLink = _addFragmentEntryLink();
+		FragmentEntryLink fragmentEntryLink = _addFragmentEntryLink(null);
 
 		LayoutStructureItem fragmentStyledLayoutStructureItem =
 			layoutStructure.addFragmentStyledLayoutStructureItem(
@@ -498,7 +556,7 @@ public class LayoutStructureTest {
 		LayoutStructureItem rootLayoutStructureItem =
 			layoutStructure.addRootLayoutStructureItem();
 
-		FragmentEntryLink fragmentEntryLink1 = _addFragmentEntryLink();
+		FragmentEntryLink fragmentEntryLink1 = _addFragmentEntryLink(null);
 
 		LayoutStructureItem fragmentStyledLayoutStructureItem1 =
 			layoutStructure.addFragmentStyledLayoutStructureItem(
@@ -509,7 +567,7 @@ public class LayoutStructureTest {
 			layoutStructure.addFragmentDropZoneLayoutStructureItem(
 				fragmentStyledLayoutStructureItem1.getItemId(), 0);
 
-		FragmentEntryLink fragmentEntryLink2 = _addFragmentEntryLink();
+		FragmentEntryLink fragmentEntryLink2 = _addFragmentEntryLink(null);
 
 		LayoutStructureItem fragmentStyledLayoutStructureItem2 =
 			layoutStructure.addFragmentStyledLayoutStructureItem(
@@ -536,14 +594,14 @@ public class LayoutStructureTest {
 		LayoutStructureItem rootLayoutStructureItem =
 			layoutStructure.addRootLayoutStructureItem();
 
-		FragmentEntryLink fragmentEntryLink1 = _addFragmentEntryLink();
+		FragmentEntryLink fragmentEntryLink1 = _addFragmentEntryLink(null);
 
 		LayoutStructureItem fragmentStyledLayoutStructureItem1 =
 			layoutStructure.addFragmentStyledLayoutStructureItem(
 				fragmentEntryLink1.getFragmentEntryLinkId(),
 				rootLayoutStructureItem.getItemId(), 0);
 
-		FragmentEntryLink fragmentEntryLink2 = _addFragmentEntryLink();
+		FragmentEntryLink fragmentEntryLink2 = _addFragmentEntryLink(null);
 
 		LayoutStructureItem fragmentStyledLayoutStructureItem2 =
 			layoutStructure.addFragmentStyledLayoutStructureItem(
@@ -569,7 +627,7 @@ public class LayoutStructureTest {
 		LayoutStructureItem rootLayoutStructureItem =
 			layoutStructure.addRootLayoutStructureItem();
 
-		FragmentEntryLink fragmentEntryLink = _addFragmentEntryLink();
+		FragmentEntryLink fragmentEntryLink = _addFragmentEntryLink(null);
 
 		LayoutStructureItem fragmentStyledLayoutStructureItem =
 			layoutStructure.addFragmentStyledLayoutStructureItem(
@@ -607,7 +665,7 @@ public class LayoutStructureTest {
 			layoutStructure.addColumnLayoutStructureItem(
 				rowStyledLayoutStructureItem.getItemId(), 0);
 
-		FragmentEntryLink fragmentEntryLink = _addFragmentEntryLink();
+		FragmentEntryLink fragmentEntryLink = _addFragmentEntryLink(null);
 
 		LayoutStructureItem fragmentStyledLayoutStructureItem =
 			layoutStructure.addFragmentStyledLayoutStructureItem(
@@ -689,7 +747,7 @@ public class LayoutStructureTest {
 			layoutStructure.addColumnLayoutStructureItem(
 				rowStyledLayoutStructureItem.getItemId(), 0);
 
-		FragmentEntryLink fragmentEntryLink1 = _addFragmentEntryLink();
+		FragmentEntryLink fragmentEntryLink1 = _addFragmentEntryLink(null);
 
 		LayoutStructureItem fragmentStyledLayoutStructureItem1 =
 			layoutStructure.addFragmentStyledLayoutStructureItem(
@@ -700,7 +758,7 @@ public class LayoutStructureTest {
 			layoutStructure.addColumnLayoutStructureItem(
 				rowStyledLayoutStructureItem.getItemId(), 1);
 
-		FragmentEntryLink fragmentEntryLink2 = _addFragmentEntryLink();
+		FragmentEntryLink fragmentEntryLink2 = _addFragmentEntryLink(null);
 
 		LayoutStructureItem fragmentStyledLayoutStructureItem2 =
 			layoutStructure.addFragmentStyledLayoutStructureItem(
@@ -779,7 +837,7 @@ public class LayoutStructureTest {
 			layoutStructure.addColumnLayoutStructureItem(
 				rowStyledLayoutStructureItem.getItemId(), 0);
 
-		FragmentEntryLink fragmentEntryLink1 = _addFragmentEntryLink();
+		FragmentEntryLink fragmentEntryLink1 = _addFragmentEntryLink(null);
 
 		LayoutStructureItem fragmentStyledLayoutStructureItem1 =
 			layoutStructure.addFragmentStyledLayoutStructureItem(
@@ -790,7 +848,7 @@ public class LayoutStructureTest {
 			layoutStructure.addColumnLayoutStructureItem(
 				rowStyledLayoutStructureItem.getItemId(), 1);
 
-		FragmentEntryLink fragmentEntryLink2 = _addFragmentEntryLink();
+		FragmentEntryLink fragmentEntryLink2 = _addFragmentEntryLink(null);
 
 		LayoutStructureItem fragmentStyledLayoutStructureItem2 =
 			layoutStructure.addFragmentStyledLayoutStructureItem(
@@ -1006,7 +1064,9 @@ public class LayoutStructureTest {
 					_group.getGroupId(), _fragmentEntry.getFragmentEntryId()));
 	}
 
-	private FragmentEntryLink _addFragmentEntryLink() throws Exception {
+	private FragmentEntryLink _addFragmentEntryLink(String editableValues)
+		throws Exception {
+
 		long defaultSegmentsExperienceId =
 			_segmentsExperienceLocalService.fetchDefaultSegmentsExperienceId(
 				_layout.getPlid());
@@ -1016,8 +1076,8 @@ public class LayoutStructureTest {
 			_fragmentEntry.getFragmentEntryId(), defaultSegmentsExperienceId,
 			_layout.getPlid(), _fragmentEntry.getCss(),
 			_fragmentEntry.getHtml(), _fragmentEntry.getJs(),
-			_fragmentEntry.getConfiguration(), null, StringPool.BLANK, 0, null,
-			_fragmentEntry.getType(),
+			_fragmentEntry.getConfiguration(), editableValues, StringPool.BLANK,
+			0, null, _fragmentEntry.getType(),
 			ServiceContextTestUtil.getServiceContext(_group.getGroupId()));
 	}
 
@@ -1070,6 +1130,9 @@ public class LayoutStructureTest {
 
 	@Inject
 	private FragmentEntryLocalService _fragmentEntryLocalService;
+
+	@Inject
+	private FragmentEntryProcessorRegistry _fragmentEntryProcessorRegistry;
 
 	@DeleteAfterTestRun
 	private Group _group;
