@@ -5,6 +5,8 @@
 
 package com.liferay.layout.util.structure;
 
+import com.liferay.fragment.model.FragmentEntryLink;
+import com.liferay.fragment.service.FragmentEntryLinkLocalServiceUtil;
 import com.liferay.fragment.service.FragmentEntryLinkServiceUtil;
 import com.liferay.layout.responsive.ViewportSize;
 import com.liferay.layout.util.constants.LayoutStructureConstants;
@@ -19,6 +21,7 @@ import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.Portlet;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.uuid.PortalUUIDUtil;
@@ -459,6 +462,61 @@ public class LayoutStructure {
 		rowStyledLayoutStructureItem.setNumberOfColumns(numberOfColumns);
 
 		return rowStyledLayoutStructureItem;
+	}
+
+	public boolean areAllNoninstantiablePortletsMarkedForDeletion(
+			Portlet portlet)
+		throws PortalException {
+
+		return areAllNoninstantiablePortletsMarkedForDeletion(portlet, null);
+	}
+
+	public boolean areAllNoninstantiablePortletsMarkedForDeletion(
+			Portlet portlet, String ignoreItemId)
+		throws PortalException {
+
+		if (portlet.isInstanceable()) {
+			return true;
+		}
+
+		for (LayoutStructureItem layoutStructureItem :
+				getLayoutStructureItems()) {
+
+			if (!(layoutStructureItem instanceof
+					FragmentStyledLayoutStructureItem)) {
+
+				continue;
+			}
+
+			FragmentStyledLayoutStructureItem
+				fragmentStyledLayoutStructureItem =
+					(FragmentStyledLayoutStructureItem)layoutStructureItem;
+
+			FragmentEntryLink fragmentEntryLink =
+				FragmentEntryLinkLocalServiceUtil.getFragmentEntryLink(
+					fragmentStyledLayoutStructureItem.getFragmentEntryLinkId());
+
+			if (fragmentEntryLink == null) {
+				continue;
+			}
+
+			JSONObject editableValuesJSONObject =
+				JSONFactoryUtil.createJSONObject(
+					fragmentEntryLink.getEditableValues());
+
+			String currentPortletId = editableValuesJSONObject.getString(
+				"portletId");
+
+			if (!Objects.equals(
+					layoutStructureItem.getItemId(), ignoreItemId) &&
+				Objects.equals(currentPortletId, portlet.getPortletId()) &&
+				!isItemMarkedForDeletion(layoutStructureItem.getItemId())) {
+
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	public List<LayoutStructureItem> copyLayoutStructureItems(
