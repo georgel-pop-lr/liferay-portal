@@ -95,7 +95,12 @@ public abstract class BaseDuplicateItemMVCActionCommand
 			String oldInstanceId = editableValuesJSONObject.getString(
 				"instanceId");
 
-			editableValuesJSONObject.put("instanceId", namespace);
+			if (portlet.isInstanceable()) {
+				editableValuesJSONObject.put("instanceId", namespace);
+			}
+			else {
+				editableValuesJSONObject.put("instanceId", StringPool.BLANK);
+			}
 
 			_copyPortletPermissions(
 				fragmentEntryLink.getCompanyId(),
