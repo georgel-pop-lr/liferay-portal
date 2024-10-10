@@ -8,10 +8,14 @@ package com.liferay.layout.internal.portlet.category;
 import com.liferay.fragment.model.FragmentEntryLink;
 import com.liferay.fragment.processor.PortletRegistry;
 import com.liferay.fragment.service.FragmentEntryLinkLocalService;
+import com.liferay.layout.constants.LayoutWebKeys;
 import com.liferay.layout.content.page.editor.constants.ContentPageEditorPortletKeys;
+import com.liferay.layout.page.template.model.LayoutPageTemplateStructure;
+import com.liferay.layout.page.template.service.LayoutPageTemplateStructureLocalService;
 import com.liferay.layout.portlet.PortletManager;
 import com.liferay.layout.portlet.category.PortletCategoryManager;
 import com.liferay.layout.util.PortalPreferencesUtil;
+import com.liferay.layout.util.structure.LayoutStructure;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMap;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMapFactory;
 import com.liferay.petra.function.transform.TransformUtil;
@@ -53,6 +57,7 @@ import com.liferay.portal.kernel.util.comparator.PortletCategoryComparator;
 import com.liferay.portal.kernel.util.comparator.PortletTitleComparator;
 import com.liferay.portal.util.PortletCategoryUtil;
 import com.liferay.portal.util.WebAppPool;
+import com.liferay.segments.manager.SegmentsExperienceManager;
 import com.liferay.segments.model.SegmentsExperienceModel;
 import com.liferay.segments.service.SegmentsExperienceLocalService;
 
@@ -234,6 +239,34 @@ public class PortletCategoryManagerImpl implements PortletCategoryManager {
 		}
 
 		return layoutDecodedPortletNames;
+	}
+
+	private LayoutStructure _getLayoutStructure(
+		HttpServletRequest httpServletRequest, Layout layout) {
+
+		LayoutStructure layoutStructure = null;
+
+		if (httpServletRequest != null) {
+			layoutStructure = (LayoutStructure)httpServletRequest.getAttribute(
+				LayoutWebKeys.LAYOUT_STRUCTURE);
+		}
+
+		if (layoutStructure == null) {
+			LayoutPageTemplateStructure layoutPageTemplateStructure =
+				_layoutPageTemplateStructureLocalService.
+					fetchLayoutPageTemplateStructure(
+						layout.getGroupId(), layout.getPlid());
+
+			SegmentsExperienceManager segmentsExperienceManager =
+				new SegmentsExperienceManager(_segmentsExperienceLocalService);
+
+			layoutStructure = LayoutStructure.of(
+				layoutPageTemplateStructure.getData(
+					segmentsExperienceManager.getSegmentsExperienceId(
+						httpServletRequest)));
+		}
+
+		return layoutStructure;
 	}
 
 	private Map<String, JSONObject> _getPortletCategoryJSONObjectsMap(
@@ -453,7 +486,14 @@ public class PortletCategoryManagerImpl implements PortletCategoryManager {
 									PortletKeys.PREFS_OWNER_TYPE_LAYOUT,
 									layout.getPlid(), portlet.getPortletId());
 
-						if (count1 > 0) {
+						LayoutStructure layoutStructure = _getLayoutStructure(
+							httpServletRequest, layout);
+
+						if ((count1 > 0) &&
+							!layoutStructure.
+								areAllNoninstantiablePortletsMarkedForDeletion(
+									portlet)) {
+
 							return true;
 						}
 
@@ -538,6 +578,10 @@ public class PortletCategoryManagerImpl implements PortletCategoryManager {
 
 	@Reference
 	private Language _language;
+
+	@Reference
+	private LayoutPageTemplateStructureLocalService
+		_layoutPageTemplateStructureLocalService;
 
 	@Reference
 	private Portal _portal;
