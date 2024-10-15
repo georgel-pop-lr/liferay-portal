@@ -108,6 +108,7 @@ export default function TopperItemActions({disabled, item}) {
 
 		if (
 			Liferay.FeatureFlags['LPD-18221'] &&
+			canBeDuplicated(fragmentEntryLinks, item, layoutData, getWidgets) &&
 			canBeRemoved(item, layoutData)
 		) {
 			items.push({

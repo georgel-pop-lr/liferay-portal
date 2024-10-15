@@ -276,6 +276,12 @@ export default function ShortcutManager() {
 					activeItemIds.every(
 						(activeItemId) =>
 							!!layoutData.items[activeItemId] &&
+							canBeDuplicated(
+								fragmentEntryLinks,
+								layoutData.items[activeItemId],
+								layoutData,
+								getWidgets
+							) &&
 							canBeRemoved(
 								layoutData.items[activeItemId],
 								layoutData
@@ -362,20 +368,16 @@ export default function ShortcutManager() {
 						(copiedItemId) =>
 							!!layoutData.items[copiedItemId] &&
 							!!layoutData.items[getParentItemId()] &&
+							canBeDuplicated(
+								fragmentEntryLinks,
+								layoutData.items[copiedItemId],
+								layoutData,
+								getWidgets
+							) &&
 							canBeCopied(
 								copiedItemId,
 								fragmentEntryLinks,
 								getParentItemId(),
-								layoutData,
-								getWidgets
-							)
-					) &&
-					copiedItemIds.every(
-						(copiedItemId) =>
-							!!layoutData.items[copiedItemId] &&
-							canBeDuplicated(
-								fragmentEntryLinks,
-								layoutData.items[copiedItemId],
 								layoutData,
 								getWidgets
 							)
