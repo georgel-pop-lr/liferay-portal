@@ -226,6 +226,7 @@ const ActionList = ({item, setActive, setOpenSaveModal}) => {
 
 		if (
 			Liferay.FeatureFlags['LPD-18221'] &&
+			canBeDuplicated(fragmentEntryLinks, item, layoutData, getWidgets) &&
 			canBeRemoved(item, layoutData)
 		) {
 			items.push({
