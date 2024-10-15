@@ -45,6 +45,7 @@ import {
 	getFormErrorDescription,
 } from '../../../../../app/utils/getFormErrorDescription';
 import isInputFragment from '../../../../../app/utils/isInputFragment';
+import isItemWidget from '../../../../../app/utils/isItemWidget';
 import updateItemStyle from '../../../../../app/utils/updateItemStyle';
 import useHasRequiredChild from '../../../../../app/utils/useHasRequiredChild';
 
@@ -226,7 +227,13 @@ const ActionList = ({item, setActive, setOpenSaveModal}) => {
 
 		if (
 			Liferay.FeatureFlags['LPD-18221'] &&
-			canBeDuplicated(fragmentEntryLinks, item, layoutData, getWidgets) &&
+			(canBeDuplicated(
+				fragmentEntryLinks,
+				item,
+				layoutData,
+				getWidgets
+			) ||
+				isItemWidget(item, fragmentEntryLinks)) &&
 			canBeRemoved(item, layoutData)
 		) {
 			items.push({
@@ -287,6 +294,7 @@ const ActionList = ({item, setActive, setOpenSaveModal}) => {
 				layoutData,
 				getWidgets
 			) ||
+				isItemWidget(item, fragmentEntryLinks) ||
 				item.type === LAYOUT_DATA_ITEM_TYPES.column ||
 				item.type === LAYOUT_DATA_ITEM_TYPES.fragmentDropZone ||
 				item.type === LAYOUT_DATA_ITEM_TYPES.formStep)

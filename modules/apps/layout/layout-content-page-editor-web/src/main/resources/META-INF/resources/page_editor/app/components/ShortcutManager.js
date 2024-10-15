@@ -50,6 +50,7 @@ import canBeRemoved from '../utils/canBeRemoved';
 import canBeRenamed from '../utils/canBeRenamed';
 import canBeSaved from '../utils/canBeSaved';
 import isCtrlOrMeta from '../utils/isCtrlOrMeta';
+import isItemWidget from '../utils/isItemWidget';
 import updateItemStyle from '../utils/updateItemStyle';
 import SaveFragmentCompositionModal from './SaveFragmentCompositionModal';
 import ShortcutModal from './ShortcutModal';
@@ -276,12 +277,16 @@ export default function ShortcutManager() {
 					activeItemIds.every(
 						(activeItemId) =>
 							!!layoutData.items[activeItemId] &&
-							canBeDuplicated(
+							(canBeDuplicated(
 								fragmentEntryLinks,
 								layoutData.items[activeItemId],
 								layoutData,
 								getWidgets
-							) &&
+							) ||
+								isItemWidget(
+									layoutData.items[activeItemId],
+									fragmentEntryLinks
+								)) &&
 							canBeRemoved(
 								layoutData.items[activeItemId],
 								layoutData
@@ -368,12 +373,16 @@ export default function ShortcutManager() {
 						(copiedItemId) =>
 							!!layoutData.items[copiedItemId] &&
 							!!layoutData.items[getParentItemId()] &&
-							canBeDuplicated(
+							(canBeDuplicated(
 								fragmentEntryLinks,
 								layoutData.items[copiedItemId],
 								layoutData,
 								getWidgets
-							) &&
+							) ||
+								isItemWidget(
+									layoutData.items[copiedItemId],
+									fragmentEntryLinks
+								)) &&
 							canBeCopied(
 								copiedItemId,
 								fragmentEntryLinks,

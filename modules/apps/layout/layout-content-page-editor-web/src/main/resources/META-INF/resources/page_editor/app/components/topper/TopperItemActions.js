@@ -36,6 +36,7 @@ import {
 } from '../../utils/getFormErrorDescription';
 import hideFragment from '../../utils/hideFragment';
 import isInputFragment from '../../utils/isInputFragment';
+import isItemWidget from '../../utils/isItemWidget';
 import useHasRequiredChild from '../../utils/useHasRequiredChild';
 import SaveFragmentCompositionModal from '../SaveFragmentCompositionModal';
 import hasDropZoneChild from '../layout_data_items/hasDropZoneChild';
@@ -108,7 +109,8 @@ export default function TopperItemActions({disabled, item}) {
 
 		if (
 			Liferay.FeatureFlags['LPD-18221'] &&
-			canBeDuplicated(fragmentEntryLinks, item, layoutData, getWidgets) &&
+			(canBeDuplicated(fragmentEntryLinks, item, layoutData, getWidgets) ||
+				isItemWidget(item, fragmentEntryLinks)) &&
 			canBeRemoved(item, layoutData)
 		) {
 			items.push({
@@ -165,7 +167,8 @@ export default function TopperItemActions({disabled, item}) {
 
 		if (
 			Liferay.FeatureFlags['LPD-18221'] &&
-			canBeDuplicated(fragmentEntryLinks, item, layoutData, getWidgets)
+			(canBeDuplicated(fragmentEntryLinks, item, layoutData, getWidgets) ||
+				isItemWidget(item, fragmentEntryLinks))
 		) {
 			items.push({
 				action: () => {
