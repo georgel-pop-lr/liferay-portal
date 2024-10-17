@@ -230,8 +230,26 @@ export default function ShortcutManager() {
 		}
 	};
 
-	function isOnlyOneParentSelected(activeItemIds) {
-		if (activeItemIds?.length > 1) {
+	const itemCanBeDuplicated = (itemId) =>
+		canBeDuplicated(
+			fragmentEntryLinks,
+			layoutData.items[itemId],
+			layoutData,
+			getWidgets
+		);
+
+	// LPD-37704 For non-instantiable widgets we can do cut and paste, but not duplicate.
+
+	const itemCanBeCutOrPasted = (itemId) =>
+		itemCanBeDuplicated(itemId) ||
+		isItemWidget(layoutData.items[itemId], fragmentEntryLinks);
+
+	const itemCanBeRemoved = (event, itemId) =>
+		canBeRemoved(layoutData.items[itemId], layoutData) &&
+		!isInteractiveElement(event.target);
+
+	const isOnlyOneParentSelected = (itemIds) => {
+		if (itemIds?.length > 1) {
 			openToast({
 				message: Liferay.Language.get(
 					'it-is-not-possible-to-paste-on-two-destinations-at-the-same-time'
@@ -243,7 +261,7 @@ export default function ShortcutManager() {
 		}
 
 		return true;
-	}
+	};
 
 	const keymapRef = useRef(null);
 
@@ -256,12 +274,7 @@ export default function ShortcutManager() {
 					activeItemIds.every(
 						(activeItemId) =>
 							!!layoutData.items[activeItemId] &&
-							canBeDuplicated(
-								fragmentEntryLinks,
-								layoutData.items[activeItemId],
-								layoutData,
-								getWidgets
-							)
+							itemCanBeDuplicated(activeItemId)
 					),
 				isKeyCombination: (event) =>
 					event.shiftKey &&
@@ -277,21 +290,8 @@ export default function ShortcutManager() {
 					activeItemIds.every(
 						(activeItemId) =>
 							!!layoutData.items[activeItemId] &&
-							(canBeDuplicated(
-								fragmentEntryLinks,
-								layoutData.items[activeItemId],
-								layoutData,
-								getWidgets
-							) ||
-								isItemWidget(
-									layoutData.items[activeItemId],
-									fragmentEntryLinks
-								)) &&
-							canBeRemoved(
-								layoutData.items[activeItemId],
-								layoutData
-							) &&
-							!isInteractiveElement(event.target)
+							itemCanBeCutOrPasted(activeItemId) &&
+							itemCanBeRemoved(event, activeItemId)
 					),
 				isKeyCombination: (event) =>
 					event.shiftKey &&
@@ -307,12 +307,7 @@ export default function ShortcutManager() {
 				activeItemIds.every(
 					(activeItemId) =>
 						!!layoutData.items[activeItemId] &&
-						canBeDuplicated(
-							fragmentEntryLinks,
-							layoutData.items[activeItemId],
-							layoutData,
-							getWidgets
-						)
+						itemCanBeDuplicated(activeItemId)
 				),
 
 			isKeyCombination: (event) =>
@@ -373,16 +368,7 @@ export default function ShortcutManager() {
 						(copiedItemId) =>
 							!!layoutData.items[copiedItemId] &&
 							!!layoutData.items[getParentItemId()] &&
-							(canBeDuplicated(
-								fragmentEntryLinks,
-								layoutData.items[copiedItemId],
-								layoutData,
-								getWidgets
-							) ||
-								isItemWidget(
-									layoutData.items[copiedItemId],
-									fragmentEntryLinks
-								)) &&
+							itemCanBeCutOrPasted(copiedItemId) &&
 							canBeCopied(
 								copiedItemId,
 								fragmentEntryLinks,
@@ -405,11 +391,7 @@ export default function ShortcutManager() {
 				activeItemIds.every(
 					(activeItemId) =>
 						!!layoutData.items[activeItemId] &&
-						canBeRemoved(
-							layoutData.items[activeItemId],
-							layoutData
-						) &&
-						!isInteractiveElement(event.target)
+						itemCanBeRemoved(event, activeItemId)
 				),
 			isKeyCombination: (event) => event.code === BACKSPACE_KEY_CODE,
 		},

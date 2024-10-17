@@ -164,6 +164,18 @@ const ActionList = ({item, setActive, setOpenSaveModal}) => {
 
 	const dropdownItems = useMemo(() => {
 		const items = [];
+		const itemCanBeDuplicated = canBeDuplicated(
+			fragmentEntryLinks,
+			item,
+			layoutData,
+			getWidgets
+		);
+
+		// LPD-37704 For non-instantiable widgets we can do cut and paste, but not duplicate.
+
+		const itemCanBeCutOrPasted =
+			itemCanBeDuplicated || isItemWidget(item, fragmentEntryLinks);
+		const itemCanBeRemoved = canBeRemoved(item, layoutData);
 
 		if (
 			item.type !== LAYOUT_DATA_ITEM_TYPES.column &&
@@ -227,14 +239,8 @@ const ActionList = ({item, setActive, setOpenSaveModal}) => {
 
 		if (
 			Liferay.FeatureFlags['LPD-18221'] &&
-			(canBeDuplicated(
-				fragmentEntryLinks,
-				item,
-				layoutData,
-				getWidgets
-			) ||
-				isItemWidget(item, fragmentEntryLinks)) &&
-			canBeRemoved(item, layoutData)
+			itemCanBeCutOrPasted &&
+			itemCanBeRemoved
 		) {
 			items.push({
 				action: () => {
@@ -253,23 +259,20 @@ const ActionList = ({item, setActive, setOpenSaveModal}) => {
 			});
 		}
 
-		if (
-			Liferay.FeatureFlags['LPD-18221'] &&
-			canBeDuplicated(fragmentEntryLinks, item, layoutData, getWidgets)
-		) {
-			items.push({
-				action: () => {
-					setCopiedItemIds([item.id]);
+		if (itemCanBeDuplicated) {
+			if (Liferay.FeatureFlags['LPD-18221']) {
+				items.push({
+					action: () => {
+						setCopiedItemIds([item.id]);
 
-					setText(Liferay.Language.get('item-copied'));
-				},
-				icon: 'copy',
-				isBetaFeature: true,
-				label: Liferay.Language.get('copy'),
-			});
-		}
+						setText(Liferay.Language.get('item-copied'));
+					},
+					icon: 'copy',
+					isBetaFeature: true,
+					label: Liferay.Language.get('copy'),
+				});
+			}
 
-		if (canBeDuplicated(fragmentEntryLinks, item, layoutData, getWidgets)) {
 			items.push({
 				action: () => {
 					dispatch(
@@ -288,13 +291,7 @@ const ActionList = ({item, setActive, setOpenSaveModal}) => {
 
 		if (
 			Liferay.FeatureFlags['LPD-18221'] &&
-			(canBeDuplicated(
-				fragmentEntryLinks,
-				item,
-				layoutData,
-				getWidgets
-			) ||
-				isItemWidget(item, fragmentEntryLinks) ||
+			(itemCanBeCutOrPasted ||
 				item.type === LAYOUT_DATA_ITEM_TYPES.column ||
 				item.type === LAYOUT_DATA_ITEM_TYPES.fragmentDropZone ||
 				item.type === LAYOUT_DATA_ITEM_TYPES.formStep)
@@ -342,10 +339,12 @@ const ActionList = ({item, setActive, setOpenSaveModal}) => {
 			});
 		}
 
-		if (canBeRemoved(item, layoutData)) {
-			items.push({
-				type: 'divider',
-			});
+		if (itemCanBeRemoved) {
+			if (items.length) {
+				items.push({
+					type: 'divider',
+				});
+			}
 
 			items.push({
 				action: () => {
