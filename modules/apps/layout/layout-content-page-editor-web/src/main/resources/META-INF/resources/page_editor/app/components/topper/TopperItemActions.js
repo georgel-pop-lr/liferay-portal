@@ -62,6 +62,18 @@ export default function TopperItemActions({disabled, item}) {
 
 	const dropdownItems = useMemo(() => {
 		const items = [];
+		const itemCanBeDuplicated = canBeDuplicated(
+			fragmentEntryLinks,
+			item,
+			layoutData,
+			getWidgets
+		);
+
+		// LPD-37704 For non-instantiable widgets we can do cut and paste, but not duplicate.
+
+		const itemCanBeCutOrPasted =
+			itemCanBeDuplicated || isItemWidget(item, fragmentEntryLinks);
+		const itemCanBeRemoved = canBeRemoved(item, layoutData);
 
 		if (
 			item.type !== LAYOUT_DATA_ITEM_TYPES.dropZone &&
@@ -109,9 +121,8 @@ export default function TopperItemActions({disabled, item}) {
 
 		if (
 			Liferay.FeatureFlags['LPD-18221'] &&
-			(canBeDuplicated(fragmentEntryLinks, item, layoutData, getWidgets) ||
-				isItemWidget(item, fragmentEntryLinks)) &&
-			canBeRemoved(item, layoutData)
+			itemCanBeCutOrPasted &&
+			itemCanBeRemoved
 		) {
 			items.push({
 				action: () => {
@@ -127,15 +138,10 @@ export default function TopperItemActions({disabled, item}) {
 				isBetaFeature: true,
 				label: Liferay.Language.get('cut'),
 			});
+		}
 
-			if (
-				canBeDuplicated(
-					fragmentEntryLinks,
-					item,
-					layoutData,
-					getWidgets
-				)
-			) {
+		if (itemCanBeDuplicated) {
+			if (Liferay.FeatureFlags['LPD-18221']) {
 				items.push({
 					action: () => setCopiedItemIds([item.itemId]),
 					icon: 'copy',
@@ -143,9 +149,7 @@ export default function TopperItemActions({disabled, item}) {
 					label: Liferay.Language.get('copy'),
 				});
 			}
-		}
 
-		if (canBeDuplicated(fragmentEntryLinks, item, layoutData, getWidgets)) {
 			items.push({
 				action: () =>
 					dispatch(
@@ -157,19 +161,9 @@ export default function TopperItemActions({disabled, item}) {
 				icon: 'copy',
 				label: Liferay.Language.get('duplicate'),
 			});
-
-			if (!Liferay.FeatureFlags['LPD-18221']) {
-				items.push({
-					type: 'divider',
-				});
-			}
 		}
 
-		if (
-			Liferay.FeatureFlags['LPD-18221'] &&
-			(canBeDuplicated(fragmentEntryLinks, item, layoutData, getWidgets) ||
-				isItemWidget(item, fragmentEntryLinks))
-		) {
+		if (Liferay.FeatureFlags['LPD-18221'] && itemCanBeCutOrPasted) {
 			items.push({
 				action: () => {
 					if (
@@ -200,13 +194,15 @@ export default function TopperItemActions({disabled, item}) {
 				isBetaFeature: true,
 				label: Liferay.Language.get('paste'),
 			});
-
-			items.push({
-				type: 'divider',
-			});
 		}
 
-		if (canBeRemoved(item, layoutData)) {
+		if (itemCanBeRemoved) {
+			if (items.length) {
+				items.push({
+					type: 'divider',
+				});
+			}
+
 			items.push({
 				action: () =>
 					dispatch(
