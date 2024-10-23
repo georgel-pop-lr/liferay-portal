@@ -24,6 +24,10 @@ import {
 import deleteItem from '../../../../src/main/resources/META-INF/resources/page_editor/app/thunks/deleteItem';
 import duplicateItem from '../../../../src/main/resources/META-INF/resources/page_editor/app/thunks/duplicateItem';
 import pasteItem from '../../../../src/main/resources/META-INF/resources/page_editor/app/thunks/pasteItem';
+import canBeCopied from '../../../../src/main/resources/META-INF/resources/page_editor/app/utils/canBeCopied';
+import canBeDuplicated from '../../../../src/main/resources/META-INF/resources/page_editor/app/utils/canBeDuplicated';
+import canBeRemoved from '../../../../src/main/resources/META-INF/resources/page_editor/app/utils/canBeRemoved';
+import isItemWidget from '../../../../src/main/resources/META-INF/resources/page_editor/app/utils/isItemWidget';
 import updateItemStyle from '../../../../src/main/resources/META-INF/resources/page_editor/app/utils/updateItemStyle';
 import StoreMother from '../../../../src/main/resources/META-INF/resources/page_editor/test_utils/StoreMother';
 
@@ -72,13 +76,23 @@ jest.mock(
 );
 
 jest.mock(
-	'../../../../src/main/resources/META-INF/resources/page_editor/app/utils/canBeDuplicated',
-	() => jest.fn(() => true)
+	'../../../../src/main/resources/META-INF/resources/page_editor/app/utils/canBeCopied',
+	() => jest.fn()
 );
 
 jest.mock(
-	'../../../../src/main/resources/META-INF/resources/page_editor/app/utils/canBeCopied',
-	() => jest.fn(() => true)
+	'../../../../src/main/resources/META-INF/resources/page_editor/app/utils/canBeDuplicated',
+	() => jest.fn()
+);
+
+jest.mock(
+	'../../../../src/main/resources/META-INF/resources/page_editor/app/utils/canBeRemoved',
+	() => jest.fn()
+);
+
+jest.mock(
+	'../../../../src/main/resources/META-INF/resources/page_editor/app/utils/isItemWidget',
+	() => jest.fn()
 );
 
 jest.mock(
@@ -324,6 +338,10 @@ describe('ShortcutManager', () => {
 	it('sets the item Id and calls deleteItem to be cut when pressing shift + ctrl + X', () => {
 		Liferay.FeatureFlags['LPD-18221'] = true;
 
+		canBeDuplicated.mockImplementation(() => true);
+
+		canBeRemoved.mockImplementation(() => true);
+
 		const setCopiedItemIds = useSetCopiedItemIds();
 
 		renderComponent({
@@ -349,8 +367,62 @@ describe('ShortcutManager', () => {
 		Liferay.FeatureFlags['LPD-18221'] = false;
 	});
 
+	it('cannot cut items because they can not be duplicated', () => {
+		Liferay.FeatureFlags['LPD-18221'] = true;
+
+		canBeDuplicated.mockImplementation(() => false);
+
+		canBeRemoved.mockImplementation(() => true);
+
+		const setCopiedItemIds = useSetCopiedItemIds();
+
+		renderComponent({
+			activeItemIds: ['fragment01'],
+		});
+
+		document.body.dispatchEvent(
+			new KeyboardEvent('keydown', {
+				code: 'KeyX',
+				ctrlKey: true,
+				shiftKey: true,
+			})
+		);
+
+		expect(setCopiedItemIds).toBeCalledTimes(0);
+
+		Liferay.FeatureFlags['LPD-18221'] = false;
+	});
+
+	it('cannot cut items because they can not be removed', () => {
+		Liferay.FeatureFlags['LPD-18221'] = true;
+
+		canBeDuplicated.mockImplementation(() => true);
+
+		canBeRemoved.mockImplementation(() => false);
+
+		const setCopiedItemIds = useSetCopiedItemIds();
+
+		renderComponent({
+			activeItemIds: ['fragment01'],
+		});
+
+		document.body.dispatchEvent(
+			new KeyboardEvent('keydown', {
+				code: 'KeyX',
+				ctrlKey: true,
+				shiftKey: true,
+			})
+		);
+
+		expect(setCopiedItemIds).toBeCalledTimes(0);
+
+		Liferay.FeatureFlags['LPD-18221'] = false;
+	});
+
 	it('sets the item id to be copied when pressing shift + ctrl + C', () => {
 		Liferay.FeatureFlags['LPD-18221'] = true;
+
+		canBeDuplicated.mockImplementation(() => true);
 
 		const setCopiedItemIds = useSetCopiedItemIds();
 
@@ -371,8 +443,67 @@ describe('ShortcutManager', () => {
 		Liferay.FeatureFlags['LPD-18221'] = false;
 	});
 
+	it('cannot copy items because they can not be duplicated', () => {
+		Liferay.FeatureFlags['LPD-18221'] = true;
+
+		canBeDuplicated.mockImplementation(() => false);
+
+		const setCopiedItemIds = useSetCopiedItemIds();
+
+		renderComponent({
+			activeItemIds: ['fragment01'],
+		});
+
+		document.body.dispatchEvent(
+			new KeyboardEvent('keydown', {
+				code: 'KeyC',
+				ctrlKey: true,
+				shiftKey: true,
+			})
+		);
+
+		expect(setCopiedItemIds).toBeCalledTimes(0);
+
+		Liferay.FeatureFlags['LPD-18221'] = false;
+	});
+
 	it('calls pasteItem when pressing shift + ctrl + V', () => {
 		Liferay.FeatureFlags['LPD-18221'] = true;
+
+		canBeDuplicated.mockImplementation(() => true);
+
+		canBeCopied.mockImplementation(() => true);
+
+		renderComponent({
+			activeItemIds: ['fragment01'],
+		});
+
+		document.body.dispatchEvent(
+			new KeyboardEvent('keydown', {
+				code: 'KeyV',
+				ctrlKey: true,
+				shiftKey: true,
+			})
+		);
+
+		expect(pasteItem).toBeCalledWith(
+			expect.objectContaining({
+				copiedItemIds: ['fragment02'],
+				parentItemId: 'fragment01',
+			})
+		);
+
+		Liferay.FeatureFlags['LPD-18221'] = false;
+	});
+
+	it('calls pasteItem when pressing shift + ctrl + V on a non-instantiable widget', () => {
+		Liferay.FeatureFlags['LPD-18221'] = true;
+
+		canBeDuplicated.mockImplementation(() => false);
+
+		canBeCopied.mockImplementation(() => true);
+
+		isItemWidget.mockImplementation(() => true);
 
 		renderComponent({
 			activeItemIds: ['fragment01'],
@@ -399,6 +530,10 @@ describe('ShortcutManager', () => {
 	it('item id will be copied to the root because no parents are selected', () => {
 		Liferay.FeatureFlags['LPD-18221'] = true;
 
+		canBeDuplicated.mockImplementation(() => true);
+
+		canBeCopied.mockImplementation(() => true);
+
 		renderComponent({
 			activeItemIds: [],
 		});
@@ -424,8 +559,62 @@ describe('ShortcutManager', () => {
 	it('cannot paste items because multiple parents are selected', () => {
 		Liferay.FeatureFlags['LPD-18221'] = true;
 
+		canBeDuplicated.mockImplementation(() => true);
+
+		canBeCopied.mockImplementation(() => true);
+
 		renderComponent({
 			activeItemIds: ['fragment01', 'fragment02'],
+		});
+
+		document.body.dispatchEvent(
+			new KeyboardEvent('keydown', {
+				code: 'KeyV',
+				ctrlKey: true,
+				shiftKey: true,
+			})
+		);
+
+		expect(pasteItem).toBeCalledTimes(0);
+
+		Liferay.FeatureFlags['LPD-18221'] = false;
+	});
+
+	it('cannot paste items because they can not be copied ', () => {
+		Liferay.FeatureFlags['LPD-18221'] = true;
+
+		canBeCopied.mockImplementation(() => false);
+
+		canBeDuplicated.mockImplementation(() => true);
+
+		renderComponent({
+			activeItemIds: ['fragment01'],
+		});
+
+		document.body.dispatchEvent(
+			new KeyboardEvent('keydown', {
+				code: 'KeyV',
+				ctrlKey: true,
+				shiftKey: true,
+			})
+		);
+
+		expect(pasteItem).toBeCalledTimes(0);
+
+		Liferay.FeatureFlags['LPD-18221'] = false;
+	});
+
+	it('cannot paste items because they can not be duplicated', () => {
+		Liferay.FeatureFlags['LPD-18221'] = true;
+
+		canBeCopied.mockImplementation(() => true);
+
+		canBeDuplicated.mockImplementation(() => false);
+
+		isItemWidget.mockImplementation(() => false);
+
+		renderComponent({
+			activeItemIds: ['fragment01'],
 		});
 
 		document.body.dispatchEvent(
@@ -446,6 +635,8 @@ describe('ShortcutManager', () => {
 			activeItemIds: ['fragment01'],
 		});
 
+		canBeDuplicated.mockImplementation(() => true);
+
 		document.body.dispatchEvent(
 			new KeyboardEvent('keydown', {
 				altKey: true,
@@ -459,5 +650,27 @@ describe('ShortcutManager', () => {
 				itemIds: ['fragment01'],
 			})
 		);
+	});
+
+	it('cannot duplicate items because they can not be duplicated', () => {
+		Liferay.FeatureFlags['LPD-18221'] = true;
+
+		canBeDuplicated.mockImplementation(() => false);
+
+		renderComponent({
+			activeItemIds: ['fragment01'],
+		});
+
+		document.body.dispatchEvent(
+			new KeyboardEvent('keydown', {
+				altKey: true,
+				code: 'KeyD',
+				ctrlKey: true,
+			})
+		);
+
+		expect(duplicateItem).toBeCalledTimes(0);
+
+		Liferay.FeatureFlags['LPD-18221'] = false;
 	});
 });

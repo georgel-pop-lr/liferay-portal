@@ -17,6 +17,10 @@ import {
 import {StoreAPIContextProvider} from '../../../../../src/main/resources/META-INF/resources/page_editor/app/contexts/StoreContext';
 import deleteItem from '../../../../../src/main/resources/META-INF/resources/page_editor/app/thunks/deleteItem';
 import pasteItem from '../../../../../src/main/resources/META-INF/resources/page_editor/app/thunks/pasteItem';
+import canBeCopied from '../../../../../src/main/resources/META-INF/resources/page_editor/app/utils/canBeCopied';
+import canBeDuplicated from '../../../../../src/main/resources/META-INF/resources/page_editor/app/utils/canBeDuplicated';
+import canBeRemoved from '../../../../../src/main/resources/META-INF/resources/page_editor/app/utils/canBeRemoved';
+import isItemWidget from '../../../../../src/main/resources/META-INF/resources/page_editor/app/utils/isItemWidget';
 
 jest.mock(
 	'../../../../../src/main/resources/META-INF/resources/page_editor/app/contexts/ClipboardContext',
@@ -39,12 +43,27 @@ jest.mock(
 );
 
 jest.mock(
-	'../../../../../src/main/resources/META-INF/resources/page_editor/app/utils/canBeCopied',
-	() => jest.fn(() => true)
+	'../../../../../src/main/resources/META-INF/resources/page_editor/app/thunks/pasteItem',
+	() => jest.fn()
 );
 
 jest.mock(
-	'../../../../../src/main/resources/META-INF/resources/page_editor/app/thunks/pasteItem',
+	'../../../../../src/main/resources/META-INF/resources/page_editor/app/utils/canBeCopied',
+	() => jest.fn()
+);
+
+jest.mock(
+	'../../../../../src/main/resources/META-INF/resources/page_editor/app/utils/canBeDuplicated',
+	() => jest.fn()
+);
+
+jest.mock(
+	'../../../../../src/main/resources/META-INF/resources/page_editor/app/utils/canBeRemoved',
+	() => jest.fn()
+);
+
+jest.mock(
+	'../../../../../src/main/resources/META-INF/resources/page_editor/app/utils/isItemWidget',
 	() => jest.fn()
 );
 
@@ -88,6 +107,10 @@ const renderTopperItemActions = ({
 };
 
 describe('TopperItemActions', () => {
+	beforeEach(() => {
+		jest.clearAllMocks();
+	});
+
 	it('does not open TopperItemActions if disabled', () => {
 		const {baseElement} = renderTopperItemActions({isDisabled: true});
 
@@ -109,6 +132,10 @@ describe('TopperItemActions', () => {
 
 	it('calls setCopiedItemIds and deleteItem when Cut action is pressed', () => {
 		Liferay.FeatureFlags['LPD-18221'] = true;
+
+		canBeDuplicated.mockImplementation(() => true);
+
+		canBeRemoved.mockImplementation(() => true);
 
 		const setCopiedItemIds = useSetCopiedItemIds();
 
@@ -132,6 +159,8 @@ describe('TopperItemActions', () => {
 	it('calls setCopiedItemIds when Copy action is pressed', () => {
 		Liferay.FeatureFlags['LPD-18221'] = true;
 
+		canBeDuplicated.mockImplementation(() => true);
+
 		const setCopiedItemIds = useSetCopiedItemIds();
 
 		renderTopperItemActions();
@@ -148,6 +177,10 @@ describe('TopperItemActions', () => {
 	it('calls pasteItem when Paste action is pressed', () => {
 		Liferay.FeatureFlags['LPD-18221'] = true;
 
+		canBeCopied.mockImplementation(() => true);
+
+		canBeDuplicated.mockImplementation(() => true);
+
 		renderTopperItemActions();
 
 		userEvent.click(screen.getByText('paste'));
@@ -158,6 +191,65 @@ describe('TopperItemActions', () => {
 				parentItemId: 'itemId1',
 			})
 		);
+
+		Liferay.FeatureFlags['LPD-18221'] = false;
+	});
+
+	it('calls pasteItem when Paste action is pressed on a non-instantiable widget', () => {
+		Liferay.FeatureFlags['LPD-18221'] = true;
+
+		canBeCopied.mockImplementation(() => true);
+
+		canBeDuplicated.mockImplementation(() => false);
+
+		isItemWidget.mockImplementation(() => true);
+
+		renderTopperItemActions();
+
+		userEvent.click(screen.getByText('paste'));
+
+		expect(pasteItem).toBeCalledWith(
+			expect.objectContaining({
+				copiedItemIds: ['itemId2'],
+				parentItemId: 'itemId1',
+			})
+		);
+
+		Liferay.FeatureFlags['LPD-18221'] = false;
+	});
+
+	it('should not call pasteItem when item can not be copied', () => {
+		Liferay.FeatureFlags['LPD-18221'] = true;
+
+		canBeCopied.mockImplementation(() => false);
+
+		canBeDuplicated.mockImplementation(() => true);
+
+		renderTopperItemActions();
+
+		userEvent.click(screen.getByText('paste'));
+
+		expect(pasteItem).toBeCalledTimes(0);
+
+		Liferay.FeatureFlags['LPD-18221'] = false;
+	});
+
+	it('should not display Cut, Copy, and Paste actions when the item cannot be duplicated or removed', () => {
+		Liferay.FeatureFlags['LPD-18221'] = true;
+
+		canBeDuplicated.mockImplementation(() => false);
+
+		isItemWidget.mockImplementation(() => false);
+
+		canBeRemoved.mockImplementation(() => false);
+
+		renderTopperItemActions();
+
+		expect(screen.queryByText('cut')).not.toBeInTheDocument();
+
+		expect(screen.queryByText('copy')).not.toBeInTheDocument();
+
+		expect(screen.queryByText('paste')).not.toBeInTheDocument();
 
 		Liferay.FeatureFlags['LPD-18221'] = false;
 	});
