@@ -465,14 +465,24 @@ const MillerColumnsItem = ({
 
 								return title;
 							})()}
-							className="text-truncate"
+							className={classNames({
+								'text-truncate':
+									!Liferay.FeatureFlags['LPD-35220'],
+							})}
 							href={viewUrl}
 							target={target}
 						>
 							{title}
 						</ClayLink>
 					) : (
-						<span className="text-truncate">{title}</span>
+						<span
+							className={classNames({
+								'text-truncate':
+									!Liferay.FeatureFlags['LPD-35220'],
+							})}
+						>
+							{title}
+						</span>
 					)}
 
 					{!hasGuestViewPermission && (
@@ -495,11 +505,21 @@ const MillerColumnsItem = ({
 
 				{description && (
 					<div className="d-flex h5 list-group-subtitle small">
-						<span className="text-truncate">{description}</span>
+						<span
+							className={classNames({
+								'text-truncate':
+									!Liferay.FeatureFlags['LPD-35220'],
+							})}
+						>
+							{description}
+						</span>
 
 						{states.map((state) => (
 							<ClayLabel
-								className="inline-item-after text-truncate"
+								className={classNames('inline-item-after', {
+									'text-truncate':
+										!Liferay.FeatureFlags['LPD-35220'],
+								})}
 								displayType={ITEM_STATES_COLORS[state.id]}
 								key={state.id}
 							>
