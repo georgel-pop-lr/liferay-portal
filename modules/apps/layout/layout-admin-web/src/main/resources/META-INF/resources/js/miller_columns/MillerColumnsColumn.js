@@ -4,6 +4,7 @@
  */
 
 import ClayLayout from '@clayui/layout';
+import {Resizer} from '@liferay/layout-js-components-web';
 import classNames from 'classnames';
 import {useSessionState} from 'frontend-js-components-web';
 import {throttle} from 'frontend-js-web';
@@ -11,7 +12,6 @@ import React, {useEffect, useRef} from 'react';
 import {useDrop} from 'react-dnd';
 
 import MillerColumnsItem from './MillerColumnsItem';
-import MillerColumnsResizer from './MillerColumnsResizer';
 import {ACCEPTING_TYPES} from './constants';
 
 const AUTOSCROLL_DELAY = 20;
@@ -143,11 +143,15 @@ const MillerColumnsColumn = ({
 			</ClayLayout.Col>
 
 			{Liferay.FeatureFlags['LPD-35220'] && (
-				<MillerColumnsResizer
-					columnRef={ref}
-					columnWidth={columnWidth}
-					index={index}
-					setColumnWidth={setColumnWidth}
+				<Resizer
+					ariaLabel={Liferay.Language.get('resize-column')}
+					cssClassName="miller-columns-col"
+					maxWidth={672}
+					minWidth={286}
+					resizeStep={20}
+					setWidth={setColumnWidth}
+					targetRef={ref}
+					width={columnWidth}
 				/>
 			)}
 		</>
