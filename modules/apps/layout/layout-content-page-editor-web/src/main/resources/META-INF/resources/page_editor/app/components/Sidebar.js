@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-import {ClayButtonWithIcon, default as ClayButton} from '@clayui/button';
+import ClayButton, {ClayButtonWithIcon} from '@clayui/button';
 import {
 	ReactDOMServer,
 	ReactPortal,
@@ -36,6 +36,7 @@ import isSmallResolution from '../utils/isSmallResolution';
 const {useEffect} = React;
 
 export const MIN_SIDEBAR_WIDTH = 280;
+const MAX_SIDEBAR_WIDTH = 500;
 
 function getActiveSidebarPanel({
 	sidebarPanelId,
@@ -305,7 +306,7 @@ export default function Sidebar() {
 						ariaControls={sidebarContentId}
 						ariaLabel={Liferay.Language.get('resize-sidebar')}
 						cssClassName="page-editor__sidebar"
-						maxWidth={500}
+						maxWidth={MAX_SIDEBAR_WIDTH}
 						minWidth={MIN_SIDEBAR_WIDTH}
 						resizeStep={20}
 						setWidth={setSidebarWidth}

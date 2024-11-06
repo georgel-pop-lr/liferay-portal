@@ -18,6 +18,9 @@ const AUTOSCROLL_DELAY = 20;
 const AUTOSCROLL_DISTANCE = 20;
 const AUTOSCROLL_RANGE_LENGTH = 20;
 
+const COLUMN_MIN_WIDTH = 286;
+const COLUMN_MAX_WIDTH = 672;
+
 const scroll = (columnsContainer, monitor) => {
 	const clientOffset = monitor.getClientOffset();
 	const containerRect = columnsContainer.current.getBoundingClientRect();
@@ -146,8 +149,8 @@ const MillerColumnsColumn = ({
 				<Resizer
 					ariaLabel={Liferay.Language.get('resize-column')}
 					cssClassName="miller-columns-col"
-					maxWidth={672}
-					minWidth={286}
+					maxWidth={COLUMN_MAX_WIDTH}
+					minWidth={COLUMN_MIN_WIDTH}
 					resizeStep={20}
 					setWidth={setColumnWidth}
 					targetRef={ref}
