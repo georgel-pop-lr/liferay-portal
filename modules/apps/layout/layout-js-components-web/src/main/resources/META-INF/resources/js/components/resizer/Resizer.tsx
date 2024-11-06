@@ -30,6 +30,8 @@ export default function Resizer({
 	targetRef,
 	width,
 }: ResizerProps) {
+	const [resizing, setResizing] = useStateSafe(false);
+
 	const resizerRef = useRef<HTMLDivElement>(null);
 
 	const widthRef = useRef(width);
@@ -71,8 +73,6 @@ export default function Resizer({
 			setWidth(maxWidth);
 		}
 	};
-
-	const [resizing, setResizing] = useStateSafe(false);
 
 	useEffect(() => {
 		const resizeElement = resizerRef.current;
