@@ -8,6 +8,7 @@ import React, {
 	Dispatch,
 	ReactNode,
 	SetStateAction,
+	useContext,
 	useEffect,
 	useState,
 } from 'react';
@@ -31,16 +32,20 @@ const KeyboardMovementContext = React.createContext<{
 	setRedirectURL: Dispatch<SetStateAction<string | null>>;
 	setSources: Dispatch<SetStateAction<MovementSources>>;
 	setTarget: Dispatch<SetStateAction<MovementTarget>>;
+	setText: Dispatch<SetStateAction<string | null>>;
 	sources: MovementSources;
 	target: MovementTarget;
+	text: string | null;
 }>({
 	columnSizes: [],
 	redirectURL: null,
 	setRedirectURL: () => {},
 	setSources: () => {},
 	setTarget: () => {},
+	setText: () => {},
 	sources: [],
 	target: null,
+	text: null,
 });
 
 const ALLOWED_KEYS = [
@@ -78,6 +83,7 @@ function KeyboardMovementProvider({
 	const [sources, setSources] = useState<MovementSources>([]);
 	const [target, setTarget] = useState<MovementTarget>(null);
 	const [redirectURL, setRedirectURL] = useState<string | null>(null);
+	const [text, setText] = useState<string | null>(null);
 
 	useEffect(() => {
 		const onKeyDown = (event: KeyboardEvent) => {
@@ -150,8 +156,10 @@ function KeyboardMovementProvider({
 				setRedirectURL,
 				setSources,
 				setTarget,
+				setText,
 				sources,
 				target,
+				text,
 			}}
 		>
 			{children}
@@ -317,4 +325,17 @@ function getMillerColumnsItem(
 	);
 }
 
-export {KeyboardMovementContext, KeyboardMovementProvider};
+function useMovementText() {
+	return useContext(KeyboardMovementContext).text;
+}
+
+function useSetMovementText() {
+	return useContext(KeyboardMovementContext).setText;
+}
+
+export {
+	KeyboardMovementContext,
+	KeyboardMovementProvider,
+	useMovementText,
+	useSetMovementText,
+};
