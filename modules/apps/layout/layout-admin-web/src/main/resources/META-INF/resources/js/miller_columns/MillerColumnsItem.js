@@ -384,6 +384,8 @@ const MillerColumnsItem = ({
 			verticalAlign="center"
 		>
 			<a
+				aria-controls={itemId}
+				aria-haspopup={true}
 				className="miller-columns-item-mask"
 				href={url}
 				onKeyDown={(event) => {
