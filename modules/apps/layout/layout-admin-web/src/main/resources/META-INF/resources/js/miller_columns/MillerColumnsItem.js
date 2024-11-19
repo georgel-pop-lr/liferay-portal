@@ -380,6 +380,7 @@ const MillerColumnsItem = ({
 			containerElement="li"
 			data-actions={bulkActions}
 			ref={ref}
+			role="none"
 			verticalAlign="center"
 		>
 			<a
@@ -397,7 +398,7 @@ const MillerColumnsItem = ({
 						navigate(url);
 					}
 				}}
-				role="button"
+				role="menuitem"
 				tabIndex={tabIndex}
 			>
 				<span className="c-inner sr-only">{title}</span>

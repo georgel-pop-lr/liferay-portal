@@ -124,6 +124,7 @@ const MillerColumnsColumn = ({
 				)}
 				containerElement="ul"
 				ref={ref}
+				role="menu"
 				{...sizeProps}
 			>
 				{columnItems.map((item) => (
