@@ -10,6 +10,7 @@ import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {DndProvider} from 'react-dnd';
 import {HTML5Backend} from 'react-dnd-html5-backend';
 
+import KeyboardMovementText from './KeyboardMovementText';
 import MillerColumnsColumn from './MillerColumnsColumn';
 import {DROP_POSITIONS} from './constants/dropPositions';
 import {KeyboardMovementProvider} from './contexts/KeyboardMovementContext';
@@ -317,6 +318,8 @@ const MillerColumns = ({
 				onMove={onItemDrop}
 				rtl={rtl}
 			>
+				<KeyboardMovementText />
+
 				<DndProvider backend={HTML5Backend}>
 					<DragPreview getLabel={getDragPreviewLabel} />
 
