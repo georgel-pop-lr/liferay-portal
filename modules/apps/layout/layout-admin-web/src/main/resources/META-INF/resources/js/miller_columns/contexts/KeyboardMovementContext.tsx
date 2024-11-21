@@ -114,6 +114,13 @@ function KeyboardMovementProvider({
 
 				if (targetItem && onMove) {
 					onMove(sources, targetItem, target.position);
+					setMovementText({
+						isFinalPosition: true,
+						items,
+						setText,
+						sources,
+						target,
+					});
 				}
 
 				disableMovement();
@@ -137,6 +144,12 @@ function KeyboardMovementProvider({
 
 				if (nextTarget) {
 					setTarget(nextTarget);
+					setMovementText({
+						items,
+						setText,
+						sources,
+						target: nextTarget,
+					});
 				}
 			}
 		};
@@ -146,7 +159,16 @@ function KeyboardMovementProvider({
 		return () => {
 			window.removeEventListener('keydown', onKeyDown, true);
 		};
-	}, [columnSizes, items, redirectURL, sources, onMove, rtl, target]);
+	}, [
+		columnSizes,
+		items,
+		redirectURL,
+		setText,
+		sources,
+		onMove,
+		rtl,
+		target,
+	]);
 
 	return (
 		<KeyboardMovementContext.Provider
