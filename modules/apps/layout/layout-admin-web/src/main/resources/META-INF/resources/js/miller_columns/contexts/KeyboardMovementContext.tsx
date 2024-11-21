@@ -336,6 +336,7 @@ function useSetMovementText() {
 export {
 	KeyboardMovementContext,
 	KeyboardMovementProvider,
+	getNextTarget,
 	useMovementText,
 	useSetMovementText,
 };
