@@ -11,6 +11,7 @@ import {
 	MovementTarget,
 } from '../contexts/KeyboardMovementContext';
 import {MillerColumnItem} from '../types/MillerColumnItem';
+import {getMillerColumnsItem} from '../utils/getMillerColumnsItem';
 import {isValidMovement} from '../utils/isValidMovement';
 
 const ALLOWED_KEYS = [
@@ -296,17 +297,6 @@ function getNextTarget({
 		sources,
 		target: candidate,
 	});
-}
-
-function getMillerColumnsItem(
-	columnIndex: number,
-	itemIndex: number,
-	items: Items
-) {
-	return Array.from(items.values()).find(
-		(item) =>
-			item.columnIndex === columnIndex && item.itemIndex === itemIndex
-	);
 }
 
 function isSource(

@@ -14,6 +14,7 @@ import React, {
 } from 'react';
 
 import {DropPosition} from '../constants/dropPositions';
+import {getMillerColumnsItem} from '../utils/getMillerColumnsItem';
 import {isValidMovement} from '../utils/isValidMovement';
 
 import type {MillerColumnItem} from '../types/MillerColumnItem';
@@ -312,17 +313,6 @@ function getNextTarget({
 		sources,
 		target: candidate,
 	});
-}
-
-function getMillerColumnsItem(
-	columnIndex: number,
-	itemIndex: number,
-	items: Map<string, MillerColumnItem>
-) {
-	return Array.from(items.values()).find(
-		(item) =>
-			item.columnIndex === columnIndex && item.itemIndex === itemIndex
-	);
 }
 
 function useMovementText() {
