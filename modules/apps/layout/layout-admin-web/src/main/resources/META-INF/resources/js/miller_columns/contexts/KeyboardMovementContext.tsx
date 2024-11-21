@@ -16,6 +16,7 @@ import React, {
 import {DropPosition} from '../constants/dropPositions';
 import {getMillerColumnsItem} from '../utils/getMillerColumnsItem';
 import {isValidMovement} from '../utils/isValidMovement';
+import {setTextForMovement} from '../utils/setTextForMovement';
 
 import type {MillerColumnItem} from '../types/MillerColumnItem';
 
@@ -115,6 +116,13 @@ function KeyboardMovementProvider({
 
 				if (targetItem && onMove) {
 					onMove(sources, targetItem, target.position);
+					setTextForMovement({
+						isFinalPosition: true,
+						items,
+						setText,
+						sources,
+						target,
+					});
 				}
 
 				disableMovement();
@@ -138,6 +146,12 @@ function KeyboardMovementProvider({
 
 				if (nextTarget) {
 					setTarget(nextTarget);
+					setTextForMovement({
+						items,
+						setText,
+						sources,
+						target: nextTarget,
+					});
 				}
 			}
 		};
@@ -147,7 +161,16 @@ function KeyboardMovementProvider({
 		return () => {
 			window.removeEventListener('keydown', onKeyDown, true);
 		};
-	}, [columnSizes, items, redirectURL, sources, onMove, rtl, target]);
+	}, [
+		columnSizes,
+		items,
+		redirectURL,
+		setText,
+		sources,
+		onMove,
+		rtl,
+		target,
+	]);
 
 	return (
 		<KeyboardMovementContext.Provider

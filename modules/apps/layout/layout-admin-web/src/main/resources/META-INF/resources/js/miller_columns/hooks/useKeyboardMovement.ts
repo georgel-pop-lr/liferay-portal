@@ -13,6 +13,7 @@ import {
 import {MillerColumnItem} from '../types/MillerColumnItem';
 import {getMillerColumnsItem} from '../utils/getMillerColumnsItem';
 import {isValidMovement} from '../utils/isValidMovement';
+import {setTextForMovement} from '../utils/setTextForMovement';
 
 const ALLOWED_KEYS = [
 	'ArrowDown',
@@ -45,6 +46,7 @@ export function useKeyboardMovement({
 		setRedirectURL,
 		setSources,
 		setTarget,
+		setText,
 		sources,
 		target,
 	} = useContext(KeyboardMovementContext);
@@ -71,6 +73,13 @@ export function useKeyboardMovement({
 			if (initialTarget) {
 				setSources(sources);
 				setTarget(initialTarget);
+				setTextForMovement({
+					isInitialPosition: true,
+					items,
+					setText,
+					sources,
+					target: initialTarget,
+				});
 			}
 		},
 		[
@@ -78,6 +87,7 @@ export function useKeyboardMovement({
 			isPrivateLayoutsEnabled,
 			item,
 			items,
+			setText,
 			setSources,
 			setTarget,
 		]
