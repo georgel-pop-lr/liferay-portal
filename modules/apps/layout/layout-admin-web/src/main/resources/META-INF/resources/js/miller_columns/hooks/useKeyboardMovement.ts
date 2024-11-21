@@ -9,10 +9,9 @@ import {
 	KeyboardMovementContext,
 	MovementSources,
 	MovementTarget,
+	getNextTarget,
 } from '../contexts/KeyboardMovementContext';
 import {MillerColumnItem} from '../types/MillerColumnItem';
-import {getMillerColumnsItem} from '../utils/getMillerColumnsItem';
-import {isValidMovement} from '../utils/isValidMovement';
 import {setTextForMovement} from '../utils/setTextForMovement';
 
 const ALLOWED_KEYS = [
@@ -174,139 +173,6 @@ function getInitialTarget({
 			},
 		})
 	);
-}
-
-function getNextTarget({
-	columnSizes,
-	isPrivateLayoutsEnabled,
-	items,
-	key,
-	sources,
-	target,
-}: {
-	columnSizes: number[];
-	isPrivateLayoutsEnabled: boolean;
-	items: Items;
-	key: AllowedKey;
-	sources: MovementSources;
-	target: MovementTarget;
-}): MovementTarget {
-	if (!target) {
-		return null;
-	}
-
-	const {columnIndex, itemIndex, position} = target;
-
-	if (columnIndex < 0 || columnIndex >= columnSizes.length) {
-		return null;
-	}
-
-	const columnSize = columnSizes[columnIndex];
-
-	let candidate: MovementTarget = null;
-
-	// Moving up
-
-	if (key === 'ArrowUp') {
-		if (position === 'bottom') {
-			candidate = {...target, position: 'middle'};
-		}
-		else if (position === 'middle') {
-			candidate = {...target, position: 'top'};
-		}
-		else if (position === 'top' && itemIndex > 0) {
-			candidate = {
-				...target,
-				itemIndex: itemIndex - 1,
-				position: 'middle',
-			};
-		}
-	}
-
-	// Moving down
-
-	if (key === 'ArrowDown') {
-		if (position === 'top') {
-			candidate = {
-				...target,
-				position: 'middle',
-			};
-		}
-		else if (position === 'middle') {
-			candidate = {
-				...target,
-				position: 'bottom',
-			};
-		}
-		else if (position === 'bottom' && itemIndex < columnSize - 1) {
-			candidate = {
-				...target,
-				itemIndex: itemIndex + 1,
-				position: 'middle',
-			};
-		}
-	}
-
-	// Moving left
-
-	if (key === 'ArrowLeft') {
-		if (columnIndex >= 1) {
-			candidate = {
-				columnIndex: columnIndex - 1,
-				itemIndex: 0,
-				position: 'bottom',
-			};
-		}
-	}
-
-	// Moving right
-
-	if (key === 'ArrowRight') {
-		if (columnIndex < columnSizes.length - 1) {
-			candidate = {
-				columnIndex: columnIndex + 1,
-				itemIndex: 0,
-				position: 'bottom',
-			};
-		}
-	}
-
-	// If no candidate, return null
-
-	if (!candidate) {
-		return null;
-	}
-
-	// Return candidate if it's valid
-
-	const candidateItem = getMillerColumnsItem(
-		candidate.columnIndex,
-		candidate.itemIndex,
-		items
-	);
-
-	if (
-		candidateItem &&
-		isValidMovement({
-			dropPosition: candidate.position,
-			isPrivateLayoutsEnabled,
-			sources,
-			target: candidateItem,
-		})
-	) {
-		return candidate;
-	}
-
-	// Try again
-
-	return getNextTarget({
-		columnSizes,
-		isPrivateLayoutsEnabled,
-		items,
-		key,
-		sources,
-		target: candidate,
-	});
 }
 
 function isSource(

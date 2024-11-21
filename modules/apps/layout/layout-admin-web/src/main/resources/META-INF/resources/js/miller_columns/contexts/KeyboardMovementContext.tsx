@@ -351,4 +351,5 @@ export {
 	KeyboardMovementProvider,
 	useSetMovementText,
 	useMovementText,
+	getNextTarget,
 };
