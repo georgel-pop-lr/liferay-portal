@@ -111,10 +111,14 @@ export function useKeyboardNavigation({
 
 	useEffect(() => {
 
-		// Don't do anything if keyboard movement is enabled
+		// Don't do anything if keyboard movement is enabled or selPlid is 0
+
+		const urlParams = new URLSearchParams(window.location.href);
+		const selPlid = urlParams.get('p_r_p_selPlid');
 
 		if (
 			!Liferay.FeatureFlags['LPD-35220'] ||
+			!Number(selPlid) ||
 			movementSources.length ||
 			isDragging ||
 			!element
