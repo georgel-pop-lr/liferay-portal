@@ -42,6 +42,7 @@ export default function Resizer({
 	tabIndex = 0,
 	targetRef,
 	width,
+	...props
 }: ResizerProps) {
 	const [resizing, setResizing] = useStateSafe(false);
 
@@ -183,6 +184,7 @@ export default function Resizer({
 			ref={resizerRef}
 			role="separator"
 			tabIndex={tabIndex}
+			{...props}
 		/>
 	);
 }
