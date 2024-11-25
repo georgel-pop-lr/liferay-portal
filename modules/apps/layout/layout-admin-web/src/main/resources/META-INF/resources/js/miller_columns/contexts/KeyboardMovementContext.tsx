@@ -3,13 +3,15 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
+import {ScreenReaderAnnouncer} from '@liferay/layout-js-components-web';
 import {navigate, sub} from 'frontend-js-web';
 import React, {
 	Dispatch,
 	ReactNode,
 	SetStateAction,
-	useContext,
+	useCallback,
 	useEffect,
+	useRef,
 	useState,
 } from 'react';
 
@@ -29,23 +31,21 @@ export type MovementTarget = {
 const KeyboardMovementContext = React.createContext<{
 	columnSizes: number[];
 	redirectURL: string | null;
+	sendMessage: (message: any) => void;
 	setRedirectURL: Dispatch<SetStateAction<string | null>>;
 	setSources: Dispatch<SetStateAction<MovementSources>>;
 	setTarget: Dispatch<SetStateAction<MovementTarget>>;
-	setText: Dispatch<SetStateAction<string | null>>;
 	sources: MovementSources;
 	target: MovementTarget;
-	text: string | null;
 }>({
 	columnSizes: [],
 	redirectURL: null,
+	sendMessage: () => {},
 	setRedirectURL: () => {},
 	setSources: () => {},
 	setTarget: () => {},
-	setText: () => {},
 	sources: [],
 	target: null,
-	text: null,
 });
 
 const ALLOWED_KEYS = [
@@ -83,7 +83,15 @@ function KeyboardMovementProvider({
 	const [sources, setSources] = useState<MovementSources>([]);
 	const [target, setTarget] = useState<MovementTarget>(null);
 	const [redirectURL, setRedirectURL] = useState<string | null>(null);
-	const [text, setText] = useState<string | null>(null);
+	const screenReaderAnnouncerRef = useRef<any>();
+
+	const sendMessage = useCallback((message) => {
+		const ref = screenReaderAnnouncerRef;
+
+		if (ref.current) {
+			ref.current?.sendMessage(message);
+		}
+	}, []);
 
 	useEffect(() => {
 		const onKeyDown = (event: KeyboardEvent) => {
@@ -117,7 +125,7 @@ function KeyboardMovementProvider({
 					setMovementText({
 						isFinalPosition: true,
 						items,
-						setText,
+						sendMessage,
 						sources,
 						target,
 					});
@@ -146,7 +154,7 @@ function KeyboardMovementProvider({
 					setTarget(nextTarget);
 					setMovementText({
 						items,
-						setText,
+						sendMessage,
 						sources,
 						target: nextTarget,
 					});
@@ -163,7 +171,7 @@ function KeyboardMovementProvider({
 		columnSizes,
 		items,
 		redirectURL,
-		setText,
+		sendMessage,
 		sources,
 		onMove,
 		rtl,
@@ -175,15 +183,19 @@ function KeyboardMovementProvider({
 			value={{
 				columnSizes,
 				redirectURL,
+				sendMessage,
 				setRedirectURL,
 				setSources,
 				setTarget,
-				setText,
 				sources,
 				target,
-				text,
 			}}
 		>
+			<ScreenReaderAnnouncer
+				aria-live="assertive"
+				ref={screenReaderAnnouncerRef}
+			/>
+
 			{children}
 		</KeyboardMovementContext.Provider>
 	);
@@ -340,14 +352,14 @@ function setMovementText({
 	isFinalPosition = false,
 	isInitialPosition = false,
 	items,
-	setText,
+	sendMessage,
 	sources,
 	target,
 }: {
 	isFinalPosition?: boolean;
 	isInitialPosition?: boolean;
 	items: Map<string, MillerColumnItem>;
-	setText: (value: string) => void;
+	sendMessage: (message: any) => void;
 	sources: MillerColumnItem[];
 	target: MovementTarget;
 }) {
@@ -356,7 +368,7 @@ function setMovementText({
 		target?.itemIndex,
 		items
 	);
-	setText(
+	sendMessage(
 		`${
 			isInitialPosition
 				? Liferay.Language.get(
@@ -403,19 +415,9 @@ function getMillerColumnsItem(
 	);
 }
 
-function useMovementText() {
-	return useContext(KeyboardMovementContext).text;
-}
-
-function useSetMovementText() {
-	return useContext(KeyboardMovementContext).setText;
-}
-
 export {
 	KeyboardMovementContext,
 	KeyboardMovementProvider,
 	getNextTarget,
 	setMovementText,
-	useMovementText,
-	useSetMovementText,
 };
