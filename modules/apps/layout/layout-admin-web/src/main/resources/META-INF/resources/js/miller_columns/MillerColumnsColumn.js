@@ -8,7 +8,7 @@ import {Resizer} from '@liferay/layout-js-components-web';
 import classNames from 'classnames';
 import {useSessionState} from 'frontend-js-components-web';
 import {throttle} from 'frontend-js-web';
-import React, {useEffect, useRef} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {useDrop} from 'react-dnd';
 
 import MillerColumnsItem from './MillerColumnsItem';
@@ -69,6 +69,7 @@ const MillerColumnsColumn = ({
 	rtl,
 }) => {
 	const ref = useRef();
+	const [resizerTabIndex, setResizerTabIndex] = useState(-1);
 
 	const [{canDrop}, drop] = useDrop({
 		accept: ACCEPTING_TYPES.ITEM,
@@ -96,6 +97,34 @@ const MillerColumnsColumn = ({
 	useEffect(() => {
 		drop(ref);
 	}, [drop]);
+
+	useEffect(() => {
+		const handleKeyUp = (event) => {
+			if (event.key === 'Tab' && resizerTabIndex === -1) {
+				if (
+					event.target.getAttribute('aria-label') ===
+					Liferay.Language.get('open-page-options-menu')
+				) {
+
+					// Move focus to resize columns
+
+					const resizer = document.querySelectorAll(
+						`[aria-label="${Liferay.Language.get('resize-column')} 0"]`
+					);
+					if (resizer.length) {
+						resizer[0].focus();
+					}
+					setResizerTabIndex(0);
+				}
+			}
+		};
+
+		window.addEventListener('keyup', handleKeyUp);
+
+		return () => {
+			window.removeEventListener('keyup', handleKeyUp);
+		};
+	}, [resizerTabIndex]);
 
 	const [columnWidth, setColumnWidth] = useSessionState(
 		`${namespace}_column-width-${index}`,
@@ -150,11 +179,12 @@ const MillerColumnsColumn = ({
 
 			{Liferay.FeatureFlags['LPD-35220'] && (
 				<Resizer
-					ariaLabel={Liferay.Language.get('resize-column')}
+					ariaLabel={`${Liferay.Language.get('resize-column')} ${index}`}
 					maxWidth={COLUMN_MAX_WIDTH}
 					minWidth={COLUMN_MIN_WIDTH}
 					resizeStep={COLUMN_WIDTH_RESIZE_STEP}
 					setWidth={setColumnWidth}
+					tabIndex={resizerTabIndex}
 					targetRef={ref}
 					width={columnWidth}
 				/>
