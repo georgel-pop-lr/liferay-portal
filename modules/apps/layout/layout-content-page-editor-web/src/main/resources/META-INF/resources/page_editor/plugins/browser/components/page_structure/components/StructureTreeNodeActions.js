@@ -43,6 +43,7 @@ import {
 	FORM_ERROR_TYPES,
 	getFormErrorDescription,
 } from '../../../../../app/utils/getFormErrorDescription';
+import {getPasteTargetId} from '../../../../../app/utils/getPasteTargetId';
 import isCuttable from '../../../../../app/utils/isCuttable';
 import isInputFragment from '../../../../../app/utils/isInputFragment';
 import {isMovementValid} from '../../../../../app/utils/isMovementValid';
@@ -316,7 +317,7 @@ const ActionList = ({item, setActive, setOpenSaveModal}) => {
 									fragmentEntryLinks
 								)
 							),
-							targetId: item.id,
+							targetId: getPasteTargetId(item.id, layoutData),
 						})
 					) {
 						dispatch(

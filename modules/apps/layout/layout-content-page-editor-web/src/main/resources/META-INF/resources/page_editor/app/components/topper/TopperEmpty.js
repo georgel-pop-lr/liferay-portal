@@ -37,6 +37,7 @@ import selectLayoutDataItemLabel from '../../selectors/selectLayoutDataItemLabel
 import pasteItems from '../../thunks/pasteItems';
 import {TARGET_POSITIONS} from '../../utils/drag_and_drop/constants/targetPositions';
 import {useDropTarget} from '../../utils/drag_and_drop/useDragAndDrop';
+import {getPasteTargetId} from '../../utils/getPasteTargetId';
 import {isMovementValid} from '../../utils/isMovementValid';
 import toMovementItem from '../../utils/toMovementItem';
 import useDropContainerId from '../../utils/useDropContainerId';
@@ -325,7 +326,10 @@ const TopperEmptyLabel = ({isActive, isHovered, item, itemElement}) => {
 														fragmentEntryLinks
 													)
 												),
-												targetId: item.itemId,
+												targetId: getPasteTargetId(
+													item.itemId,
+													layoutData
+												),
 											})
 										) {
 											dispatch(

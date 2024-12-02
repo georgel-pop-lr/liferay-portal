@@ -45,6 +45,7 @@ import canBeHidden from '../utils/canBeHidden';
 import canBeRemoved from '../utils/canBeRemoved';
 import canBeRenamed from '../utils/canBeRenamed';
 import canBeSaved from '../utils/canBeSaved';
+import {getPasteTargetId} from '../utils/getPasteTargetId';
 import isCtrlOrMeta from '../utils/isCtrlOrMeta';
 import isCuttable from '../utils/isCuttable';
 import {isMovementValid} from '../utils/isMovementValid';
@@ -254,7 +255,10 @@ export default function ShortcutManager() {
 						sources: clipboard.map((id) =>
 							toMovementItem(id, layoutData, fragmentEntryLinks)
 						),
-						targetId: getParentItemId(),
+						targetId: getPasteTargetId(
+							getParentItemId(),
+							layoutData
+						),
 					}),
 				isKeyCombination: (event) =>
 					isCtrlOrMeta(event) && event.code === V_KEY_CODE,

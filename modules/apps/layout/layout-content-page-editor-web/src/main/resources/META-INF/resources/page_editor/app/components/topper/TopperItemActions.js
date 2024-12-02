@@ -36,6 +36,7 @@ import {
 	FORM_ERROR_TYPES,
 	getFormErrorDescription,
 } from '../../utils/getFormErrorDescription';
+import {getPasteTargetId} from '../../utils/getPasteTargetId';
 import getPortletCustomActions from '../../utils/getPortletCustomActions';
 import getPortletId from '../../utils/getPortletId';
 import hideFragment from '../../utils/hideFragment';
@@ -202,7 +203,7 @@ export default function TopperItemActions({disabled, item}) {
 									fragmentEntryLinks
 								)
 							),
-							targetId: item.itemId,
+							targetId: getPasteTargetId(item.itemId, layoutData),
 						})
 					) {
 						dispatch(
