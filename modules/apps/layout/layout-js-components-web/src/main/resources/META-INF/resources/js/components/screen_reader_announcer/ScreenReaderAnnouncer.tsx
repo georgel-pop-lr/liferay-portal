@@ -11,10 +11,6 @@ import React, {
 	useState,
 } from 'react';
 
-// @ts-ignore
-
-import {v4 as uuidv4} from 'uuid';
-
 type ScreenReaderAnnouncerProps = {
 	'aria-atomic'?: AriaAttributes['aria-atomic'];
 	'aria-live'?: AriaAttributes['aria-live'];
@@ -25,30 +21,16 @@ const ScreenReaderAnnouncer = React.forwardRef<any, ScreenReaderAnnouncerProps>(
 		{'aria-atomic': ariaAtomic = false, 'aria-live': ariaLive = 'polite'},
 		ref
 	) => {
-		const [textMap, setTextMap] = useState<Record<string, string>>({});
+		const [message, setMessage] = useState<string>('');
 		const isMounted = useIsMounted();
 
 		const sendMessage = useCallback(
 			(message: string) => {
-				const messageId = uuidv4();
-
-				setTextMap((previousTextMap) => {
-					const nextTextMap = {...previousTextMap};
-
-					nextTextMap[messageId] = message;
-
-					return nextTextMap;
-				});
+				setMessage(message);
 
 				setTimeout(() => {
 					if (isMounted()) {
-						setTextMap((previousTextMap) => {
-							const nextTextMap = {...previousTextMap};
-
-							delete nextTextMap[messageId];
-
-							return nextTextMap;
-						});
+						setMessage('');
 					}
 				}, 10000);
 			},
@@ -58,15 +40,13 @@ const ScreenReaderAnnouncer = React.forwardRef<any, ScreenReaderAnnouncerProps>(
 		useImperativeHandle(ref, () => ({sendMessage}));
 
 		return (
-			<div
+			<span
 				aria-atomic={ariaAtomic}
 				aria-live={ariaLive}
 				className="sr-only"
 			>
-				{Object.entries(textMap).map(([messageId, message]) => (
-					<p key={messageId}>{message}</p>
-				))}
-			</div>
+				{message}
+			</span>
 		);
 	}
 );
