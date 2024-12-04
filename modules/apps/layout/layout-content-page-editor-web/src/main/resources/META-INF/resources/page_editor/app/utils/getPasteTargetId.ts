@@ -21,25 +21,24 @@ export function getPasteTargetId(
 	layoutData: LayoutData
 ): string {
 	const target = layoutData.items[targetId];
-	const layoutDataItems = layoutData.items;
+	const items = layoutData.items;
 
-	// return first stepper id for multistep form
+	// Return first step id for multistep form
 
 	if (
 		target.type === LAYOUT_DATA_ITEM_TYPES.form &&
 		target.config.formType === 'multistep'
 	) {
-		for (const childItemId of target.children) {
-			const layoutDataItem = layoutDataItems[childItemId];
-			if (
-				layoutDataItem.type === LAYOUT_DATA_ITEM_TYPES.formStepContainer
-			) {
-				return layoutDataItems[layoutDataItem.children[0]].itemId;
+		for (const childId of target.children) {
+			const child = items[childId];
+
+			if (child.type === LAYOUT_DATA_ITEM_TYPES.formStepContainer) {
+				return items[child.children[0]].itemId;
 			}
 		}
 	}
 
-	// return collectionItem id if collection is mapped
+	// Return collectionItem id if collection is mapped
 
 	if (
 		target.type === LAYOUT_DATA_ITEM_TYPES.collection &&
@@ -48,15 +47,15 @@ export function getPasteTargetId(
 		return target.children[0];
 	}
 
-	// return available parent id
+	// Return available parent id
 
 	if (PARENT_TYPES.some((type) => type === target.type)) {
 		return target.itemId;
 	}
 
-	const parent = layoutDataItems[target.parentId];
+	const parent = items[target.parentId];
 
-	// if not found go deeper and check for available parent id
+	// If not found go deeper and check for available parent id
 
 	return getPasteTargetId(parent.itemId, layoutData);
 }
