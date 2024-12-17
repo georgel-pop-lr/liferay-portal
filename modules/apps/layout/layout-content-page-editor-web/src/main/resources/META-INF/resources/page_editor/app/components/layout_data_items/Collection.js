@@ -217,6 +217,7 @@ const Grid = ({
 											collectionConfig.numberOfColumns
 										][collectionConfig.numberOfColumns][j]
 									}
+									id={`${collectionId}-${index}`} // Identify index
 								>
 									{index < numberOfItemsToDisplay && (
 										<ItemContext

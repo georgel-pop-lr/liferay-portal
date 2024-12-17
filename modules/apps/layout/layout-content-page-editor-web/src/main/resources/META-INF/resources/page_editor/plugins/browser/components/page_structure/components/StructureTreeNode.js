@@ -26,6 +26,7 @@ import {
 	useActivationOrigin,
 	useActiveItemIds,
 	useSelectItem,
+	useSelectMultipleItems,
 } from '../../../../../app/contexts/ControlsContext';
 import {
 	useDisableKeyboardMovement,
@@ -281,8 +282,13 @@ function NodeContent({
 		(state) => state.selectedViewportSize
 	);
 	const selectItem = useSelectItem();
+	const selectMultipleItems = useSelectMultipleItems();
 	const setEditedNodeId = useSetEditedNodeId();
 	const setText = useSetMovementText();
+
+	const selectItems = Liferay.FeatureFlags['LPD-18221']
+		? selectMultipleItems
+		: selectItem;
 
 	const layoutDataRef = useSelectorRef((store) => store.layoutData);
 
@@ -348,6 +354,7 @@ function NodeContent({
 					itemIds: activeItemIds,
 					parentItemIds: [parentItemId],
 					positions: [position],
+					selectItems,
 				});
 
 		dispatch(thunk);

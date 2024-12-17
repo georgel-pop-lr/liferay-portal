@@ -7,6 +7,7 @@ import {State} from '../../types/State';
 import moveItemsAction from '../actions/moveItems';
 import updateNetwork from '../actions/updateNetwork';
 import LayoutService from '../services/LayoutService';
+import selectFirstControlsItem from '../utils/selectFirstControlsItem';
 import sortItemIds from '../utils/sortItemIds';
 import filterSelectedItems from './filterSelectedItems';
 
@@ -14,9 +15,15 @@ type Props = {
 	itemIds: string[];
 	parentItemIds: string[];
 	positions: number[];
+	selectItems: () => {};
 };
 
-export default function moveItems({itemIds, parentItemIds, positions}: Props) {
+export default function moveItems({
+	itemIds,
+	parentItemIds,
+	positions,
+	selectItems,
+}: Props) {
 	return (
 		dispatch: (
 			action: ReturnType<typeof updateNetwork | typeof moveItemsAction>
@@ -38,6 +45,16 @@ export default function moveItems({itemIds, parentItemIds, positions}: Props) {
 			segmentsExperienceId,
 		}).then((layoutData) => {
 			dispatch(moveItemsAction({itemIds: sortedItemIds, layoutData}));
+
+			if (sortedItemIds.length) {
+				sortedItemIds.forEach((movedItemId) => {
+					selectFirstControlsItem({
+						itemId: movedItemId,
+						layoutData,
+						selectItems,
+					});
+				});
+			}
 		});
 	};
 }

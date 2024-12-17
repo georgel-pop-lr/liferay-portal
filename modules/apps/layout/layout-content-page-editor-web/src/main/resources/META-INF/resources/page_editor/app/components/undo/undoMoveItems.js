@@ -3,12 +3,29 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
+/* import {
+	useSelectItem,
+	useSelectMultipleItems,
+} from '../../contexts/ControlsContext';*/
 import moveItems from '../../thunks/moveItems';
 
 function undoAction({action}) {
 	const {itemIds, parentItemIds, positions} = action;
 
-	return moveItems({itemIds, parentItemIds, positions});
+	/* TODO: Pass selectItem function to undo
+	const selectItem = useSelectItem();
+	const selectMultipleItems = useSelectMultipleItems();
+
+	const selectItems = Liferay.FeatureFlags['LPD-18221']
+		? selectMultipleItems
+		: selectItem;*/
+
+	return moveItems({
+		itemIds,
+		parentItemIds,
+		positions,
+		selectItems: () => {},
+	});
 }
 
 function getDerivedStateForUndo({action, state}) {

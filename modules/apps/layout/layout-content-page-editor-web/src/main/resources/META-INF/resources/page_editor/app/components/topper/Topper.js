@@ -25,6 +25,7 @@ import {
 	useIsHovered,
 	useMultiSelectType,
 	useSelectItem,
+	useSelectMultipleItems,
 } from '../../contexts/ControlsContext';
 import {useEditableProcessorUniqueId} from '../../contexts/EditableProcessorContext';
 import {
@@ -114,7 +115,12 @@ function TopperContent({
 	const {itemId: keyboardMovementTargetId} = useMovementTarget();
 	const keyboardMovementPosition = useMovementTargetPosition();
 	const selectItem = useSelectItem();
+	const selectMultipleItems = useSelectMultipleItems();
 	const topperLabelId = useId();
+
+	const selectItems = Liferay.FeatureFlags['LPD-18221']
+		? selectMultipleItems
+		: selectItem;
 
 	const dropContainerId = useDropContainerId();
 	const dropTargetPosition = targetPosition || keyboardMovementPosition;
@@ -167,6 +173,7 @@ function TopperContent({
 					itemIds: activeItemIds,
 					parentItemIds: [parentItemId],
 					positions: [position],
+					selectItems,
 				});
 
 		dispatch(thunk);

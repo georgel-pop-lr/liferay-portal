@@ -125,6 +125,7 @@ export default function KeyboardMovementManager() {
 								itemIds: sources.map(({itemId}) => itemId),
 								parentItemIds: [targetId],
 								positions: [position],
+								selectItems,
 							});
 				}
 				else if (actionType === ACTION_TYPES.add) {
