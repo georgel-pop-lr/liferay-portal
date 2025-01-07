@@ -16,6 +16,7 @@ import {fromControlsId} from '../components/layout_data_items/Collection';
 import {ITEM_TYPES} from '../config/constants/itemTypes';
 import {LAYOUT_DATA_ITEM_TYPES} from '../config/constants/layoutDataItemTypes';
 import {MULTI_SELECT_TYPES} from '../config/constants/multiSelectTypes';
+import getFirstControlsId from '../utils/getFirstControlsId';
 import {useToControlsId} from './CollectionItemContext';
 import {useSelectorRef} from './StoreContext';
 
@@ -70,38 +71,50 @@ function getActiveItemIds(activeItemIds, itemId) {
  * all the elements iterated as included until the end of the range is found.
  *
  * @param {array} items Items to analyze if they are within the range.
- * @param {object} layoutDataItems Layout data items.
+ * @param {object} layoutData Layout data
  * @param {array} rangeLimitIds This array contains the beginning and end of the range.
  */
 
-export function getItemsWithinRange({itemIds, layoutDataItems, rangeLimitIds}) {
+export function getItemsWithinRange({
+	activeItemIds,
+	itemIds,
+	layoutData,
+	rangeLimitIds,
+}) {
 	let activateSelection = false;
+	const layoutDataItems = layoutData.items;
 	const selectedItems = [];
-
 	const findItemsWithinRange = ({
 		itemIds,
 		layoutDataItems,
 		rangeLimitIds,
 	}) => {
+		const startControlsId = fromControlsId(rangeLimitIds.start);
+		const endControlsId = fromControlsId(rangeLimitIds.end);
+
 		for (const childId of itemIds) {
 			const item = layoutDataItems[childId];
 
+			const isActive = activeItemIds.some(
+				(itemId) => fromControlsId(itemId) === childId
+			);
+
 			const isLimitId =
-				rangeLimitIds.start === childId ||
-				rangeLimitIds.end === childId;
+				startControlsId === childId || endControlsId === childId;
 
 			if (isLimitId) {
 				activateSelection = !activateSelection;
 			}
 
 			if (
+				!isActive &&
 				(isLimitId || activateSelection) &&
 				item.type !== LAYOUT_DATA_ITEM_TYPES.formStep &&
 				item.type !== LAYOUT_DATA_ITEM_TYPES.column &&
 				item.type !== LAYOUT_DATA_ITEM_TYPES.collectionItem &&
 				item.type !== LAYOUT_DATA_ITEM_TYPES.fragmentDropZone
 			) {
-				selectedItems.push(childId);
+				selectedItems.push(getFirstControlsId({item, layoutData}));
 			}
 
 			findItemsWithinRange({
@@ -166,7 +179,7 @@ const reducer = (state, action) => {
 			// Avoid selection in range when directly selecting an item that
 			// is not a layout data item, such as editables.
 
-			if (!layoutData.items[itemId]) {
+			if (!layoutData.items[fromControlsId(itemId)]) {
 				return nextState;
 			}
 
@@ -211,8 +224,9 @@ const reducer = (state, action) => {
 				const root = layoutData.items[layoutData.rootItems.main];
 
 				nextActiveItemIds = getItemsWithinRange({
+					activeItemIds: initialActiveItemIds,
 					itemIds: root.children,
-					layoutDataItems: layoutData.items,
+					layoutData,
 					rangeLimitIds,
 				});
 
