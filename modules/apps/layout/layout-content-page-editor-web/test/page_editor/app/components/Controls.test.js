@@ -30,10 +30,16 @@ const STATE = {
 
 const LAYOUT_DATA = {
 	items: {
+		collection: {
+			children: [],
+			itemId: 'collection',
+			parentId: 'root',
+			type: LAYOUT_DATA_ITEM_TYPES.collection,
+		},
 		collectionItem: {
 			children: [],
 			itemId: 'collectionItem',
-			parentId: 'column',
+			parentId: 'collection',
 			type: LAYOUT_DATA_ITEM_TYPES.collectionItem,
 		},
 		column: {
@@ -580,8 +586,9 @@ describe('Reducer', () => {
 		it('select range from top to bottom avoiding non-selectable elements', () => {
 			expect(
 				getItemsWithinRange({
+					activeItemIds: [],
 					itemIds: LAYOUT_DATA.items.root.children,
-					layoutDataItems: LAYOUT_DATA.items,
+					layoutData: LAYOUT_DATA,
 					rangeLimitIds: {end: 'fragment04', start: 'fragment02'},
 				})
 			).toEqual([
@@ -598,8 +605,9 @@ describe('Reducer', () => {
 		it('select range from bottom to top avoiding non-selectable elements', () => {
 			expect(
 				getItemsWithinRange({
+					activeItemIds: [],
 					itemIds: LAYOUT_DATA.items.root.children,
-					layoutDataItems: LAYOUT_DATA.items,
+					layoutData: LAYOUT_DATA,
 					rangeLimitIds: {end: 'fragment01', start: 'fragment03'},
 				})
 			).toEqual([
