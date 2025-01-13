@@ -69,16 +69,13 @@ public class LayoutCommonTagTest {
 
 		String message = "<strong>Test warning message</strong>";
 
-		MockHttpServletRequest mockHttpServletRequest =
-			_getMockHttpServletRequest(message);
-
 		MockHttpServletResponse mockHttpServletResponse =
 			new MockHttpServletResponse();
 
 		layoutCommonTag.setPageContext(new MockPageContext(
-			null,	mockHttpServletRequest, mockHttpServletResponse));
+			null, _getMockHttpServletRequest(message), mockHttpServletResponse));
 
-		layoutCommonTag.doTag(mockHttpServletRequest, mockHttpServletResponse);
+		layoutCommonTag.doEndTag();
 
 		String content = mockHttpServletResponse.getContentAsString();
 
