@@ -7,12 +7,8 @@ package com.liferay.layout.taglib.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.layout.taglib.servlet.taglib.LayoutCommonTag;
-import com.liferay.layout.test.util.ContentLayoutTestUtil;
-import com.liferay.layout.test.util.LayoutTestUtil;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.model.Group;
-import com.liferay.portal.kernel.model.Layout;
-import com.liferay.portal.kernel.model.LayoutConstants;
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
@@ -20,8 +16,6 @@ import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
-import com.liferay.portal.kernel.test.util.RandomTestUtil;
-import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.HtmlUtil;
@@ -69,18 +63,6 @@ public class LayoutCommonTagTest {
 
 	@Test
 	public void testWarningTextFormat() throws Exception {
-		Layout layout = LayoutTestUtil.addTypeContentLayout(_group);
-
-		ContentLayoutTestUtil.publishLayout(layout.fetchDraftLayout(), layout);
-
-		_layoutLocalService.addLayout(
-			null, TestPropsValues.getUserId(), _group.getGroupId(), false,
-			layout.getLayoutId(), RandomTestUtil.randomString(),
-			StringPool.BLANK, StringPool.BLANK, LayoutConstants.TYPE_CONTENT,
-			false, StringPool.BLANK,
-			ServiceContextTestUtil.getServiceContext(
-				TestPropsValues.getGroupId(), TestPropsValues.getUserId()));
-
 		LayoutCommonTag layoutCommonTag = new LayoutCommonTag();
 
 		HttpServletRequest httpServletRequest = _getMockHttpServletRequest();
