@@ -65,31 +65,27 @@ public class LayoutCommonTagTest {
 	public void testWarningTextFormat() throws Exception {
 		LayoutCommonTag layoutCommonTag = new LayoutCommonTag();
 
-		HttpServletRequest httpServletRequest = _getMockHttpServletRequest();
+		layoutCommonTag.setDisplaySessionMessages(true);
 
 		String message = "<strong>Test warning message</strong>";
 
-		SessionMessages.add(
-			httpServletRequest, "test_requestProcessedWarning", message);
-
-		layoutCommonTag.setDisplaySessionMessages(true);
+		MockHttpServletRequest mockHttpServletRequest =
+			_getMockHttpServletRequest(message);
 
 		MockHttpServletResponse mockHttpServletResponse =
 			new MockHttpServletResponse();
 
-		MockPageContext mockPageContext = new MockPageContext(
-			null, httpServletRequest, mockHttpServletResponse);
+		layoutCommonTag.setPageContext(new MockPageContext(
+			null,	mockHttpServletRequest, mockHttpServletResponse));
 
-		layoutCommonTag.setPageContext(mockPageContext);
-
-		layoutCommonTag.doTag(httpServletRequest, mockHttpServletResponse);
+		layoutCommonTag.doTag(mockHttpServletRequest, mockHttpServletResponse);
 
 		String content = mockHttpServletResponse.getContentAsString();
 
 		Assert.assertTrue(content.contains(HtmlUtil.escapeJS(message)));
 	}
 
-	private MockHttpServletRequest _getMockHttpServletRequest()
+	private MockHttpServletRequest _getMockHttpServletRequest(String message)
 		throws Exception {
 
 		MockHttpServletRequest mockHttpServletRequest =
@@ -108,6 +104,9 @@ public class LayoutCommonTagTest {
 			WebKeys.THEME_DISPLAY, themeDisplay);
 
 		themeDisplay.setRequest(mockHttpServletRequest);
+
+		SessionMessages.add(
+			mockHttpServletRequest, "test_requestProcessedWarning", message);
 
 		return mockHttpServletRequest;
 	}
