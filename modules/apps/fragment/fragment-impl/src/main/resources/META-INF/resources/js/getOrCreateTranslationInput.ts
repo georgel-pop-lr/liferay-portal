@@ -7,7 +7,8 @@ export default function getOrCreateTranslationInput(
 	inputName: string,
 	languageId: string,
 	localizationInputsContainer: HTMLElement,
-	namespace: string
+	namespace: string,
+	inputType: string = 'hidden'
 ) {
 	const inputId = `${namespace}${inputName}_${languageId}`;
 
@@ -15,9 +16,10 @@ export default function getOrCreateTranslationInput(
 
 	if (!translationInput) {
 		translationInput = document.createElement('input');
-		translationInput.type = 'hidden';
+		translationInput.type = inputType;
 		translationInput.id = inputId;
 		translationInput.name = `${inputName}_${languageId}`;
+		translationInput.className = `${inputType}-hidden-input`;
 		localizationInputsContainer.appendChild(translationInput);
 	}
 
