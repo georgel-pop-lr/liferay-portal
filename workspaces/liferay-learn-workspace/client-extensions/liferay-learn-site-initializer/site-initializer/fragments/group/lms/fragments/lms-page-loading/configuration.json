@@ -5,7 +5,7 @@
 				{
 					"dataType": "string",
 					"defaultValue": "loading-knowledge-label",
-					"description": "Language override key to set the loading text.",
+					"description": "",
 					"label": "Loading Text Key",
 					"name": "loadingTextKey",
 					"type": "text",
