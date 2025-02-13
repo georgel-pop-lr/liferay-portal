@@ -105,7 +105,10 @@ public class SystemEventAdvice extends ChainableMethodAdvice {
 
 		Group group = GroupLocalServiceUtil.fetchGroup(groupId);
 
+		String classExternalReferenceCode = getClassExternalReferenceCode(
+			classedModel);
 		String className = getClassName(classedModel);
+		long classPK = getClassPK(classedModel);
 
 		String referrerClassName = null;
 
@@ -114,11 +117,6 @@ public class SystemEventAdvice extends ChainableMethodAdvice {
 
 			referrerClassName = typedModel.getClassName();
 		}
-
-		long classPK = getClassPK(classedModel);
-
-		String classExternalReferenceCode = getClassExternalReferenceCode(
-			classedModel);
 
 		SystemEventHierarchyEntry systemEventHierarchyEntry =
 			SystemEventHierarchyEntryThreadLocal.peek();
