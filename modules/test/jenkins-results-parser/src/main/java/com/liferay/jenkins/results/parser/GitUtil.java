@@ -217,7 +217,7 @@ public class GitUtil {
 				"git ls-remote -h ", remoteURL);
 		}
 
-		ExecutionResult executionResult;
+		ExecutionResult executionResult = null;
 
 		try {
 			executionResult = executeBashCommands(
