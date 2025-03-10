@@ -11,7 +11,7 @@ import {
 } from '@liferay/marketplace-js-components-web';
 import React, {ReactElement} from 'react';
 
-import MarketplaceViews from './MarketplaceViews';
+import MarketplaceViews from '../marketplace/MarketplaceViews';
 
 interface Props {
 	trigger?: ReactElement;

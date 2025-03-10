@@ -16,7 +16,7 @@ import {
 import {fetch} from 'frontend-js-web';
 import React from 'react';
 
-import {InstallFragmentModalBody} from './InstallFragmentModal';
+import {InstallFragmentModalBody} from '../modals/InstallFragmentModal';
 
 async function fetchFragmentBlob(marketplaceRest: MarketplaceRest, url: URL) {
 	const response = await marketplaceRest.fetchMarketplace<Response>(
