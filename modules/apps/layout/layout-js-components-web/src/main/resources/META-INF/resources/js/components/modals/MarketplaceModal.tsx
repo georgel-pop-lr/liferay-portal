@@ -8,45 +8,80 @@ import {
 	Marketplace,
 	MarketplaceContextProvider,
 	MarketplaceRest,
+	MarketplaceView,
+	useMarketplaceContext,
 } from '@liferay/marketplace-js-components-web';
-import React, {ReactElement} from 'react';
+import {sub} from 'frontend-js-web';
+import React, {ReactElement, useCallback, useEffect, useState} from 'react';
 
 import MarketplaceViews from '../marketplace/MarketplaceViews';
 
-interface Props {
-	trigger?: ReactElement;
-}
+function MarketplaceModal({trigger}: {trigger?: ReactElement}) {
+	const [title, setTitle] = useState<string | undefined>();
 
-function MarketplaceModal({trigger}: Props) {
 	return (
 		<MarketplaceContextProvider
 			baseResourceURL={MarketplaceRest.getBaseResourceURL()}
 			settings={{productFilter: 'fragments'}}
 		>
 			<Marketplace.Modal
+				title={title}
 				trigger={
-					trigger ? (
-						trigger
-					) : (
-						<ClayButtonWithIcon
-							aria-label={Liferay.Language.get(
-								'open-marketplace-explorer'
-							)}
-							borderless
-							displayType="secondary"
-							monospaced
-							size="sm"
-							symbol="marketplace"
-							title={Liferay.Language.get(
-								'open-marketplace-explorer'
-							)}
-						/>
-					)
+					<MarketplaceModalTrigger
+						setTitle={setTitle}
+						trigger={trigger}
+					/>
 				}
 			>
 				<MarketplaceViews />
 			</Marketplace.Modal>
 		</MarketplaceContextProvider>
+	);
+}
+
+function MarketplaceModalTrigger({
+	setTitle,
+	trigger,
+}: {
+	setTitle: React.Dispatch<React.SetStateAction<string | undefined>>;
+	trigger?: ReactElement;
+}) {
+	const {
+		modal: {onOpenChange},
+		product,
+		setView,
+		view,
+	} = useMarketplaceContext();
+
+	const handleClick = useCallback(() => {
+		if (view === MarketplaceView.PURCHASE) {
+			setView(MarketplaceView.PRODUCTS);
+		}
+		onOpenChange(true);
+	}, [view, setView, onOpenChange]);
+
+	useEffect(() => {
+		if (view === MarketplaceView.PURCHASE) {
+			setTitle(sub(Liferay.Language.get('installing-x'), product.name));
+		}
+		else {
+			setTitle(undefined);
+		}
+	}, [view, product.name, setTitle]);
+
+	return trigger ? (
+		trigger
+	) : (
+		<ClayButtonWithIcon
+			aria-label={Liferay.Language.get('open-marketplace-explorer')}
+			borderless
+			displayType="secondary"
+			monospaced
+			onClick={handleClick}
+			size="sm"
+			symbol="marketplace"
+			title={Liferay.Language.get('open-marketplace-explorer')}
+		/>
 	);
 }
 

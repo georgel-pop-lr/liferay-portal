@@ -5,10 +5,11 @@
 
 import ClayLoadingIndicator from '@clayui/loading-indicator';
 import ClayModal, {useModal} from '@clayui/modal';
+import {Product} from '@liferay/marketplace-js-components-web';
 import {sub} from 'frontend-js-web';
 import React, {useState} from 'react';
 
-export function InstallFragmentModalBody() {
+export function InstallFragmentModalBody({fragment}: {fragment: Product}) {
 	return (
 		<>
 			<ClayLoadingIndicator
@@ -32,10 +33,10 @@ export function InstallFragmentModalBody() {
 }
 
 export default function InstallFragmentModal({
-	name,
+	fragment,
 	onCloseModal = () => {},
 }: {
-	name: string;
+	fragment: Product;
 	onCloseModal?: () => void;
 }) {
 	const [visible, setVisible] = useState(true);
@@ -47,17 +48,15 @@ export default function InstallFragmentModal({
 		},
 	});
 
-	return (
-		visible && (
-			<ClayModal className="modal-dialog-centered" observer={observer}>
-				<ClayModal.Header>
-					{sub(Liferay.Language.get('installing-x'), name)}
-				</ClayModal.Header>
+	return visible ? (
+		<ClayModal className="modal-dialog-centered" observer={observer}>
+			<ClayModal.Header>
+				{sub(Liferay.Language.get('installing-x'), fragment.name)}
+			</ClayModal.Header>
 
-				<ClayModal.Body>
-					<InstallFragmentModalBody />
-				</ClayModal.Body>
-			</ClayModal>
-		)
-	);
+			<ClayModal.Body>
+				<InstallFragmentModalBody fragment={fragment} />
+			</ClayModal.Body>
+		</ClayModal>
+	) : null;
 }
