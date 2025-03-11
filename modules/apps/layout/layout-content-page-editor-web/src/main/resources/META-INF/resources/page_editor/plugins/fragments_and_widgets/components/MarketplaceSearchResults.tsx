@@ -45,7 +45,9 @@ export default function MarketplaceSearchResults({
 		);
 	}, [baseResourceURL, marketplaceConfiguration.data]);
 
-	const showMoreResults = results?.lastPage && results.lastPage > page;
+	const hasMoreResults = Boolean(
+		results?.lastPage && results?.lastPage > page
+	);
 
 	useEffect(() => {
 		if (!marketplaceConfiguration.authorized) {
@@ -93,31 +95,9 @@ export default function MarketplaceSearchResults({
 				{Liferay.Language.get('showing-results-from-marketplace')}
 			</p>
 
-			{results?.items.length ? (
-				<div className="px-3">
-					{results.items.map((item: Product, index) => (
-						<MarketplaceModal
-							key={index}
-							trigger={<MarketplaceTabItem item={item} />}
-						/>
-					))}
-				</div>
-			) : (
-				!loading && (
-					<ClayEmptyState
-						description={Liferay.Language.get(
-							'try-again-with-a-different-search'
-						)}
-						imgSrc={`${Liferay.ThemeDisplay.getPathThemeImages()}/states/search_state.svg`}
-						small
-						title={Liferay.Language.get('no-results-found')}
-					/>
-				)
-			)}
+			<SearchResults loading={loading} results={results} />
 
-			{loading && <ClayLoadingIndicator className="mt-3" size="sm" />}
-
-			{showMoreResults && (
+			{hasMoreResults && (
 				<ClayButton
 					aria-label={Liferay.Language.get('load-more-results')}
 					className="p-3 text-secondary"
@@ -131,5 +111,41 @@ export default function MarketplaceSearchResults({
 				</ClayButton>
 			)}
 		</>
+	);
+}
+
+function SearchResults({
+	loading,
+	results,
+}: {
+	loading: boolean;
+	results?: APIResponse<Product>;
+}) {
+	if (loading) {
+		return <ClayLoadingIndicator className="mt-3" size="sm" />;
+	}
+
+	if (!results?.items.length) {
+		return (
+			<ClayEmptyState
+				description={Liferay.Language.get(
+					'try-again-with-a-different-search'
+				)}
+				imgSrc={`${Liferay.ThemeDisplay.getPathThemeImages()}/states/search_state.svg`}
+				small
+				title={Liferay.Language.get('no-results-found')}
+			/>
+		);
+	}
+
+	return (
+		<div className="px-3">
+			{results.items.map((item: Product, index) => (
+				<MarketplaceModal
+					key={index}
+					trigger={<MarketplaceTabItem item={item} />}
+				/>
+			))}
+		</div>
 	);
 }
