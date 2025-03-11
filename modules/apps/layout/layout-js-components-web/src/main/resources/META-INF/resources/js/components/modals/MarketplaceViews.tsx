@@ -7,7 +7,6 @@
 
 import ClayButton from '@clayui/button';
 import {
-	Cart,
 	Marketplace,
 	MarketplaceRest,
 	MarketplaceView,
@@ -28,30 +27,6 @@ async function fetchFragmentBlob(marketplaceRest: MarketplaceRest, url: URL) {
 	);
 
 	return response.blob();
-}
-
-async function getVirtualEntryBlob(
-	cart: Cart,
-	marketplaceRest: MarketplaceRest
-) {
-	const placedOrder = await marketplaceRest.getPlacedOrder(
-		cart.id,
-		new URLSearchParams({
-			nestedFields: 'placedOrderItems',
-		})
-	);
-
-	if (!placedOrder.placedOrderItems.length) {
-		return;
-	}
-
-	const [virtualItem] = placedOrder.placedOrderItems?.[0]?.virtualItems ?? [];
-
-	if (!virtualItem) {
-		return;
-	}
-
-	return fetchFragmentBlob(marketplaceRest, new URL(virtualItem.url));
 }
 
 function getProductAttachmentBlob(
