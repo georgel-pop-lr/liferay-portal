@@ -11,7 +11,7 @@ import ClayToolbar from '@clayui/toolbar';
 import classNames from 'classnames';
 import {openToast, useId} from 'frontend-js-components-web';
 import {fetch, navigate, sub} from 'frontend-js-web';
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 
 import isNullOrUndefined from '../../utils/isNullOrUndefined';
 import ImportOptionsModal, {OverwriteStrategy} from './ImportOptionsModal';
@@ -25,6 +25,7 @@ interface Props {
 	};
 	importURL: string;
 	portletNamespace: string;
+	preselectedFile?: File | null;
 }
 
 const FILE_TEXTS = {
@@ -36,10 +37,18 @@ const FILE_TEXTS = {
 
 const ZIP_EXTENSION = '.zip';
 
-function Import({backURL, helpLink, importURL, portletNamespace}: Props) {
+function Import({
+	backURL,
+	helpLink,
+	importURL,
+	portletNamespace,
+	preselectedFile,
+}: Props) {
 	const [error, setError] = useState<string | null>(null);
-	const [file, setFile] = useState<File | null>(null);
-	const [fileName, setFileName] = useState<string | null>(null);
+	const [file, setFile] = useState<File | null>(preselectedFile || null);
+	const [fileName, setFileName] = useState<string | null>(
+		preselectedFile?.name || null
+	);
 	const [fileText, setFileText] = useState<string>(FILE_TEXTS.initial);
 	const [importResults, setImportResults] = useState<Results | null>(null);
 	const [importOptionsModalVisible, setImportOptionsModalVisible] =
@@ -49,6 +58,23 @@ function Import({backURL, helpLink, importURL, portletNamespace}: Props) {
 
 	const fileInputId = useId();
 	const fileButtonDescriptionId = useId();
+
+	useEffect(() => {
+		if (preselectedFile) {
+			const fileExtension = preselectedFile?.name
+				.substring(preselectedFile?.name.lastIndexOf('.'))
+				.toLowerCase();
+
+			if (fileExtension === ZIP_EXTENSION) {
+				setError(null);
+				setFileText(FILE_TEXTS.loaded);
+			}
+			else {
+				setError(Liferay.Language.get('only-zip-files-are-allowed'));
+				setFileText(FILE_TEXTS.initial);
+			}
+		}
+	}, [preselectedFile]);
 
 	const validateFile = (event: React.ChangeEvent<HTMLInputElement>) => {
 		if (!event.target.files || event.target.files?.length === 0) {
