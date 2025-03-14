@@ -13,9 +13,9 @@ import {
 	Product,
 	useMarketplaceContext,
 } from '@liferay/marketplace-js-components-web';
-import {fetch} from 'frontend-js-web';
-import React from 'react';
+import React, {useState} from 'react';
 
+import {default as Import} from '../import/Import';
 import {InstallFragmentModalBody} from '../modals/InstallFragmentModal';
 
 async function fetchFragmentBlob(marketplaceRest: MarketplaceRest, url: URL) {
@@ -39,27 +39,21 @@ function getProductAttachmentBlob(
 	);
 }
 
-async function uploadFragment(blob: Blob, name: string) {
-	const formData = new FormData();
-
-	formData.append(
-		'file',
-		blob,
-		`${name.replace(' ', '-').toLowerCase()}.zip`
-	);
-
-	// Within the blob upload the .zip to the fragments endpoint
-	// This is an example of import.
-
-	await fetch('/o/headless-delivery/upload', {
-		body: formData,
-		method: 'POST',
-	});
+interface Props {
+	backURL: string;
+	importURL: string;
+	portletNamespace: string;
 }
 
-export default function MarketplaceViews() {
+export default function MarketplaceViews({
+	backURL,
+	importURL,
+	portletNamespace,
+}: Props) {
 	const {marketplaceRest, product, setProduct, setView, view} =
 		useMarketplaceContext();
+
+	const [file, setFile] = useState<File | null>(null);
 
 	async function onClickInstall(product: Product) {
 		setView(MarketplaceView.PURCHASE);
@@ -72,24 +66,18 @@ export default function MarketplaceViews() {
 
 			await marketplaceRest.checkoutCart(cart);
 
-			// This is an example of a virtual Entry
-			// Currently there is an issue to retrieve the virtual item
-			// from the cart due this bug: https://liferay.atlassian.net/browse/LPD-50173
-			// getVirtualEntryBlob would be the ideal solution for this case.
-
-			// const blob = await getVirtualEntryBlob(cart, marketplaceRest);
-
-			// This is an example of a product attachment
-			// We will (for now) save the fragment zip inside the product attachment
-			// in order to not block the whole development of this feature
-
 			const blob = await getProductAttachmentBlob(
 				marketplaceRest,
 				product
 			);
 
 			if (blob) {
-				await uploadFragment(blob, product.name);
+				const file = new File(
+					[blob],
+					`${product.name.replace(' ', '-').toLowerCase()}.zip`,
+					{type: 'application/zip'}
+				);
+				setFile(file);
 			}
 
 			Liferay.Util.openToast({
@@ -109,6 +97,17 @@ export default function MarketplaceViews() {
 				type: 'danger',
 			});
 		}
+	}
+
+	if (file) {
+		return (
+			<Import
+				backURL={backURL}
+				importURL={importURL}
+				portletNamespace={portletNamespace}
+				preselectedFile={file}
+			/>
+		);
 	}
 
 	return (
@@ -149,7 +148,7 @@ export default function MarketplaceViews() {
 
 			{view === MarketplaceView.PURCHASE && (
 				<div className="p-4">
-					<InstallFragmentModalBody fragment={product} />
+					<InstallFragmentModalBody />
 				</div>
 			)}
 		</>

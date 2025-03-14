@@ -15,15 +15,19 @@ import '../../../css/MarketplaceButton.scss';
 import classNames from 'classnames';
 
 interface Props {
+	backURL: string;
 	body: string;
 	heading: string;
+	importURL: string;
 	isMarketplaceButtonVisited: boolean;
 	portletNamespace: string;
 }
 
 function MarketplaceButton({
+	backURL,
 	body,
 	heading,
+	importURL,
 	isMarketplaceButtonVisited,
 	portletNamespace,
 }: Props) {
@@ -43,7 +47,13 @@ function MarketplaceButton({
 	}, [body, heading, portletNamespace]);
 
 	if (visited) {
-		return <MarketplaceModal />;
+		return (
+			<MarketplaceModal
+				backURL={backURL}
+				importURL={importURL}
+				portletNamespace={portletNamespace}
+			/>
+		);
 	}
 
 	return (

@@ -13,6 +13,7 @@ Map<String, List<FragmentCollection>> inheritedFragmentCollections = (Map<String
 List<FragmentCollection> systemFragmentCollections = (List<FragmentCollection>)request.getAttribute(FragmentWebKeys.SYSTEM_FRAGMENT_COLLECTIONS);
 
 List<FragmentCollectionContributor> fragmentCollectionContributors = fragmentEntriesDisplayContext.getFragmentCollectionContributors(locale);
+ImportDisplayContext importDisplayContext = new ImportDisplayContext(request, renderRequest, renderResponse);
 %>
 
 <liferay-ui:error embed="<%= false %>" exception="<%= DuplicateFragmentCollectionKeyException.class %>">
@@ -79,19 +80,24 @@ List<FragmentCollectionContributor> fragmentCollectionContributors = fragmentEnt
 								</li>
 
 								<c:if test='<%= FeatureFlagManagerUtil.isEnabled("LPD-34938") && permissionChecker.isOmniadmin() %>'>
+
+									<%
+									Map<String, Object> marketplaceButtonProps = HashMapBuilder.<String, Object>put(
+										"body", LanguageUtil.get(request, "we-are-excited-to-share-that-marketplace-is-now-part-of-fragments")
+									).put(
+										"heading", LanguageUtil.get(request, "marketplace-is-now-in-fragments")
+									).put(
+										"isMarketplaceButtonVisited", GetterUtil.getBoolean(SessionClicks.get(request, liferayPortletResponse.getNamespace() + "isMarketplaceButtonVisited", "false"))
+									).build();
+
+									marketplaceButtonProps.putAll(importDisplayContext.getProps());
+									%>
+
 									<li>
 										<div class="marketplace-button">
 											<react:component
 												module="{MarketplaceButton} from layout-js-components-web"
-												props='<%=
-													HashMapBuilder.<String, Object>put(
-														"body", LanguageUtil.get(request, "we-are-excited-to-share-that-marketplace-is-now-part-of-fragments")
-													).put(
-														"heading", LanguageUtil.get(request, "marketplace-is-now-in-fragments")
-													).put(
-														"isMarketplaceButtonVisited", GetterUtil.getBoolean(SessionClicks.get(request, liferayPortletResponse.getNamespace() + "isMarketplaceButtonVisited", "false"))
-													).build()
-												%>'
+												props="<%= marketplaceButtonProps %>"
 											/>
 										</div>
 									</li>
@@ -261,8 +267,6 @@ List<FragmentCollectionContributor> fragmentCollectionContributors = fragmentEnt
 </aui:form>
 
 <%
-ImportDisplayContext importDisplayContext = new ImportDisplayContext(request, renderRequest, renderResponse);
-
 List<String> draftFragmentsImporterResultEntries = importDisplayContext.getFragmentsImporterResultEntries(FragmentsImporterResultEntry.Status.IMPORTED_DRAFT);
 %>
 

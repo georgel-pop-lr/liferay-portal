@@ -292,12 +292,14 @@ export default function FragmentsSidebar() {
 					{Liferay.FeatureFlags['LPD-34938'] &&
 					permissions.VIEW_MARKETPLACE ? (
 						<MarketplaceButton
+							backURL={config.fragmentsImportBackURL}
 							body={Liferay.Language.get(
 								'we-are-excited-to-share-that-marketplace-is-now-part-of-page-builder'
 							)}
 							heading={Liferay.Language.get(
 								'marketplace-is-now-in-page-builder'
 							)}
+							importURL={config.fragmentsImportURL}
 							isMarketplaceButtonVisited={
 								config.isMarketplaceButtonVisited
 							}

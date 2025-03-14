@@ -16,7 +16,19 @@ import React, {ReactElement, useCallback, useEffect, useState} from 'react';
 
 import MarketplaceViews from '../marketplace/MarketplaceViews';
 
-function MarketplaceModal({trigger}: {trigger?: ReactElement}) {
+interface Props {
+	backURL: string;
+	importURL: string;
+	portletNamespace: string;
+	trigger?: ReactElement;
+}
+
+function MarketplaceModal({
+	backURL,
+	importURL,
+	portletNamespace,
+	trigger,
+}: Props) {
 	const [title, setTitle] = useState<string | undefined>();
 
 	return (
@@ -33,7 +45,11 @@ function MarketplaceModal({trigger}: {trigger?: ReactElement}) {
 					/>
 				}
 			>
-				<MarketplaceViews />
+				<MarketplaceViews
+					backURL={backURL}
+					importURL={importURL}
+					portletNamespace={portletNamespace}
+				/>
 			</Marketplace.Modal>
 		</MarketplaceContextProvider>
 	);
