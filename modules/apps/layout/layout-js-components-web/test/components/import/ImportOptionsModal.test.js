@@ -8,7 +8,8 @@ import {fireEvent, render} from '@testing-library/react';
 import React from 'react';
 
 import ImportOptionsModal, {
-	ModalContent,
+	DEFAULT_OPTION,
+	ImportOptionsModalContent
 } from '../../../src/main/resources/META-INF/resources/js/components/import/ImportOptionsModal';
 import checkAccessibility from '../../__lib__/checkAccessibility';
 
@@ -78,12 +79,13 @@ describe('ImportOptionsModal', () => {
 });
 
 describe('ImportOptionsModal Accessibility', () => {
-	it('checks accesibility of modal content', async () => {
+	it('checks accessibility of modal content', async () => {
 		const {container} = render(
-			<ModalContent
-				onClickImport={jest.fn()}
+			<ImportOptionsModalContent
+				onImport={jest.fn()}
 				onClose={jest.fn()}
 				onRadioChange={jest.fn()}
+				selectedOption={DEFAULT_OPTION.value}
 			/>
 		);
 

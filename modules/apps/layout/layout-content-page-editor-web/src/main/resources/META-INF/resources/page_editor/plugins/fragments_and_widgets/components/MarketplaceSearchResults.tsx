@@ -19,6 +19,7 @@ import {
 import React, {useEffect, useRef, useState} from 'react';
 
 import {LIST_ITEM_TYPES} from '../../../app/config/constants/listItemTypes';
+import {config} from '../../../app/js-index';
 import {useKeyboardNavigation} from '../../../app/js-index';
 import MarketplaceTabItem from './MarketplaceTabItem';
 
@@ -95,7 +96,8 @@ function SearchResultsPanel({searchValue}: {searchValue: string}) {
 			'attachments.accountId': '-1',
 			'filter': marketplaceRest.settings?.references?.fragmentsFilter,
 			'images.accountId': '-1',
-			'nestedFields': 'productSpecifications,skus,categories,images',
+			'nestedFields':
+				'attachments,productSpecifications,skus,categories,images',
 			'page': String(page),
 			'pageSize': '20',
 			'search': searchValueRef.current,
@@ -230,6 +232,9 @@ function MarketplaceSearchResultsList({item}: {item: Product}) {
 			tabIndex={isTarget ? 0 : -1}
 		>
 			<MarketplaceModal
+				backURL={config.fragmentsImportBackURL}
+				importURL={config.fragmentsImportURL}
+				portletNamespace={config.fragmentPortletNamespace}
 				trigger={
 					<MarketplaceTabItem item={item} onClickRef={onClickRef} />
 				}

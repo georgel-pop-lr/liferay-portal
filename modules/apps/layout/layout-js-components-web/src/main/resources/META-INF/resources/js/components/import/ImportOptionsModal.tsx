@@ -4,20 +4,9 @@
  */
 
 import ClayButton from '@clayui/button';
-import {ClayRadio, ClayRadioGroup} from '@clayui/form';
-import ClayModal, {useModal} from '@clayui/modal';
-import React, {ReactText, useState} from 'react';
-
-interface ModalProps {
-	onClickImport: () => void;
-	onClose: () => void;
-	onRadioChange: (value: ReactText) => void;
-}
-
-interface Props {
-	onCloseModal: () => void;
-	onImport: (overwriteStrategy?: OverwriteStrategy) => void;
-}
+import { ClayRadio, ClayRadioGroup } from '@clayui/form';
+import ClayModal, { useModal } from '@clayui/modal';
+import React, { useState } from 'react';
 
 const OPTIONS = [
 	{
@@ -36,19 +25,57 @@ const OPTIONS = [
 
 export type OverwriteStrategy = (typeof OPTIONS)[number]['value'];
 
-const DEFAULT_OPTION = OPTIONS[0];
+export const DEFAULT_OPTION = OPTIONS[0];
 
-export function ModalContent({
-	onClickImport,
-	onClose,
-	onRadioChange,
-}: ModalProps) {
+export function ImportOptionsModalContent({
+											  onImport,
+											  onClose,
+											  selectedOption,
+	onRadioChange
+										  }: {
+	onImport: (overwriteStrategy?: OverwriteStrategy) => void;
+	onClose: () => void;
+	selectedOption: OverwriteStrategy;
+	onRadioChange: (value: OverwriteStrategy) => void;
+}) {
+
 	return (
 		<>
 			<ClayModal.Header>
 				{Liferay.Language.get('import-options')}
 			</ClayModal.Header>
 
+			<ImportOptionsModalBody onRadioChange={onRadioChange} selectedOption={selectedOption}/>
+			<ClayModal.Footer
+				last={
+					<ClayButton.Group spaced>
+						<ClayButton displayType="secondary" onClick={onClose}>
+							{Liferay.Language.get('cancel')}
+						</ClayButton>
+
+						<ClayButton onClick={() => {
+							onImport(selectedOption);
+
+							onClose();
+						}}>
+							{Liferay.Language.get('import')}
+						</ClayButton>
+					</ClayButton.Group>
+				}
+			/>
+		</>
+	);
+}
+
+export function ImportOptionsModalBody({
+										   selectedOption,
+	onRadioChange
+									   }: {
+	selectedOption?: OverwriteStrategy;
+	onRadioChange: (value: OverwriteStrategy) => void;
+}) {
+	return (
+		<>
 			<ClayModal.Body>
 				<p className="c-mb-4 text-secondary">
 					{Liferay.Language.get(
@@ -57,8 +84,10 @@ export function ModalContent({
 				</p>
 
 				<ClayRadioGroup
-					defaultValue={DEFAULT_OPTION.value}
-					onChange={onRadioChange}
+					defaultValue={!selectedOption ? DEFAULT_OPTION.value : selectedOption}
+					onChange={(value: string | number) =>
+						onRadioChange(value as OverwriteStrategy)
+				     }
 				>
 					{OPTIONS.map((option) => (
 						<ClayRadio
@@ -69,43 +98,29 @@ export function ModalContent({
 					))}
 				</ClayRadioGroup>
 			</ClayModal.Body>
-
-			<ClayModal.Footer
-				last={
-					<ClayButton.Group spaced>
-						<ClayButton displayType="secondary" onClick={onClose}>
-							{Liferay.Language.get('cancel')}
-						</ClayButton>
-
-						<ClayButton onClick={onClickImport}>
-							{Liferay.Language.get('import')}
-						</ClayButton>
-					</ClayButton.Group>
-				}
-			/>
 		</>
 	);
 }
 
-function ImportOptionsModal({onCloseModal, onImport}: Props) {
+function ImportOptionsModal({ onCloseModal, onImport }: {
+	onCloseModal: () => void;
+	onImport: (overwriteStrategy?: OverwriteStrategy) => void;
+}) {
 	const [selectedOption, setSelectedOption] = useState<OverwriteStrategy>(
 		DEFAULT_OPTION.value
 	);
 
-	const {observer, onClose} = useModal({
+	const { observer, onClose } = useModal({
 		onClose: onCloseModal,
 	});
 
 	return (
 		<ClayModal observer={observer}>
-			<ModalContent
-				onClickImport={() => {
-					onImport(selectedOption);
-
-					onClose();
-				}}
+			<ImportOptionsModalContent
 				onClose={onClose}
-				onRadioChange={(value) =>
+				onImport={onImport}
+				selectedOption={selectedOption}
+				onRadioChange={(value: OverwriteStrategy) =>
 					setSelectedOption(value as OverwriteStrategy)
 				}
 			/>

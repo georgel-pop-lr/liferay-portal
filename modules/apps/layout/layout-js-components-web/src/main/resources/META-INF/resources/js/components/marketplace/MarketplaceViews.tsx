@@ -105,7 +105,7 @@ export default function MarketplaceViews({
 				backURL={backURL}
 				importURL={importURL}
 				portletNamespace={portletNamespace}
-				preselectedFile={file}
+				providedFile={file}
 			/>
 		);
 	}

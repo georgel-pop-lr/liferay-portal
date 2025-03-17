@@ -380,6 +380,9 @@ public class ContentPageEditorDisplayContext {
 				() -> ModelHintsUtil.getMaxLength(
 					FragmentComposition.class.getName(), "name")
 			).put(
+				"fragmentPortletNamespace",
+				portal.getPortletNamespace(FragmentPortletKeys.FRAGMENT)
+			).put(
 				"fragmentsImportBackURL",
 				String.valueOf(renderResponse.createRenderURL())
 			).put(

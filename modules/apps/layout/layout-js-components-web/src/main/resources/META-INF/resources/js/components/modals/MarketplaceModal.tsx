@@ -30,10 +30,17 @@ function MarketplaceModal({
 	trigger,
 }: Props) {
 	const [title, setTitle] = useState<string | undefined>();
+	const [importSuccessfully, setImportSuccessfully] =
+		useState<boolean>(false);
 
 	return (
 		<MarketplaceContextProvider
 			baseResourceURL={MarketplaceRest.getBaseResourceURL()}
+			onCloseModal={() => {
+				if (importSuccessfully) {
+					window.location.reload();
+				}
+			}}
 			settings={{productFilter: 'fragments'}}
 		>
 			<Marketplace.Modal

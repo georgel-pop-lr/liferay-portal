@@ -303,7 +303,7 @@ export default function FragmentsSidebar() {
 							isMarketplaceButtonVisited={
 								config.isMarketplaceButtonVisited
 							}
-							portletNamespace={config.portletNamespace}
+							portletNamespace={config.fragmentPortletNamespace}
 						/>
 					) : null}
 				</div>
