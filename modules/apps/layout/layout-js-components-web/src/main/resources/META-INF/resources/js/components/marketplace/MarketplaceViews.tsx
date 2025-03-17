@@ -104,8 +104,8 @@ export default function MarketplaceViews({
 			<Import
 				backURL={backURL}
 				importURL={importURL}
+				marketplaceFile={file}
 				portletNamespace={portletNamespace}
-				providedFile={file}
 			/>
 		);
 	}

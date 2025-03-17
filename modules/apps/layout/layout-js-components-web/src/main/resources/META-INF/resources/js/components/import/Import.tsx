@@ -102,16 +102,12 @@ function FileUpload({
 	error,
 	file,
 	helpLink,
-	setError,
 	setFile,
-	setScreenReaderText,
 }: {
 	error: string | null;
 	file: File | null;
 	helpLink?: {href: string; message: string};
-	setError: React.Dispatch<React.SetStateAction<string | null>>;
 	setFile: React.Dispatch<React.SetStateAction<File | null>>;
-	setScreenReaderText: React.Dispatch<React.SetStateAction<string>>;
 }) {
 	const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -124,90 +120,80 @@ function FileUpload({
 		}
 
 		setFile(event.target.files[0]);
-
-		const fileName = event.target.files[0]?.name || '';
-
-		const fileExtension = fileName
-			.substring(fileName.lastIndexOf('.'))
-			.toLowerCase();
-
-		if (fileExtension === ZIP_EXTENSION) {
-			setError(null);
-			setScreenReaderText(FILE_TEXTS.loaded);
-		}
-		else {
-			setError(Liferay.Language.get('only-zip-files-are-allowed'));
-			setScreenReaderText(FILE_TEXTS.initial);
-		}
 	};
 
 	return (
-		<ClayLayout.Sheet className="c-gap-4 d-flex flex-column" size="lg">
-			<h2 className="c-mb-0 text-6">
-				{Liferay.Language.get('import-file')}
-			</h2>
+		<ClayLayout.ContainerFluid view>
+			<ClayLayout.Sheet className="c-gap-4 d-flex flex-column" size="lg">
+				<h2 className="c-mb-0 text-6">
+					{Liferay.Language.get('import-file')}
+				</h2>
 
-			<p className="c-mb-0 text-secondary" id={fileButtonDescriptionId}>
-				{Liferay.Language.get(
-					'select-a-zip-file-containing-one-or-multiple-entries'
-				)}
-
-				{helpLink ? (
-					<span className="ml-1">
-						<ClayLink href={helpLink.href} target="_blank">
-							{helpLink.message}
-						</ClayLink>
-					</span>
-				) : null}
-			</p>
-
-			<ClayForm.Group
-				className={classNames('c-mb-0', {
-					'has-error': error,
-				})}
-			>
-				<label htmlFor={fileInputId}>
-					{Liferay.Language.get('file-upload')}
-				</label>
-
-				<input
-					accept={ZIP_EXTENSION}
-					hidden
-					id={fileInputId}
-					onChange={validateFile}
-					ref={fileInputRef}
-					type="file"
-				/>
-
-				<ClayButton
-					aria-describedby={fileButtonDescriptionId}
-					className="d-block"
-					displayType="secondary"
-					onClick={() => fileInputRef.current?.click()}
-					size="sm"
+				<p
+					className="c-mb-0 text-secondary"
+					id={fileButtonDescriptionId}
 				>
-					{file
-						? Liferay.Language.get('replace-file')
-						: Liferay.Language.get('select-file')}
-				</ClayButton>
+					{Liferay.Language.get(
+						'select-a-zip-file-containing-one-or-multiple-entries'
+					)}
 
-				{error && (
-					<ClayForm.FeedbackGroup>
-						<ClayForm.FeedbackItem>
-							<ClayForm.FeedbackIndicator symbol="exclamation-full" />
-
-							{error}
-						</ClayForm.FeedbackItem>
-					</ClayForm.FeedbackGroup>
-				)}
-			</ClayForm.Group>
-
-			{file ? (
-				<p className="c-mb-0 font-weight-semi-bold small">
-					{file.name}
+					{helpLink ? (
+						<span className="ml-1">
+							<ClayLink href={helpLink.href} target="_blank">
+								{helpLink.message}
+							</ClayLink>
+						</span>
+					) : null}
 				</p>
-			) : null}
-		</ClayLayout.Sheet>
+
+				<ClayForm.Group
+					className={classNames('c-mb-0', {
+						'has-error': error,
+					})}
+				>
+					<label htmlFor={fileInputId}>
+						{Liferay.Language.get('file-upload')}
+					</label>
+
+					<input
+						accept={ZIP_EXTENSION}
+						hidden
+						id={fileInputId}
+						onChange={validateFile}
+						ref={fileInputRef}
+						type="file"
+					/>
+
+					<ClayButton
+						aria-describedby={fileButtonDescriptionId}
+						className="d-block"
+						displayType="secondary"
+						onClick={() => fileInputRef.current?.click()}
+						size="sm"
+					>
+						{file
+							? Liferay.Language.get('replace-file')
+							: Liferay.Language.get('select-file')}
+					</ClayButton>
+
+					{error && (
+						<ClayForm.FeedbackGroup>
+							<ClayForm.FeedbackItem>
+								<ClayForm.FeedbackIndicator symbol="exclamation-full" />
+
+								{error}
+							</ClayForm.FeedbackItem>
+						</ClayForm.FeedbackGroup>
+					)}
+				</ClayForm.Group>
+
+				{file ? (
+					<p className="c-mb-0 font-weight-semi-bold small">
+						{file.name}
+					</p>
+				) : null}
+			</ClayLayout.Sheet>
+		</ClayLayout.ContainerFluid>
 	);
 }
 
@@ -215,8 +201,8 @@ function Import({
 	backURL,
 	helpLink,
 	importURL,
+	marketplaceFile,
 	portletNamespace,
-	providedFile,
 }: {
 	backURL: string;
 	helpLink?: {
@@ -224,11 +210,11 @@ function Import({
 		message: string;
 	};
 	importURL: string;
+	marketplaceFile?: File | null;
 	portletNamespace: string;
-	providedFile?: File | null;
 }) {
 	const [error, setError] = useState<string | null>(null);
-	const [file, setFile] = useState<File | null>(providedFile || null);
+	const [file, setFile] = useState<File | null>(marketplaceFile || null);
 	const [screenReaderText, setScreenReaderText] = useState<string>(
 		FILE_TEXTS.initial
 	);
@@ -308,87 +294,97 @@ function Import({
 	);
 
 	useEffect(() => {
-		if (providedFile) {
-			const fileExtension = providedFile?.name
-				.substring(providedFile?.name.lastIndexOf('.'))
+		if (file) {
+			const fileName = file?.name || '';
+
+			const fileExtension = fileName
+				.substring(fileName.lastIndexOf('.'))
 				.toLowerCase();
 
 			if (fileExtension === ZIP_EXTENSION) {
 				setError(null);
 				setScreenReaderText(FILE_TEXTS.loaded);
-				importFile();
 			}
 			else {
 				setError(Liferay.Language.get('only-zip-files-are-allowed'));
 				setScreenReaderText(FILE_TEXTS.initial);
 			}
 		}
-	}, [providedFile, importFile]);
+	}, [file]);
+
+	useEffect(() => {
+		if (!error) {
+			importFile();
+		}
+	}, [error, marketplaceFile, importFile]);
 
 	return (
 		<>
-			{!providedFile ? (
-				<Toolbar
-					error={error}
-					file={file}
-					goBack={() => {
-						navigate(backURL);
-					}}
-					importFile={importFile}
-					importResults={importResults}
-					onImportOtherFile={() => {
-						setImportResults(null);
-						setFile(null);
-						setScreenReaderText(FILE_TEXTS.initial);
-					}}
-				/>
-			) : null}
+			<span aria-live="assertive" className="sr-only">
+				{screenReaderText}
+			</span>
 
-			<ClayLayout.ContainerFluid view>
-				<span aria-live="assertive" className="sr-only">
-					{screenReaderText}
-				</span>
-
-				{!providedFile && !importResults ? (
-					<FileUpload
+			{marketplaceFile ? (
+				<>
+					{importOptionsModalVisible ? (
+						<ImportOptionsModalBody
+							onRadioChange={(selectedOption) => {
+								setImportOptionsModalVisible(false);
+								importFile(selectedOption);
+							}}
+						/>
+					) : null}
+					{error ? (
+						<ClayAlert
+							className="m-3"
+							displayType="danger"
+							title={Liferay.Language.get('error')}
+						>
+							{error}
+						</ClayAlert>
+					) : null}
+				</>
+			) : (
+				<>
+					<Toolbar
 						error={error}
 						file={file}
-						helpLink={helpLink}
-						setError={setError}
-						setFile={setFile}
-						setScreenReaderText={setScreenReaderText}
-					/>
-				) : null}
-
-				{providedFile && importOptionsModalVisible ? (
-					<ImportOptionsModalBody
-						onRadioChange={(selectedOption) => {
-							setImportOptionsModalVisible(false);
-							importFile(selectedOption);
+						goBack={() => {
+							navigate(backURL);
+						}}
+						importFile={importFile}
+						importResults={importResults}
+						onImportOtherFile={() => {
+							setImportResults(null);
+							setFile(null);
+							setScreenReaderText(FILE_TEXTS.initial);
 						}}
 					/>
-				) : null}
 
-				{providedFile && error ? (
-					<ClayAlert
-						className="m-3"
-						displayType="danger"
-						title={Liferay.Language.get('error')}
-					>
-						{error}
-					</ClayAlert>
-				) : null}
+					{!importResults ? (
+						<FileUpload
+							error={error}
+							file={file}
+							helpLink={helpLink}
+							setFile={setFile}
+						/>
+					) : null}
 
-				{importResults ? (
+					{importOptionsModalVisible ? (
+						<ImportOptionsModal
+							onCloseModal={() =>
+								setImportOptionsModalVisible(false)
+							}
+							onImport={importFile}
+						/>
+					) : null}
+				</>
+			)}
+
+			{importResults ? (
+				<ClayLayout.ContainerFluid view>
 					<ImportResults importResults={importResults} />
-				) : null}
-			</ClayLayout.ContainerFluid>
-
-			{importOptionsModalVisible && !providedFile ? (
-				<ImportOptionsModal
-					onCloseModal={() => setImportOptionsModalVisible(false)}
-					onImport={importFile}
-				/>
+				</ClayLayout.ContainerFluid>
 			) : null}
 		</>
 	);

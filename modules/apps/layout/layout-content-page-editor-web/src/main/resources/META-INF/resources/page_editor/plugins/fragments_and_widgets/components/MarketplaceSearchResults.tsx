@@ -18,8 +18,8 @@ import {
 } from '@liferay/marketplace-js-components-web';
 import React, {useEffect, useRef, useState} from 'react';
 
+import {config} from '../../../app/config';
 import {LIST_ITEM_TYPES} from '../../../app/config/constants/listItemTypes';
-import {config} from '../../../app/js-index';
 import {useKeyboardNavigation} from '../../../app/js-index';
 import MarketplaceTabItem from './MarketplaceTabItem';
 

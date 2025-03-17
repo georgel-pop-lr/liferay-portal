@@ -9,10 +9,6 @@ export {default as useKeyboardNavigation} from '../../page_editor/plugins/fragme
 
 // @ts-ignore
 
-export {config} from './config/index';
-
-// @ts-ignore
-
 export {useActivationOrigin} from './contexts/ControlsContext';
 
 // @ts-ignore

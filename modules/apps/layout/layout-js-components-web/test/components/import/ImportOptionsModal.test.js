@@ -9,7 +9,7 @@ import React from 'react';
 
 import ImportOptionsModal, {
 	DEFAULT_OPTION,
-	ImportOptionsModalContent
+	ImportOptionsModalContent,
 } from '../../../src/main/resources/META-INF/resources/js/components/import/ImportOptionsModal';
 import checkAccessibility from '../../__lib__/checkAccessibility';
 
@@ -82,8 +82,8 @@ describe('ImportOptionsModal Accessibility', () => {
 	it('checks accessibility of modal content', async () => {
 		const {container} = render(
 			<ImportOptionsModalContent
-				onImport={jest.fn()}
 				onClose={jest.fn()}
+				onImport={jest.fn()}
 				onRadioChange={jest.fn()}
 				selectedOption={DEFAULT_OPTION.value}
 			/>

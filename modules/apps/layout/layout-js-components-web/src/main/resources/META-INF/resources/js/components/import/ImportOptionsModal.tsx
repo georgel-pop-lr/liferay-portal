@@ -4,9 +4,9 @@
  */
 
 import ClayButton from '@clayui/button';
-import { ClayRadio, ClayRadioGroup } from '@clayui/form';
-import ClayModal, { useModal } from '@clayui/modal';
-import React, { useState } from 'react';
+import {ClayRadio, ClayRadioGroup} from '@clayui/form';
+import ClayModal, {useModal} from '@clayui/modal';
+import React, {useState} from 'react';
 
 const OPTIONS = [
 	{
@@ -28,24 +28,26 @@ export type OverwriteStrategy = (typeof OPTIONS)[number]['value'];
 export const DEFAULT_OPTION = OPTIONS[0];
 
 export function ImportOptionsModalContent({
-											  onImport,
-											  onClose,
-											  selectedOption,
-	onRadioChange
-										  }: {
-	onImport: (overwriteStrategy?: OverwriteStrategy) => void;
+	onClose,
+	onImport,
+	onRadioChange,
+	selectedOption,
+}: {
 	onClose: () => void;
-	selectedOption: OverwriteStrategy;
+	onImport: (overwriteStrategy?: OverwriteStrategy) => void;
 	onRadioChange: (value: OverwriteStrategy) => void;
+	selectedOption: OverwriteStrategy;
 }) {
-
 	return (
 		<>
 			<ClayModal.Header>
 				{Liferay.Language.get('import-options')}
 			</ClayModal.Header>
 
-			<ImportOptionsModalBody onRadioChange={onRadioChange} selectedOption={selectedOption}/>
+			<ImportOptionsModalBody
+				onRadioChange={onRadioChange}
+				selectedOption={selectedOption}
+			/>
 			<ClayModal.Footer
 				last={
 					<ClayButton.Group spaced>
@@ -53,11 +55,13 @@ export function ImportOptionsModalContent({
 							{Liferay.Language.get('cancel')}
 						</ClayButton>
 
-						<ClayButton onClick={() => {
-							onImport(selectedOption);
+						<ClayButton
+							onClick={() => {
+								onImport(selectedOption);
 
-							onClose();
-						}}>
+								onClose();
+							}}
+						>
 							{Liferay.Language.get('import')}
 						</ClayButton>
 					</ClayButton.Group>
@@ -68,11 +72,11 @@ export function ImportOptionsModalContent({
 }
 
 export function ImportOptionsModalBody({
-										   selectedOption,
-	onRadioChange
-									   }: {
-	selectedOption?: OverwriteStrategy;
+	onRadioChange,
+	selectedOption,
+}: {
 	onRadioChange: (value: OverwriteStrategy) => void;
+	selectedOption?: OverwriteStrategy;
 }) {
 	return (
 		<>
@@ -84,10 +88,12 @@ export function ImportOptionsModalBody({
 				</p>
 
 				<ClayRadioGroup
-					defaultValue={!selectedOption ? DEFAULT_OPTION.value : selectedOption}
+					defaultValue={
+						!selectedOption ? DEFAULT_OPTION.value : selectedOption
+					}
 					onChange={(value: string | number) =>
 						onRadioChange(value as OverwriteStrategy)
-				     }
+					}
 				>
 					{OPTIONS.map((option) => (
 						<ClayRadio
@@ -102,7 +108,10 @@ export function ImportOptionsModalBody({
 	);
 }
 
-function ImportOptionsModal({ onCloseModal, onImport }: {
+function ImportOptionsModal({
+	onCloseModal,
+	onImport,
+}: {
 	onCloseModal: () => void;
 	onImport: (overwriteStrategy?: OverwriteStrategy) => void;
 }) {
@@ -110,7 +119,7 @@ function ImportOptionsModal({ onCloseModal, onImport }: {
 		DEFAULT_OPTION.value
 	);
 
-	const { observer, onClose } = useModal({
+	const {observer, onClose} = useModal({
 		onClose: onCloseModal,
 	});
 
@@ -119,10 +128,10 @@ function ImportOptionsModal({ onCloseModal, onImport }: {
 			<ImportOptionsModalContent
 				onClose={onClose}
 				onImport={onImport}
-				selectedOption={selectedOption}
 				onRadioChange={(value: OverwriteStrategy) =>
 					setSelectedOption(value as OverwriteStrategy)
 				}
+				selectedOption={selectedOption}
 			/>
 		</ClayModal>
 	);
