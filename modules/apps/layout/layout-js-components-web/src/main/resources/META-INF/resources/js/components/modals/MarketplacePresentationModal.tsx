@@ -12,23 +12,19 @@ import MarketplaceModal from './MarketplaceModal';
 
 import '../../../css/MarketplaceModal.scss';
 
-interface Props {
-	backURL: string;
-	body: string;
-	heading: string;
-	importURL: string;
-	onCloseModal: () => void;
-	portletNamespace: string;
-}
-
 function MarketplacePresentationModal({
-	backURL,
 	body,
 	heading,
 	importURL,
 	onCloseModal,
 	portletNamespace,
-}: Props) {
+}: {
+	body: string;
+	heading: string;
+	importURL: string;
+	onCloseModal: () => void;
+	portletNamespace: string;
+}) {
 	const {observer, onClose} = useModal({
 		onClose: () => {
 			onCloseModal();
@@ -58,7 +54,6 @@ function MarketplacePresentationModal({
 						</ClayButton>
 
 						<MarketplaceModal
-							backURL={backURL}
 							importURL={importURL}
 							portletNamespace={portletNamespace}
 							trigger={

@@ -232,7 +232,6 @@ function MarketplaceSearchResultsList({item}: {item: Product}) {
 			tabIndex={isTarget ? 0 : -1}
 		>
 			<MarketplaceModal
-				backURL={config.fragmentsImportBackURL}
 				importURL={config.fragmentsImportURL}
 				portletNamespace={config.fragmentPortletNamespace}
 				trigger={

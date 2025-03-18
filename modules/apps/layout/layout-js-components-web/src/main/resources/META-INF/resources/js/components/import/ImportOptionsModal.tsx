@@ -27,7 +27,7 @@ export type OverwriteStrategy = (typeof OPTIONS)[number]['value'];
 
 export const DEFAULT_OPTION = OPTIONS[0];
 
-export function ImportOptionsModalContent({
+export function ModalContent({
 	onClose,
 	onImport,
 	onRadioChange,
@@ -44,7 +44,7 @@ export function ImportOptionsModalContent({
 				{Liferay.Language.get('import-options')}
 			</ClayModal.Header>
 
-			<ImportOptionsModalBody
+			<ModalBody
 				onRadioChange={onRadioChange}
 				selectedOption={selectedOption}
 			/>
@@ -71,7 +71,7 @@ export function ImportOptionsModalContent({
 	);
 }
 
-export function ImportOptionsModalBody({
+export function ModalBody({
 	onRadioChange,
 	selectedOption,
 }: {
@@ -125,7 +125,7 @@ function ImportOptionsModal({
 
 	return (
 		<ClayModal observer={observer}>
-			<ImportOptionsModalContent
+			<ModalContent
 				onClose={onClose}
 				onImport={onImport}
 				onRadioChange={(value: OverwriteStrategy) =>

@@ -15,7 +15,6 @@ import '../../../css/MarketplaceButton.scss';
 import classNames from 'classnames';
 
 interface Props {
-	backURL: string;
 	body: string;
 	heading: string;
 	importURL: string;
@@ -24,7 +23,6 @@ interface Props {
 }
 
 function MarketplaceButton({
-	backURL,
 	body,
 	heading,
 	importURL,
@@ -49,7 +47,6 @@ function MarketplaceButton({
 	if (visited) {
 		return (
 			<MarketplaceModal
-				backURL={backURL}
 				importURL={importURL}
 				portletNamespace={portletNamespace}
 			/>

@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-import ClayAlert from '@clayui/alert';
 import ClayButton from '@clayui/button';
 import ClayForm from '@clayui/form';
 import ClayLayout from '@clayui/layout';
@@ -11,14 +10,12 @@ import ClayLink from '@clayui/link';
 import ClayToolbar from '@clayui/toolbar';
 import classNames from 'classnames';
 import {openToast, useId} from 'frontend-js-components-web';
-import {fetch, navigate, sub} from 'frontend-js-web';
+import {navigate, sub} from 'frontend-js-web';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 
 import isNullOrUndefined from '../../utils/isNullOrUndefined';
-import ImportOptionsModal, {
-	ImportOptionsModalBody,
-	OverwriteStrategy,
-} from './ImportOptionsModal';
+import ImportFragments from './ImportFragments';
+import ImportOptionsModal, {OverwriteStrategy} from './ImportOptionsModal';
 import ImportResults, {Results, getResultsText} from './ImportResults';
 
 const FILE_TEXTS = {
@@ -201,7 +198,6 @@ function Import({
 	backURL,
 	helpLink,
 	importURL,
-	marketplaceFile,
 	portletNamespace,
 }: {
 	backURL: string;
@@ -210,11 +206,10 @@ function Import({
 		message: string;
 	};
 	importURL: string;
-	marketplaceFile?: File | null;
 	portletNamespace: string;
 }) {
 	const [error, setError] = useState<string | null>(null);
-	const [file, setFile] = useState<File | null>(marketplaceFile || null);
+	const [file, setFile] = useState<File | null>(null);
 	const [screenReaderText, setScreenReaderText] = useState<string>(
 		FILE_TEXTS.initial
 	);
@@ -224,27 +219,9 @@ function Import({
 
 	const importFile = useCallback(
 		(overwriteStrategy?: OverwriteStrategy) => {
-			const formData = new FormData();
-
-			if (!file) {
-				return;
-			}
-
-			formData.append(`${portletNamespace}file`, file);
-
-			if (overwriteStrategy) {
-				formData.append(
-					`${portletNamespace}importType`,
-					overwriteStrategy
-				);
-			}
-
-			fetch(importURL, {
-				body: formData,
-				method: 'POST',
-			})
-				.then((response) => response.json())
-				.then(({importResults, valid}) => {
+			ImportFragments({
+				file,
+				handleResponse: ({importResults, valid}) => {
 					if (!isNullOrUndefined(valid) && !valid) {
 						setImportOptionsModalVisible(true);
 
@@ -268,18 +245,11 @@ function Import({
 					setScreenReaderText(getResultsText(importResults));
 
 					setFile(null);
-				})
-				.catch(() => {
-					openToast({
-						message: sub(
-							Liferay.Language.get(
-								'something-went-wrong-and-the-x-could-not-be-imported'
-							),
-							file?.name || ''
-						),
-						type: 'danger',
-					});
-				});
+				},
+				importURL,
+				overwriteStrategy,
+				portletNamespace,
+			});
 		},
 		[
 			backURL,
@@ -312,74 +282,42 @@ function Import({
 		}
 	}, [file]);
 
-	useEffect(() => {
-		if (!error) {
-			importFile();
-		}
-	}, [error, marketplaceFile, importFile]);
-
 	return (
 		<>
 			<span aria-live="assertive" className="sr-only">
 				{screenReaderText}
 			</span>
 
-			{marketplaceFile ? (
-				<>
-					{importOptionsModalVisible ? (
-						<ImportOptionsModalBody
-							onRadioChange={(selectedOption) => {
-								setImportOptionsModalVisible(false);
-								importFile(selectedOption);
-							}}
-						/>
-					) : null}
-					{error ? (
-						<ClayAlert
-							className="m-3"
-							displayType="danger"
-							title={Liferay.Language.get('error')}
-						>
-							{error}
-						</ClayAlert>
-					) : null}
-				</>
-			) : (
-				<>
-					<Toolbar
-						error={error}
-						file={file}
-						goBack={() => {
-							navigate(backURL);
-						}}
-						importFile={importFile}
-						importResults={importResults}
-						onImportOtherFile={() => {
-							setImportResults(null);
-							setFile(null);
-							setScreenReaderText(FILE_TEXTS.initial);
-						}}
-					/>
+			<Toolbar
+				error={error}
+				file={file}
+				goBack={() => {
+					navigate(backURL);
+				}}
+				importFile={importFile}
+				importResults={importResults}
+				onImportOtherFile={() => {
+					setImportResults(null);
+					setFile(null);
+					setScreenReaderText(FILE_TEXTS.initial);
+				}}
+			/>
 
-					{!importResults ? (
-						<FileUpload
-							error={error}
-							file={file}
-							helpLink={helpLink}
-							setFile={setFile}
-						/>
-					) : null}
+			{!importResults ? (
+				<FileUpload
+					error={error}
+					file={file}
+					helpLink={helpLink}
+					setFile={setFile}
+				/>
+			) : null}
 
-					{importOptionsModalVisible ? (
-						<ImportOptionsModal
-							onCloseModal={() =>
-								setImportOptionsModalVisible(false)
-							}
-							onImport={importFile}
-						/>
-					) : null}
-				</>
-			)}
+			{importOptionsModalVisible ? (
+				<ImportOptionsModal
+					onCloseModal={() => setImportOptionsModalVisible(false)}
+					onImport={importFile}
+				/>
+			) : null}
 
 			{importResults ? (
 				<ClayLayout.ContainerFluid view>

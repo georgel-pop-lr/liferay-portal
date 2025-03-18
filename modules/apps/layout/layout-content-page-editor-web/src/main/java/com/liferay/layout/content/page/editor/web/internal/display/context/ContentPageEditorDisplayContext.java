@@ -383,9 +383,6 @@ public class ContentPageEditorDisplayContext {
 				"fragmentPortletNamespace",
 				portal.getPortletNamespace(FragmentPortletKeys.FRAGMENT)
 			).put(
-				"fragmentsImportBackURL",
-				String.valueOf(renderResponse.createRenderURL())
-			).put(
 				"fragmentsImportURL",
 				() -> ResourceURLBuilder.createResourceURL(
 					PortletURLFactoryUtil.create(

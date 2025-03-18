@@ -16,31 +16,20 @@ import React, {ReactElement, useCallback, useEffect, useState} from 'react';
 
 import MarketplaceViews from '../marketplace/MarketplaceViews';
 
-interface Props {
-	backURL: string;
-	importURL: string;
-	portletNamespace: string;
-	trigger?: ReactElement;
-}
-
 function MarketplaceModal({
-	backURL,
 	importURL,
 	portletNamespace,
 	trigger,
-}: Props) {
+}: {
+	importURL: string;
+	portletNamespace: string;
+	trigger?: ReactElement;
+}) {
 	const [title, setTitle] = useState<string | undefined>();
-	const [importSuccessfully, setImportSuccessfully] =
-		useState<boolean>(false);
 
 	return (
 		<MarketplaceContextProvider
 			baseResourceURL={MarketplaceRest.getBaseResourceURL()}
-			onCloseModal={() => {
-				if (importSuccessfully) {
-					window.location.reload();
-				}
-			}}
 			settings={{productFilter: 'fragments'}}
 		>
 			<Marketplace.Modal
@@ -53,7 +42,6 @@ function MarketplaceModal({
 				}
 			>
 				<MarketplaceViews
-					backURL={backURL}
 					importURL={importURL}
 					portletNamespace={portletNamespace}
 				/>

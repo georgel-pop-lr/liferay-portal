@@ -13,9 +13,11 @@ import {
 	Product,
 	useMarketplaceContext,
 } from '@liferay/marketplace-js-components-web';
-import React, {useState} from 'react';
+import {openToast} from 'frontend-js-components-web';
+import {sub} from 'frontend-js-web';
+import React, {useCallback} from 'react';
 
-import {default as Import} from '../import/Import';
+import ImportFragments from '../import/ImportFragments';
 import {InstallFragmentModalBody} from '../modals/InstallFragmentModal';
 
 async function fetchFragmentBlob(marketplaceRest: MarketplaceRest, url: URL) {
@@ -39,21 +41,44 @@ function getProductAttachmentBlob(
 	);
 }
 
-interface Props {
-	backURL: string;
-	importURL: string;
-	portletNamespace: string;
-}
-
 export default function MarketplaceViews({
-	backURL,
 	importURL,
 	portletNamespace,
-}: Props) {
+}: {
+	importURL: string;
+	portletNamespace: string;
+}) {
 	const {marketplaceRest, product, setProduct, setView, view} =
 		useMarketplaceContext();
 
-	const [file, setFile] = useState<File | null>(null);
+	const importFile = useCallback(
+		(file: File) => {
+			ImportFragments({
+				file,
+				handleResponse: ({importResults}) => {
+					if (!Object.keys(importResults).length) {
+						openToast({
+							message: sub(
+								Liferay.Language.get(
+									'no-new-items-were-imported'
+								),
+								file?.name || ''
+							),
+							type: 'info',
+						});
+					}
+					else {
+						window.location.reload();
+					}
+				},
+				importURL,
+				isMarketplace: true,
+				overwriteStrategy: 'keep_both',
+				portletNamespace,
+			});
+		},
+		[importURL, portletNamespace]
+	);
 
 	async function onClickInstall(product: Product) {
 		setView(MarketplaceView.PURCHASE);
@@ -77,7 +102,7 @@ export default function MarketplaceViews({
 					`${product.name.replace(' ', '-').toLowerCase()}.zip`,
 					{type: 'application/zip'}
 				);
-				setFile(file);
+				importFile(file);
 			}
 
 			Liferay.Util.openToast({
@@ -97,17 +122,6 @@ export default function MarketplaceViews({
 				type: 'danger',
 			});
 		}
-	}
-
-	if (file) {
-		return (
-			<Import
-				backURL={backURL}
-				importURL={importURL}
-				marketplaceFile={file}
-				portletNamespace={portletNamespace}
-			/>
-		);
 	}
 
 	return (
