@@ -55,6 +55,12 @@ public interface FragmentCollectionService extends BaseService {
 	public FragmentCollection addFragmentCollection(
 			String externalReferenceCode, long groupId,
 			String fragmentCollectionKey, String name, String description,
+			boolean marketplace, ServiceContext serviceContext)
+		throws PortalException;
+
+	public FragmentCollection addFragmentCollection(
+			String externalReferenceCode, long groupId,
+			String fragmentCollectionKey, String name, String description,
 			ServiceContext serviceContext)
 		throws PortalException;
 

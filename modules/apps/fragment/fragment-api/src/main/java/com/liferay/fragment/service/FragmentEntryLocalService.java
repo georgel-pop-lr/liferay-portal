@@ -87,6 +87,15 @@ public interface FragmentEntryLocalService
 			String css, String html, String js, boolean cacheable,
 			String configuration, String icon, long previewFileEntryId,
 			boolean readOnly, int type, String typeOptions, int status,
+			boolean marketplace, ServiceContext serviceContext)
+		throws PortalException;
+
+	public FragmentEntry addFragmentEntry(
+			String externalReferenceCode, long userId, long groupId,
+			long fragmentCollectionId, String fragmentEntryKey, String name,
+			String css, String html, String js, boolean cacheable,
+			String configuration, String icon, long previewFileEntryId,
+			boolean readOnly, int type, String typeOptions, int status,
 			ServiceContext serviceContext)
 		throws PortalException;
 

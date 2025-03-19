@@ -45,7 +45,7 @@ public class FragmentEntryServiceHttp {
 			HttpPrincipal httpPrincipal, long groupId,
 			long fragmentCollectionId, String fragmentEntryKey, String name,
 			String css, String html, String js, String configuration,
-			long previewFileEntryId, int type, int status,
+			long previewFileEntryId, int type, int status, boolean marketplace,
 			com.liferay.portal.kernel.service.ServiceContext serviceContext)
 		throws com.liferay.portal.kernel.exception.PortalException {
 
@@ -57,7 +57,102 @@ public class FragmentEntryServiceHttp {
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, groupId, fragmentCollectionId, fragmentEntryKey,
 				name, css, html, js, configuration, previewFileEntryId, type,
+				status, marketplace, serviceContext);
+
+			Object returnObj = null;
+
+			try {
+				returnObj = TunnelUtil.invoke(httpPrincipal, methodHandler);
+			}
+			catch (Exception exception) {
+				if (exception instanceof
+						com.liferay.portal.kernel.exception.PortalException) {
+
+					throw (com.liferay.portal.kernel.exception.PortalException)
+						exception;
+				}
+
+				throw new com.liferay.portal.kernel.exception.SystemException(
+					exception);
+			}
+
+			return (com.liferay.fragment.model.FragmentEntry)returnObj;
+		}
+		catch (com.liferay.portal.kernel.exception.SystemException
+					systemException) {
+
+			_log.error(systemException, systemException);
+
+			throw systemException;
+		}
+	}
+
+	public static com.liferay.fragment.model.FragmentEntry addFragmentEntry(
+			HttpPrincipal httpPrincipal, long groupId,
+			long fragmentCollectionId, String fragmentEntryKey, String name,
+			String css, String html, String js, String configuration,
+			long previewFileEntryId, int type, int status,
+			com.liferay.portal.kernel.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		try {
+			MethodKey methodKey = new MethodKey(
+				FragmentEntryServiceUtil.class, "addFragmentEntry",
+				_addFragmentEntryParameterTypes1);
+
+			MethodHandler methodHandler = new MethodHandler(
+				methodKey, groupId, fragmentCollectionId, fragmentEntryKey,
+				name, css, html, js, configuration, previewFileEntryId, type,
 				status, serviceContext);
+
+			Object returnObj = null;
+
+			try {
+				returnObj = TunnelUtil.invoke(httpPrincipal, methodHandler);
+			}
+			catch (Exception exception) {
+				if (exception instanceof
+						com.liferay.portal.kernel.exception.PortalException) {
+
+					throw (com.liferay.portal.kernel.exception.PortalException)
+						exception;
+				}
+
+				throw new com.liferay.portal.kernel.exception.SystemException(
+					exception);
+			}
+
+			return (com.liferay.fragment.model.FragmentEntry)returnObj;
+		}
+		catch (com.liferay.portal.kernel.exception.SystemException
+					systemException) {
+
+			_log.error(systemException, systemException);
+
+			throw systemException;
+		}
+	}
+
+	public static com.liferay.fragment.model.FragmentEntry addFragmentEntry(
+			HttpPrincipal httpPrincipal, String externalReferenceCode,
+			long groupId, long fragmentCollectionId, String fragmentEntryKey,
+			String name, String css, String html, String js, boolean cacheable,
+			String configuration, String icon, long previewFileEntryId,
+			boolean readOnly, int type, String typeOptions, int status,
+			boolean marketplace,
+			com.liferay.portal.kernel.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		try {
+			MethodKey methodKey = new MethodKey(
+				FragmentEntryServiceUtil.class, "addFragmentEntry",
+				_addFragmentEntryParameterTypes2);
+
+			MethodHandler methodHandler = new MethodHandler(
+				methodKey, externalReferenceCode, groupId, fragmentCollectionId,
+				fragmentEntryKey, name, css, html, js, cacheable, configuration,
+				icon, previewFileEntryId, readOnly, type, typeOptions, status,
+				marketplace, serviceContext);
 
 			Object returnObj = null;
 
@@ -99,7 +194,7 @@ public class FragmentEntryServiceHttp {
 		try {
 			MethodKey methodKey = new MethodKey(
 				FragmentEntryServiceUtil.class, "addFragmentEntry",
-				_addFragmentEntryParameterTypes1);
+				_addFragmentEntryParameterTypes3);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, externalReferenceCode, groupId, fragmentCollectionId,
@@ -144,7 +239,7 @@ public class FragmentEntryServiceHttp {
 		try {
 			MethodKey methodKey = new MethodKey(
 				FragmentEntryServiceUtil.class, "copyFragmentEntry",
-				_copyFragmentEntryParameterTypes2);
+				_copyFragmentEntryParameterTypes4);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, groupId, sourceFragmentEntryId, fragmentCollectionId,
@@ -185,7 +280,7 @@ public class FragmentEntryServiceHttp {
 		try {
 			MethodKey methodKey = new MethodKey(
 				FragmentEntryServiceUtil.class, "deleteFragmentEntries",
-				_deleteFragmentEntriesParameterTypes3);
+				_deleteFragmentEntriesParameterTypes5);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, fragmentEntriesIds);
@@ -221,7 +316,7 @@ public class FragmentEntryServiceHttp {
 		try {
 			MethodKey methodKey = new MethodKey(
 				FragmentEntryServiceUtil.class, "deleteFragmentEntry",
-				_deleteFragmentEntryParameterTypes4);
+				_deleteFragmentEntryParameterTypes6);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, fragmentEntryId);
@@ -262,7 +357,7 @@ public class FragmentEntryServiceHttp {
 		try {
 			MethodKey methodKey = new MethodKey(
 				FragmentEntryServiceUtil.class, "deleteFragmentEntry",
-				_deleteFragmentEntryParameterTypes5);
+				_deleteFragmentEntryParameterTypes7);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, externalReferenceCode, groupId);
@@ -301,7 +396,7 @@ public class FragmentEntryServiceHttp {
 		try {
 			MethodKey methodKey = new MethodKey(
 				FragmentEntryServiceUtil.class, "fetchDraft",
-				_fetchDraftParameterTypes6);
+				_fetchDraftParameterTypes8);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, primaryKey);
@@ -334,7 +429,7 @@ public class FragmentEntryServiceHttp {
 		try {
 			MethodKey methodKey = new MethodKey(
 				FragmentEntryServiceUtil.class, "fetchFragmentEntry",
-				_fetchFragmentEntryParameterTypes7);
+				_fetchFragmentEntryParameterTypes9);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, fragmentEntryId);
@@ -374,7 +469,7 @@ public class FragmentEntryServiceHttp {
 		try {
 			MethodKey methodKey = new MethodKey(
 				FragmentEntryServiceUtil.class, "getDraft",
-				_getDraftParameterTypes8);
+				_getDraftParameterTypes10);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, primaryKey);
@@ -418,7 +513,7 @@ public class FragmentEntryServiceHttp {
 			MethodKey methodKey = new MethodKey(
 				FragmentEntryServiceUtil.class,
 				"getFragmentCompositionsAndFragmentEntries",
-				_getFragmentCompositionsAndFragmentEntriesParameterTypes9);
+				_getFragmentCompositionsAndFragmentEntriesParameterTypes11);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, groupId, fragmentCollectionId, status, start, end,
@@ -457,7 +552,7 @@ public class FragmentEntryServiceHttp {
 			MethodKey methodKey = new MethodKey(
 				FragmentEntryServiceUtil.class,
 				"getFragmentCompositionsAndFragmentEntries",
-				_getFragmentCompositionsAndFragmentEntriesParameterTypes10);
+				_getFragmentCompositionsAndFragmentEntriesParameterTypes12);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, groupId, fragmentCollectionId, name, status, start,
@@ -492,7 +587,7 @@ public class FragmentEntryServiceHttp {
 			MethodKey methodKey = new MethodKey(
 				FragmentEntryServiceUtil.class,
 				"getFragmentCompositionsAndFragmentEntriesCount",
-				_getFragmentCompositionsAndFragmentEntriesCountParameterTypes11);
+				_getFragmentCompositionsAndFragmentEntriesCountParameterTypes13);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, groupId, fragmentCollectionId, status);
@@ -526,7 +621,7 @@ public class FragmentEntryServiceHttp {
 			MethodKey methodKey = new MethodKey(
 				FragmentEntryServiceUtil.class,
 				"getFragmentCompositionsAndFragmentEntriesCount",
-				_getFragmentCompositionsAndFragmentEntriesCountParameterTypes12);
+				_getFragmentCompositionsAndFragmentEntriesCountParameterTypes14);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, groupId, fragmentCollectionId, name, status);
@@ -559,7 +654,7 @@ public class FragmentEntryServiceHttp {
 		try {
 			MethodKey methodKey = new MethodKey(
 				FragmentEntryServiceUtil.class, "getFragmentEntries",
-				_getFragmentEntriesParameterTypes13);
+				_getFragmentEntriesParameterTypes15);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, fragmentCollectionId);
@@ -594,7 +689,7 @@ public class FragmentEntryServiceHttp {
 		try {
 			MethodKey methodKey = new MethodKey(
 				FragmentEntryServiceUtil.class, "getFragmentEntries",
-				_getFragmentEntriesParameterTypes14);
+				_getFragmentEntriesParameterTypes16);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, groupId, fragmentCollectionId, start, end);
@@ -631,7 +726,7 @@ public class FragmentEntryServiceHttp {
 		try {
 			MethodKey methodKey = new MethodKey(
 				FragmentEntryServiceUtil.class, "getFragmentEntries",
-				_getFragmentEntriesParameterTypes15);
+				_getFragmentEntriesParameterTypes17);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, groupId, fragmentCollectionId, start, end,
@@ -669,7 +764,7 @@ public class FragmentEntryServiceHttp {
 		try {
 			MethodKey methodKey = new MethodKey(
 				FragmentEntryServiceUtil.class, "getFragmentEntriesByName",
-				_getFragmentEntriesByNameParameterTypes16);
+				_getFragmentEntriesByNameParameterTypes18);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, groupId, fragmentCollectionId, name, start, end,
@@ -709,7 +804,7 @@ public class FragmentEntryServiceHttp {
 			MethodKey methodKey = new MethodKey(
 				FragmentEntryServiceUtil.class,
 				"getFragmentEntriesByNameAndStatus",
-				_getFragmentEntriesByNameAndStatusParameterTypes17);
+				_getFragmentEntriesByNameAndStatusParameterTypes19);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, groupId, fragmentCollectionId, name, status, start,
@@ -745,7 +840,7 @@ public class FragmentEntryServiceHttp {
 		try {
 			MethodKey methodKey = new MethodKey(
 				FragmentEntryServiceUtil.class, "getFragmentEntriesByStatus",
-				_getFragmentEntriesByStatusParameterTypes18);
+				_getFragmentEntriesByStatusParameterTypes20);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, groupId, fragmentCollectionId, status);
@@ -782,7 +877,7 @@ public class FragmentEntryServiceHttp {
 		try {
 			MethodKey methodKey = new MethodKey(
 				FragmentEntryServiceUtil.class, "getFragmentEntriesByStatus",
-				_getFragmentEntriesByStatusParameterTypes19);
+				_getFragmentEntriesByStatusParameterTypes21);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, groupId, fragmentCollectionId, status, start, end,
@@ -820,7 +915,7 @@ public class FragmentEntryServiceHttp {
 		try {
 			MethodKey methodKey = new MethodKey(
 				FragmentEntryServiceUtil.class, "getFragmentEntriesByType",
-				_getFragmentEntriesByTypeParameterTypes20);
+				_getFragmentEntriesByTypeParameterTypes22);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, groupId, fragmentCollectionId, type, start, end,
@@ -857,7 +952,7 @@ public class FragmentEntryServiceHttp {
 			MethodKey methodKey = new MethodKey(
 				FragmentEntryServiceUtil.class,
 				"getFragmentEntriesByTypeAndStatus",
-				_getFragmentEntriesByTypeAndStatusParameterTypes21);
+				_getFragmentEntriesByTypeAndStatusParameterTypes23);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, groupId, fragmentCollectionId, type, status);
@@ -895,7 +990,7 @@ public class FragmentEntryServiceHttp {
 			MethodKey methodKey = new MethodKey(
 				FragmentEntryServiceUtil.class,
 				"getFragmentEntriesByTypeAndStatus",
-				_getFragmentEntriesByTypeAndStatusParameterTypes22);
+				_getFragmentEntriesByTypeAndStatusParameterTypes24);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, groupId, fragmentCollectionId, type, status, start,
@@ -929,7 +1024,7 @@ public class FragmentEntryServiceHttp {
 		try {
 			MethodKey methodKey = new MethodKey(
 				FragmentEntryServiceUtil.class, "getFragmentEntriesCount",
-				_getFragmentEntriesCountParameterTypes23);
+				_getFragmentEntriesCountParameterTypes25);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, groupId, fragmentCollectionId);
@@ -962,7 +1057,7 @@ public class FragmentEntryServiceHttp {
 		try {
 			MethodKey methodKey = new MethodKey(
 				FragmentEntryServiceUtil.class, "getFragmentEntriesCountByName",
-				_getFragmentEntriesCountByNameParameterTypes24);
+				_getFragmentEntriesCountByNameParameterTypes26);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, groupId, fragmentCollectionId, name);
@@ -996,7 +1091,7 @@ public class FragmentEntryServiceHttp {
 			MethodKey methodKey = new MethodKey(
 				FragmentEntryServiceUtil.class,
 				"getFragmentEntriesCountByNameAndStatus",
-				_getFragmentEntriesCountByNameAndStatusParameterTypes25);
+				_getFragmentEntriesCountByNameAndStatusParameterTypes27);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, groupId, fragmentCollectionId, name, status);
@@ -1030,7 +1125,7 @@ public class FragmentEntryServiceHttp {
 			MethodKey methodKey = new MethodKey(
 				FragmentEntryServiceUtil.class,
 				"getFragmentEntriesCountByStatus",
-				_getFragmentEntriesCountByStatusParameterTypes26);
+				_getFragmentEntriesCountByStatusParameterTypes28);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, groupId, fragmentCollectionId, status);
@@ -1063,7 +1158,7 @@ public class FragmentEntryServiceHttp {
 		try {
 			MethodKey methodKey = new MethodKey(
 				FragmentEntryServiceUtil.class, "getFragmentEntriesCountByType",
-				_getFragmentEntriesCountByTypeParameterTypes27);
+				_getFragmentEntriesCountByTypeParameterTypes29);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, groupId, fragmentCollectionId, type);
@@ -1097,7 +1192,7 @@ public class FragmentEntryServiceHttp {
 			MethodKey methodKey = new MethodKey(
 				FragmentEntryServiceUtil.class,
 				"getFragmentEntriesCountByTypeAndStatus",
-				_getFragmentEntriesCountByTypeAndStatusParameterTypes28);
+				_getFragmentEntriesCountByTypeAndStatusParameterTypes30);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, groupId, fragmentCollectionId, type, status);
@@ -1133,7 +1228,7 @@ public class FragmentEntryServiceHttp {
 			MethodKey methodKey = new MethodKey(
 				FragmentEntryServiceUtil.class,
 				"getFragmentEntryByExternalReferenceCode",
-				_getFragmentEntryByExternalReferenceCodeParameterTypes29);
+				_getFragmentEntryByExternalReferenceCodeParameterTypes31);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, externalReferenceCode, groupId);
@@ -1173,7 +1268,7 @@ public class FragmentEntryServiceHttp {
 		try {
 			MethodKey methodKey = new MethodKey(
 				FragmentEntryServiceUtil.class, "getTempFileNames",
-				_getTempFileNamesParameterTypes30);
+				_getTempFileNamesParameterTypes32);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, groupId, folderName);
@@ -1214,7 +1309,7 @@ public class FragmentEntryServiceHttp {
 		try {
 			MethodKey methodKey = new MethodKey(
 				FragmentEntryServiceUtil.class, "moveFragmentEntry",
-				_moveFragmentEntryParameterTypes31);
+				_moveFragmentEntryParameterTypes33);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, fragmentEntryId, fragmentCollectionId);
@@ -1255,7 +1350,7 @@ public class FragmentEntryServiceHttp {
 		try {
 			MethodKey methodKey = new MethodKey(
 				FragmentEntryServiceUtil.class, "publishDraft",
-				_publishDraftParameterTypes32);
+				_publishDraftParameterTypes34);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, draftFragmentEntry);
@@ -1296,7 +1391,7 @@ public class FragmentEntryServiceHttp {
 		try {
 			MethodKey methodKey = new MethodKey(
 				FragmentEntryServiceUtil.class, "updateDraft",
-				_updateDraftParameterTypes33);
+				_updateDraftParameterTypes35);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, draftFragmentEntry);
@@ -1337,7 +1432,7 @@ public class FragmentEntryServiceHttp {
 		try {
 			MethodKey methodKey = new MethodKey(
 				FragmentEntryServiceUtil.class, "updateFragmentEntry",
-				_updateFragmentEntryParameterTypes34);
+				_updateFragmentEntryParameterTypes36);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, fragmentEntry);
@@ -1378,7 +1473,7 @@ public class FragmentEntryServiceHttp {
 		try {
 			MethodKey methodKey = new MethodKey(
 				FragmentEntryServiceUtil.class, "updateFragmentEntry",
-				_updateFragmentEntryParameterTypes35);
+				_updateFragmentEntryParameterTypes37);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, fragmentEntryId, cacheable);
@@ -1419,7 +1514,7 @@ public class FragmentEntryServiceHttp {
 		try {
 			MethodKey methodKey = new MethodKey(
 				FragmentEntryServiceUtil.class, "updateFragmentEntry",
-				_updateFragmentEntryParameterTypes36);
+				_updateFragmentEntryParameterTypes38);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, fragmentEntryId, previewFileEntryId);
@@ -1463,7 +1558,7 @@ public class FragmentEntryServiceHttp {
 		try {
 			MethodKey methodKey = new MethodKey(
 				FragmentEntryServiceUtil.class, "updateFragmentEntry",
-				_updateFragmentEntryParameterTypes37);
+				_updateFragmentEntryParameterTypes39);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, fragmentEntryId, fragmentCollectionId, name, css,
@@ -1505,7 +1600,7 @@ public class FragmentEntryServiceHttp {
 		try {
 			MethodKey methodKey = new MethodKey(
 				FragmentEntryServiceUtil.class, "updateFragmentEntry",
-				_updateFragmentEntryParameterTypes38);
+				_updateFragmentEntryParameterTypes40);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, fragmentEntryId, name);
@@ -1545,9 +1640,24 @@ public class FragmentEntryServiceHttp {
 		new Class[] {
 			long.class, long.class, String.class, String.class, String.class,
 			String.class, String.class, String.class, long.class, int.class,
-			int.class, com.liferay.portal.kernel.service.ServiceContext.class
+			int.class, boolean.class,
+			com.liferay.portal.kernel.service.ServiceContext.class
 		};
 	private static final Class<?>[] _addFragmentEntryParameterTypes1 =
+		new Class[] {
+			long.class, long.class, String.class, String.class, String.class,
+			String.class, String.class, String.class, long.class, int.class,
+			int.class, com.liferay.portal.kernel.service.ServiceContext.class
+		};
+	private static final Class<?>[] _addFragmentEntryParameterTypes2 =
+		new Class[] {
+			String.class, long.class, long.class, String.class, String.class,
+			String.class, String.class, String.class, boolean.class,
+			String.class, String.class, long.class, boolean.class, int.class,
+			String.class, int.class, boolean.class,
+			com.liferay.portal.kernel.service.ServiceContext.class
+		};
+	private static final Class<?>[] _addFragmentEntryParameterTypes3 =
 		new Class[] {
 			String.class, long.class, long.class, String.class, String.class,
 			String.class, String.class, String.class, boolean.class,
@@ -1555,134 +1665,134 @@ public class FragmentEntryServiceHttp {
 			String.class, int.class,
 			com.liferay.portal.kernel.service.ServiceContext.class
 		};
-	private static final Class<?>[] _copyFragmentEntryParameterTypes2 =
+	private static final Class<?>[] _copyFragmentEntryParameterTypes4 =
 		new Class[] {
 			long.class, long.class, long.class,
 			com.liferay.portal.kernel.service.ServiceContext.class
 		};
-	private static final Class<?>[] _deleteFragmentEntriesParameterTypes3 =
+	private static final Class<?>[] _deleteFragmentEntriesParameterTypes5 =
 		new Class[] {long[].class};
-	private static final Class<?>[] _deleteFragmentEntryParameterTypes4 =
+	private static final Class<?>[] _deleteFragmentEntryParameterTypes6 =
 		new Class[] {long.class};
-	private static final Class<?>[] _deleteFragmentEntryParameterTypes5 =
+	private static final Class<?>[] _deleteFragmentEntryParameterTypes7 =
 		new Class[] {String.class, long.class};
-	private static final Class<?>[] _fetchDraftParameterTypes6 = new Class[] {
+	private static final Class<?>[] _fetchDraftParameterTypes8 = new Class[] {
 		long.class
 	};
-	private static final Class<?>[] _fetchFragmentEntryParameterTypes7 =
+	private static final Class<?>[] _fetchFragmentEntryParameterTypes9 =
 		new Class[] {long.class};
-	private static final Class<?>[] _getDraftParameterTypes8 = new Class[] {
+	private static final Class<?>[] _getDraftParameterTypes10 = new Class[] {
 		long.class
 	};
 	private static final Class<?>[]
-		_getFragmentCompositionsAndFragmentEntriesParameterTypes9 =
+		_getFragmentCompositionsAndFragmentEntriesParameterTypes11 =
 			new Class[] {
 				long.class, long.class, int.class, int.class, int.class,
 				com.liferay.portal.kernel.util.OrderByComparator.class
 			};
 	private static final Class<?>[]
-		_getFragmentCompositionsAndFragmentEntriesParameterTypes10 =
+		_getFragmentCompositionsAndFragmentEntriesParameterTypes12 =
 			new Class[] {
 				long.class, long.class, String.class, int.class, int.class,
 				int.class,
 				com.liferay.portal.kernel.util.OrderByComparator.class
 			};
 	private static final Class<?>[]
-		_getFragmentCompositionsAndFragmentEntriesCountParameterTypes11 =
+		_getFragmentCompositionsAndFragmentEntriesCountParameterTypes13 =
 			new Class[] {long.class, long.class, int.class};
 	private static final Class<?>[]
-		_getFragmentCompositionsAndFragmentEntriesCountParameterTypes12 =
+		_getFragmentCompositionsAndFragmentEntriesCountParameterTypes14 =
 			new Class[] {long.class, long.class, String.class, int.class};
-	private static final Class<?>[] _getFragmentEntriesParameterTypes13 =
-		new Class[] {long.class};
-	private static final Class<?>[] _getFragmentEntriesParameterTypes14 =
-		new Class[] {long.class, long.class, int.class, int.class};
 	private static final Class<?>[] _getFragmentEntriesParameterTypes15 =
+		new Class[] {long.class};
+	private static final Class<?>[] _getFragmentEntriesParameterTypes16 =
+		new Class[] {long.class, long.class, int.class, int.class};
+	private static final Class<?>[] _getFragmentEntriesParameterTypes17 =
 		new Class[] {
 			long.class, long.class, int.class, int.class,
 			com.liferay.portal.kernel.util.OrderByComparator.class
 		};
-	private static final Class<?>[] _getFragmentEntriesByNameParameterTypes16 =
+	private static final Class<?>[] _getFragmentEntriesByNameParameterTypes18 =
 		new Class[] {
 			long.class, long.class, String.class, int.class, int.class,
 			com.liferay.portal.kernel.util.OrderByComparator.class
 		};
 	private static final Class<?>[]
-		_getFragmentEntriesByNameAndStatusParameterTypes17 = new Class[] {
+		_getFragmentEntriesByNameAndStatusParameterTypes19 = new Class[] {
 			long.class, long.class, String.class, int.class, int.class,
 			int.class, com.liferay.portal.kernel.util.OrderByComparator.class
 		};
 	private static final Class<?>[]
-		_getFragmentEntriesByStatusParameterTypes18 = new Class[] {
+		_getFragmentEntriesByStatusParameterTypes20 = new Class[] {
 			long.class, long.class, int.class
 		};
 	private static final Class<?>[]
-		_getFragmentEntriesByStatusParameterTypes19 = new Class[] {
+		_getFragmentEntriesByStatusParameterTypes21 = new Class[] {
 			long.class, long.class, int.class, int.class, int.class,
 			com.liferay.portal.kernel.util.OrderByComparator.class
 		};
-	private static final Class<?>[] _getFragmentEntriesByTypeParameterTypes20 =
+	private static final Class<?>[] _getFragmentEntriesByTypeParameterTypes22 =
 		new Class[] {
 			long.class, long.class, int.class, int.class, int.class,
 			com.liferay.portal.kernel.util.OrderByComparator.class
 		};
 	private static final Class<?>[]
-		_getFragmentEntriesByTypeAndStatusParameterTypes21 = new Class[] {
+		_getFragmentEntriesByTypeAndStatusParameterTypes23 = new Class[] {
 			long.class, long.class, int.class, int.class
 		};
 	private static final Class<?>[]
-		_getFragmentEntriesByTypeAndStatusParameterTypes22 = new Class[] {
+		_getFragmentEntriesByTypeAndStatusParameterTypes24 = new Class[] {
 			long.class, long.class, int.class, int.class, int.class, int.class,
 			com.liferay.portal.kernel.util.OrderByComparator.class
 		};
-	private static final Class<?>[] _getFragmentEntriesCountParameterTypes23 =
+	private static final Class<?>[] _getFragmentEntriesCountParameterTypes25 =
 		new Class[] {long.class, long.class};
 	private static final Class<?>[]
-		_getFragmentEntriesCountByNameParameterTypes24 = new Class[] {
+		_getFragmentEntriesCountByNameParameterTypes26 = new Class[] {
 			long.class, long.class, String.class
 		};
 	private static final Class<?>[]
-		_getFragmentEntriesCountByNameAndStatusParameterTypes25 = new Class[] {
+		_getFragmentEntriesCountByNameAndStatusParameterTypes27 = new Class[] {
 			long.class, long.class, String.class, int.class
 		};
 	private static final Class<?>[]
-		_getFragmentEntriesCountByStatusParameterTypes26 = new Class[] {
+		_getFragmentEntriesCountByStatusParameterTypes28 = new Class[] {
 			long.class, long.class, int.class
 		};
 	private static final Class<?>[]
-		_getFragmentEntriesCountByTypeParameterTypes27 = new Class[] {
+		_getFragmentEntriesCountByTypeParameterTypes29 = new Class[] {
 			long.class, long.class, int.class
 		};
 	private static final Class<?>[]
-		_getFragmentEntriesCountByTypeAndStatusParameterTypes28 = new Class[] {
+		_getFragmentEntriesCountByTypeAndStatusParameterTypes30 = new Class[] {
 			long.class, long.class, int.class, int.class
 		};
 	private static final Class<?>[]
-		_getFragmentEntryByExternalReferenceCodeParameterTypes29 = new Class[] {
+		_getFragmentEntryByExternalReferenceCodeParameterTypes31 = new Class[] {
 			String.class, long.class
 		};
-	private static final Class<?>[] _getTempFileNamesParameterTypes30 =
+	private static final Class<?>[] _getTempFileNamesParameterTypes32 =
 		new Class[] {long.class, String.class};
-	private static final Class<?>[] _moveFragmentEntryParameterTypes31 =
+	private static final Class<?>[] _moveFragmentEntryParameterTypes33 =
 		new Class[] {long.class, long.class};
-	private static final Class<?>[] _publishDraftParameterTypes32 =
+	private static final Class<?>[] _publishDraftParameterTypes34 =
 		new Class[] {com.liferay.fragment.model.FragmentEntry.class};
-	private static final Class<?>[] _updateDraftParameterTypes33 = new Class[] {
+	private static final Class<?>[] _updateDraftParameterTypes35 = new Class[] {
 		com.liferay.fragment.model.FragmentEntry.class
 	};
-	private static final Class<?>[] _updateFragmentEntryParameterTypes34 =
-		new Class[] {com.liferay.fragment.model.FragmentEntry.class};
-	private static final Class<?>[] _updateFragmentEntryParameterTypes35 =
-		new Class[] {long.class, boolean.class};
 	private static final Class<?>[] _updateFragmentEntryParameterTypes36 =
-		new Class[] {long.class, long.class};
+		new Class[] {com.liferay.fragment.model.FragmentEntry.class};
 	private static final Class<?>[] _updateFragmentEntryParameterTypes37 =
+		new Class[] {long.class, boolean.class};
+	private static final Class<?>[] _updateFragmentEntryParameterTypes38 =
+		new Class[] {long.class, long.class};
+	private static final Class<?>[] _updateFragmentEntryParameterTypes39 =
 		new Class[] {
 			long.class, long.class, String.class, String.class, String.class,
 			String.class, boolean.class, String.class, String.class, long.class,
 			boolean.class, String.class, int.class
 		};
-	private static final Class<?>[] _updateFragmentEntryParameterTypes38 =
+	private static final Class<?>[] _updateFragmentEntryParameterTypes40 =
 		new Class[] {long.class, String.class};
 
 }
