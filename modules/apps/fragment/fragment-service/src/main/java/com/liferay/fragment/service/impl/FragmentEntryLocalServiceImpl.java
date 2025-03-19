@@ -84,7 +84,7 @@ public class FragmentEntryLocalServiceImpl
 			String css, String html, String js, boolean cacheable,
 			String configuration, String icon, long previewFileEntryId,
 			boolean readOnly, int type, String typeOptions, int status,
-			ServiceContext serviceContext)
+			boolean marketplace, ServiceContext serviceContext)
 		throws PortalException {
 
 		// Fragment entry
@@ -137,6 +137,7 @@ public class FragmentEntryLocalServiceImpl
 		draftFragmentEntry.setConfiguration(configuration);
 		draftFragmentEntry.setIcon(icon);
 		draftFragmentEntry.setPreviewFileEntryId(previewFileEntryId);
+		draftFragmentEntry.setMarketplace(marketplace);
 		draftFragmentEntry.setReadOnly(readOnly);
 		draftFragmentEntry.setType(type);
 		draftFragmentEntry.setTypeOptions(typeOptions);
@@ -153,6 +154,23 @@ public class FragmentEntryLocalServiceImpl
 		}
 
 		return updatedDraftFragmentEntry;
+	}
+
+	@Override
+	public FragmentEntry addFragmentEntry(
+			String externalReferenceCode, long userId, long groupId,
+			long fragmentCollectionId, String fragmentEntryKey, String name,
+			String css, String html, String js, boolean cacheable,
+			String configuration, String icon, long previewFileEntryId,
+			boolean readOnly, int type, String typeOptions, int status,
+			ServiceContext serviceContext)
+		throws PortalException {
+
+		return addFragmentEntry(
+			externalReferenceCode, userId, groupId, fragmentCollectionId,
+			fragmentEntryKey, name, css, html, js, cacheable, configuration,
+			icon, previewFileEntryId, readOnly, type, typeOptions, status,
+			false, serviceContext);
 	}
 
 	@Override
@@ -203,7 +221,8 @@ public class FragmentEntryLocalServiceImpl
 				publishedFragmentEntry.isReadOnly(),
 				publishedFragmentEntry.getType(),
 				publishedFragmentEntry.getTypeOptions(),
-				WorkflowConstants.STATUS_APPROVED, serviceContext);
+				WorkflowConstants.STATUS_APPROVED,
+				publishedFragmentEntry.isMarketplace(), serviceContext);
 
 			_copyFragmentEntryPreviewFileEntry(
 				userId, groupId, publishedFragmentEntry,
@@ -227,7 +246,8 @@ public class FragmentEntryLocalServiceImpl
 				draftFragmentEntry.getIcon(), 0,
 				draftFragmentEntry.isReadOnly(), draftFragmentEntry.getType(),
 				draftFragmentEntry.getTypeOptions(),
-				WorkflowConstants.STATUS_DRAFT, serviceContext);
+				WorkflowConstants.STATUS_DRAFT,
+				draftFragmentEntry.isMarketplace(), serviceContext);
 
 			_copyFragmentEntryPreviewFileEntry(
 				userId, groupId, draftFragmentEntry, targetDraftFragmentEntry);
