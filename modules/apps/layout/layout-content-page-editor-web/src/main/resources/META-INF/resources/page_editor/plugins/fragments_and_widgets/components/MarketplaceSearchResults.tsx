@@ -22,6 +22,8 @@ import {LIST_ITEM_TYPES} from '../../../app/config/constants/listItemTypes';
 import {useKeyboardNavigation} from '../../../app/js-index';
 import MarketplaceTabItem from './MarketplaceTabItem';
 
+const PAGE_SIZE = 20;
+
 export default function MarketplaceSearchResults({
 	searchValue,
 }: {
@@ -96,8 +98,8 @@ function SearchResultsPanel({searchValue}: {searchValue: string}) {
 			'filter': marketplaceRest.settings?.references?.fragmentsFilter,
 			'images.accountId': '-1',
 			'nestedFields': 'productSpecifications,skus,categories,images',
-			'page': String(page),
-			'pageSize': '20',
+			'page': `${page}`,
+			'pageSize': `${PAGE_SIZE}`,
 			'search': searchValueRef.current,
 			'skus.accountId': '-1',
 			'sort': 'name:asc',
@@ -162,7 +164,7 @@ function SearchResults({
 	const listRef = useRef<HTMLUListElement | null>(null);
 
 	useEffect(() => {
-		if (listRef.current && results?.items.length) {
+		if (listRef.current && results && results.items.length <= PAGE_SIZE) {
 			const firstListItem = listRef.current.firstChild as HTMLLIElement;
 
 			firstListItem?.focus();
