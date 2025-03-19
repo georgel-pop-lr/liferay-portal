@@ -160,22 +160,14 @@ function SearchResults({
 	results?: APIResponse<Product>;
 }) {
 	const listRef = useRef<HTMLUListElement | null>(null);
-	const hasLoadedRef = useRef(false);
 
 	useEffect(() => {
-		if (!hasLoadedRef.current && listRef.current && results?.items.length) {
+		if (listRef.current && results?.items.length) {
 			const firstListItem = listRef.current.firstChild as HTMLLIElement;
 
 			firstListItem?.focus();
-			hasLoadedRef.current = true;
 		}
 	}, [results, listRef]);
-
-	useEffect(() => {
-		if (results?.items.length === 0) {
-			hasLoadedRef.current = false;
-		}
-	}, [results]);
 
 	return (
 		<>
