@@ -12,6 +12,7 @@ export function InstallFragmentModalBody() {
 	return (
 		<>
 			<ClayLoadingIndicator
+				aria-label={Liferay.Language.get('installation-in-progress')}
 				className="mb-4 mt-2"
 				displayType="primary"
 				shape="squares"
@@ -31,13 +32,15 @@ export function InstallFragmentModalBody() {
 	);
 }
 
+interface InstallFragmentModalProps {
+	name: string;
+	onCloseModal?: () => void;
+}
+
 export default function InstallFragmentModal({
 	name,
 	onCloseModal = () => {},
-}: {
-	name: string;
-	onCloseModal?: () => void;
-}) {
+}: InstallFragmentModalProps) {
 	const [visible, setVisible] = useState(true);
 
 	const {observer} = useModal({
@@ -47,17 +50,15 @@ export default function InstallFragmentModal({
 		},
 	});
 
-	return (
-		visible && (
-			<ClayModal className="modal-dialog-centered" observer={observer}>
-				<ClayModal.Header>
-					{sub(Liferay.Language.get('installing-x'), name)}
-				</ClayModal.Header>
+	return visible ? (
+		<ClayModal className="modal-dialog-centered" observer={observer}>
+			<ClayModal.Header>
+				{sub(Liferay.Language.get('installing-x'), name)}
+			</ClayModal.Header>
 
-				<ClayModal.Body>
-					<InstallFragmentModalBody />
-				</ClayModal.Body>
-			</ClayModal>
-		)
-	);
+			<ClayModal.Body>
+				<InstallFragmentModalBody />
+			</ClayModal.Body>
+		</ClayModal>
+	) : null;
 }
