@@ -13,6 +13,7 @@ Map<String, List<FragmentCollection>> inheritedFragmentCollections = (Map<String
 List<FragmentCollection> systemFragmentCollections = (List<FragmentCollection>)request.getAttribute(FragmentWebKeys.SYSTEM_FRAGMENT_COLLECTIONS);
 
 List<FragmentCollectionContributor> fragmentCollectionContributors = fragmentEntriesDisplayContext.getFragmentCollectionContributors(locale);
+ImportDisplayContext importDisplayContext = new ImportDisplayContext(request, renderRequest, renderResponse);
 %>
 
 <liferay-ui:error embed="<%= false %>" exception="<%= DuplicateFragmentCollectionKeyException.class %>">
@@ -86,6 +87,14 @@ List<FragmentCollectionContributor> fragmentCollectionContributors = fragmentEnt
 												props='<%=
 													HashMapBuilder.<String, Object>put(
 														"body", LanguageUtil.get(request, "we-are-excited-to-share-that-marketplace-is-now-part-of-fragments")
+													).put(
+														"fragmentPortletNamespace", liferayPortletResponse.getNamespace()
+													).put(
+														"fragmentsImportURL",
+														importDisplayContext.getProps(
+														).get(
+															"importURL"
+														)
 													).put(
 														"heading", LanguageUtil.get(request, "marketplace-is-now-in-fragments")
 													).put(
@@ -261,8 +270,6 @@ List<FragmentCollectionContributor> fragmentCollectionContributors = fragmentEnt
 </aui:form>
 
 <%
-ImportDisplayContext importDisplayContext = new ImportDisplayContext(request, renderRequest, renderResponse);
-
 List<String> draftFragmentsImporterResultEntries = importDisplayContext.getFragmentsImporterResultEntries(FragmentsImporterResultEntry.Status.IMPORTED_DRAFT);
 %>
 
