@@ -72,7 +72,7 @@ export default function MarketplaceViews({
 					}
 				},
 				importURL,
-				isMarketplace: true,
+				marketplace: true,
 				overwriteStrategy: 'keep_both',
 				portletNamespace,
 			});

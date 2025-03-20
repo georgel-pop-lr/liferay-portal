@@ -12,14 +12,14 @@ export default function ImportFragments({
 	file,
 	handleResponse,
 	importURL,
-	isMarketplace = false,
+	marketplace = false,
 	overwriteStrategy,
 	portletNamespace,
 }: {
 	file: File | null;
 	handleResponse?: (response: any) => void;
 	importURL: string;
-	isMarketplace?: boolean;
+	marketplace?: boolean;
 	overwriteStrategy?: OverwriteStrategy;
 	portletNamespace: string;
 }) {
@@ -32,7 +32,7 @@ export default function ImportFragments({
 	}
 
 	formData.append(`${portletNamespace}file`, file);
-	formData.append(`${portletNamespace}isMarketplace`, String(isMarketplace));
+	formData.append(`${portletNamespace}marketplace`, String(marketplace));
 
 	if (overwriteStrategy) {
 		formData.append(`${portletNamespace}importType`, overwriteStrategy);
