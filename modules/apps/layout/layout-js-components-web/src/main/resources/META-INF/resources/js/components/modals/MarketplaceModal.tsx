@@ -41,6 +41,9 @@ export default function MarketplaceModal({
 			settings={{productFilter: 'fragments'}}
 		>
 			<Marketplace.Modal
+				noConnectionMessage={Liferay.Language.get(
+					'please-go-to-instance-settings-to-enable-the-connection'
+				)}
 				title={title}
 				trigger={
 					<MarketplaceModalTrigger
