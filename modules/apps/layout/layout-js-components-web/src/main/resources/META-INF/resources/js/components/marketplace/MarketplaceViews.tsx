@@ -10,6 +10,7 @@ import {
 	Marketplace,
 	MarketplaceRest,
 	MarketplaceView,
+	PlacedOrder,
 	Product,
 	useMarketplaceContext,
 } from '@liferay/marketplace-js-components-web';
@@ -20,16 +21,36 @@ import React, {useCallback} from 'react';
 import importFragmentsZipFile from '../import_fragments/importFragmentsZipFile';
 import {InstallFragmentModalBody} from '../modals/InstallFragmentModal';
 
-async function fetchFragmentBlob(marketplaceRest: MarketplaceRest, url: URL) {
-	const response = await marketplaceRest.fetchMarketplace<Response>(
-		url.pathname,
-		{
-			earlyReturn: true,
-		}
-	);
+async function fetchFragmentBlob(
+	marketplaceRest: MarketplaceRest,
+	url: string
+) {
+	const response = await marketplaceRest.fetchMarketplace<Response>(url, {
+		earlyReturn: true,
+	});
 
 	return response.blob();
 }
+
+async function getVirtualEntryBlob(
+	placedOrder: PlacedOrder,
+	marketplaceRest: MarketplaceRest
+) {
+	if (!placedOrder.placedOrderItems.length) {
+		return;
+	}
+
+	const [virtualItem] = placedOrder.placedOrderItems?.[0]?.virtualItems ?? [];
+
+	if (!virtualItem) {
+		return;
+	}
+
+	return fetchFragmentBlob(marketplaceRest, virtualItem.url);
+}
+
+const sleep = (timer: number) =>
+	new Promise((resolve) => setTimeout(() => resolve(true), timer));
 
 function getProductAttachmentBlob(
 	marketplaceRest: MarketplaceRest,
@@ -41,18 +62,20 @@ function getProductAttachmentBlob(
 
 	return fetchFragmentBlob(
 		marketplaceRest,
-		new URL(product.attachments[0].src)
+		new URL(product.attachments[0].src).pathname
 	);
 }
 
 interface MarketplaceViewsProps {
 	fragmentPortletNamespace: string;
 	fragmentsImportURL: string;
+	showBackButton?: boolean;
 }
 
 export default function MarketplaceViews({
 	fragmentPortletNamespace,
 	fragmentsImportURL,
+	showBackButton,
 }: MarketplaceViewsProps) {
 	const {
 		marketplaceRest,
@@ -103,25 +126,51 @@ export default function MarketplaceViews({
 			setProduct(product);
 
 			try {
-				const cart = await marketplaceRest.createCart(product, {
-					orderTypeExternalReferenceCode: 'FRAGMENT',
-				});
+				const cart = await marketplaceRest.createCart(
+					product as Product,
+					{
+						orderTypeExternalReferenceCode:
+							'LOW_CODE_CONFIGURATION',
+					}
+				);
 
 				await marketplaceRest.checkoutCart(cart);
 
-				const blob = await getProductAttachmentBlob(
-					marketplaceRest,
-					product
+				// Temporary workaround, wait until the virtualItem is activated from the object action
+
+				await sleep(1500);
+
+				const placedOrder = await marketplaceRest.getPlacedOrder(
+					cart.id,
+					new URLSearchParams({nestedFields: 'placedOrderItems'})
 				);
+
+				// This is an example of a virtual Entry
+				// Currently there is an issue to retrieve the virtual item
+				// from the cart due this bug: https://liferay.atlassian.net/browse/LPD-50173
+				// getVirtualEntryBlob would be the ideal solution for this case.
+
+				const blob = await getVirtualEntryBlob(
+					placedOrder,
+					marketplaceRest
+				);
+
+				// This is an example of a product attachment
+				// We will (for now) save the fragment zip inside the product attachment
+				// in order to not block the whole development of this feature
+
+				// const blob = await getProductAttachmentBlob(
+				// 	marketplaceRest,
+				// 	product
+				// );
 
 				if (blob) {
 					const file = new File(
 						[blob],
 						`${product.name.replace(' ', '-').toLowerCase()}.zip`,
-						{
-							type: 'application/zip',
-						}
+						{type: 'application/zip'}
 					);
+
 					await handleImportFile(file);
 
 					openToast({
@@ -148,6 +197,8 @@ export default function MarketplaceViews({
 		[marketplaceRest, setProduct, setView, handleImportFile, onOpenChange]
 	);
 
+	console.log({view});
+
 	return (
 		<>
 			{view === MarketplaceView.PRODUCTS && (
@@ -170,6 +221,11 @@ export default function MarketplaceViews({
 
 			{view === MarketplaceView.STOREFRONT && (
 				<Marketplace.Storefront
+					onClickBack={
+						showBackButton
+							? () => setView(MarketplaceView.PRODUCTS)
+							: undefined
+					}
 					primaryButton={
 						<ClayButton
 							className="ml-auto mt-3 rounded"

@@ -6,6 +6,7 @@
 import {ClayButtonWithIcon} from '@clayui/button';
 import {
 	Marketplace,
+	MarketplaceContext,
 	MarketplaceContextProvider,
 	MarketplaceRest,
 	MarketplaceView,
@@ -13,6 +14,7 @@ import {
 } from '@liferay/marketplace-js-components-web';
 import {sub} from 'frontend-js-web';
 import React, {
+	ComponentProps,
 	ReactElement,
 	cloneElement,
 	useCallback,
@@ -22,17 +24,12 @@ import React, {
 
 import MarketplaceViews from '../marketplace/MarketplaceViews';
 
-interface MarketplaceModalProps {
-	fragmentPortletNamespace: string;
-	fragmentsImportURL: string;
-	trigger?: ReactElement;
-}
-
 export default function MarketplaceModal({
-	fragmentPortletNamespace,
-	fragmentsImportURL,
 	trigger,
-}: MarketplaceModalProps) {
+	...marketplaceViewProps
+}: {
+	trigger?: ReactElement;
+} & ComponentProps<typeof MarketplaceViews>) {
 	const [title, setTitle] = useState<string | undefined>();
 
 	return (
@@ -40,23 +37,29 @@ export default function MarketplaceModal({
 			baseResourceURL={MarketplaceRest.getBaseResourceURL()}
 			settings={{productFilter: 'fragments'}}
 		>
-			<Marketplace.Modal
-				noConnectionMessage={Liferay.Language.get(
-					'please-go-to-instance-settings-to-enable-the-connection'
+			<MarketplaceContext.Consumer>
+				{({view}) => (
+					<Marketplace.Modal
+						noConnectionMessage={Liferay.Language.get(
+							'please-go-to-instance-settings-to-enable-the-connection'
+						)}
+						size={
+							view === MarketplaceView.PURCHASE
+								? ('md' as any)
+								: 'full-screen'
+						}
+						title={title}
+						trigger={
+							<MarketplaceModalTrigger
+								setTitle={setTitle}
+								trigger={trigger}
+							/>
+						}
+					>
+						<MarketplaceViews {...marketplaceViewProps} />
+					</Marketplace.Modal>
 				)}
-				title={title}
-				trigger={
-					<MarketplaceModalTrigger
-						setTitle={setTitle}
-						trigger={trigger}
-					/>
-				}
-			>
-				<MarketplaceViews
-					fragmentPortletNamespace={fragmentPortletNamespace}
-					fragmentsImportURL={fragmentsImportURL}
-				/>
-			</Marketplace.Modal>
+			</MarketplaceContext.Consumer>
 		</MarketplaceContextProvider>
 	);
 }
@@ -81,16 +84,16 @@ function MarketplaceModalTrigger({
 		if (view === MarketplaceView.PURCHASE) {
 			setView(MarketplaceView.PRODUCTS);
 		}
+
 		onOpenChange(true);
 	}, [view, setView, onOpenChange]);
 
 	useEffect(() => {
-		if (view === MarketplaceView.PURCHASE && product) {
-			setTitle(sub(Liferay.Language.get('installing-x'), product.name));
-		}
-		else {
-			setTitle(undefined);
-		}
+		setTitle(
+			view === MarketplaceView.PURCHASE && product
+				? sub(Liferay.Language.get('installing-x'), product.name)
+				: undefined
+		);
 	}, [view, product, setTitle]);
 
 	if (trigger) {
