@@ -9,7 +9,7 @@ import React from 'react';
 
 import ImportOptionsModal, {
 	ModalContent,
-} from '../../../src/main/resources/META-INF/resources/js/components/import/ImportOptionsModal';
+} from '../../../src/main/resources/META-INF/resources/js/components/import_fragments/ImportOptionsModal';
 import checkAccessibility from '../../__lib__/checkAccessibility';
 
 const renderComponent = async ({
