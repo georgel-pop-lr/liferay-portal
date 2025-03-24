@@ -11,9 +11,9 @@ export {
 } from './components/color_picker/ColorPicker';
 export {default as DragPreview} from './components/drag_preview/DragPreview';
 export {default as ExperienceSelector} from './components/experience_selector/ExperienceSelector';
-export {default as Import} from './components/import/Import';
-export {default as ImportOptionsModal} from './components/import/ImportOptionsModal';
-export {default as ImportResults} from './components/import/ImportResults';
+export {default as ImportFragments} from './components/import_fragments/ImportFragments';
+export {default as ImportOptionsModal} from './components/import_fragments/ImportOptionsModal';
+export {default as ImportResults} from './components/import_fragments/ImportResults';
 export {default as LengthInput} from './components/length_input/LengthInput';
 export {default as MarketplaceButton} from './components/marketplace/MarketplaceButton';
 export {default as MarketplaceModal} from './components/marketplace/MarketplaceModal';

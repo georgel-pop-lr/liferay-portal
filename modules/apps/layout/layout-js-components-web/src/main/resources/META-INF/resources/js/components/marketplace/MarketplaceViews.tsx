@@ -17,7 +17,7 @@ import {openToast} from 'frontend-js-components-web';
 import {sub} from 'frontend-js-web';
 import React, {useCallback} from 'react';
 
-import importFragmentsZipFile from '../import/importFragmentsZipFile';
+import importFragmentsZipFile from '../import_fragments/importFragmentsZipFile';
 import {InstallFragmentModalBody} from './InstallFragmentModal';
 
 async function fetchFragmentBlob(marketplaceRest: MarketplaceRest, url: URL) {
