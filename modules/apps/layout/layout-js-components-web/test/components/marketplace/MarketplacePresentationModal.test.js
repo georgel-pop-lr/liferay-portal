@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-import {act, fireEvent, render, screen, waitFor} from '@testing-library/react';
+import {render, screen, waitFor} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import '@testing-library/jest-dom/extend-expect';
@@ -56,14 +57,6 @@ const renderComponent = (props = mockProps) =>
 	render(<MarketplacePresentationModal {...props} />);
 
 describe('MarketplacePresentationModal', () => {
-	afterAll(() => {
-		jest.useRealTimers();
-	});
-
-	beforeAll(() => {
-		jest.useFakeTimers();
-	});
-
 	beforeEach(() => {
 		jest.clearAllMocks();
 	});
@@ -84,18 +77,17 @@ describe('MarketplacePresentationModal', () => {
 	});
 
 	it('calls onCloseModal when cancel button is clicked', async () => {
-		const {findByRole} = await renderComponent();
+		const {findByRole} = renderComponent();
 
 		const cancelButton = await findByRole('button', {name: /cancel/i});
 
 		expect(cancelButton).toBeInTheDocument();
 
-		await act(async () => {
-			fireEvent.click(cancelButton);
-			jest.advanceTimersByTime(1000);
-		});
+		userEvent.click(cancelButton);
 
-		expect(mockProps.onCloseModal).toHaveBeenCalledTimes(1);
+		await waitFor(() => {
+			expect(mockProps.onCloseModal).toHaveBeenCalledTimes(1);
+		});
 	});
 
 	it('renders MarketplaceModal with correct props', async () => {
@@ -107,14 +99,11 @@ describe('MarketplacePresentationModal', () => {
 
 		expect(exploreMarketplaceButton).toBeInTheDocument();
 
-		await act(async () => {
-			fireEvent.click(exploreMarketplaceButton);
-			jest.advanceTimersByTime(1000);
-		});
+		userEvent.click(exploreMarketplaceButton);
 
-		expect(
-			screen.getByTestId('mock-marketplace-modal-local')
-		).toBeInTheDocument();
+		await waitFor(() => {
+			screen.getByTestId('mock-marketplace-modal-local');
+		});
 
 		expect(
 			require('../../../src/main/resources/META-INF/resources/js/components/marketplace/MarketplaceModal')
@@ -137,21 +126,20 @@ describe('MarketplacePresentationModal', () => {
 
 		expect(exploreMarketplaceButton).toBeInTheDocument();
 
-		await act(async () => {
-			fireEvent.click(exploreMarketplaceButton);
-			jest.advanceTimersByTime(1000);
-		});
+		userEvent.click(exploreMarketplaceButton);
 
-		expect(
-			screen.getByTestId('mock-marketplace-modal-local')
-		).toBeInTheDocument();
+		await waitFor(() => {
+			expect(
+				screen.getByTestId('mock-marketplace-modal-local')
+			).toBeInTheDocument();
+		});
 
 		const mockMarketPlaceModalCall =
 			require('../../../src/main/resources/META-INF/resources/js/components/marketplace/MarketplaceModal')
 				.default.mock.calls[0][0];
 
 		expect(mockMarketPlaceModalCall.trigger.type.name).toEqual(
-			'MarketplaceModalTrigger'
+			'OpenMarketplaceModal'
 		);
 	});
 });

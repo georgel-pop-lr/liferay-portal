@@ -4,7 +4,8 @@
  */
 
 import {MarketplaceView} from '@liferay/marketplace-js-components-web';
-import {fireEvent, render, screen} from '@testing-library/react';
+import {render, screen, waitFor} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import {sub} from 'frontend-js-web';
 import React from 'react';
 
@@ -80,6 +81,7 @@ describe('MarketplaceModal', () => {
 
 	it('renders Marketplace.Modal with correct props', () => {
 		renderComponent();
+
 		expect(
 			screen.getByTestId('mock-marketplace-modal')
 		).toBeInTheDocument();
@@ -97,6 +99,7 @@ describe('MarketplaceModal', () => {
 
 	it('renders MarketplaceViews with correct props', () => {
 		renderComponent();
+
 		expect(
 			screen.getByTestId('mock-marketplace-views')
 		).toBeInTheDocument();
@@ -111,11 +114,13 @@ describe('MarketplaceModal', () => {
 
 	it('renders custom trigger if provided', () => {
 		renderComponent();
+
 		expect(screen.getByTestId('custom-trigger')).toBeInTheDocument();
 	});
 
 	it('renders default trigger if custom trigger is not provided', () => {
 		renderComponent({...mockProps, trigger: undefined});
+
 		expect(
 			screen.getByRole('button', {
 				name: Liferay.Language.get('open-marketplace-explorer'),
@@ -123,25 +128,34 @@ describe('MarketplaceModal', () => {
 		).toBeInTheDocument();
 	});
 
-	it('calls onOpenChange when trigger is clicked', () => {
+	it('calls onOpenChange when trigger is clicked', async () => {
 		const {getByTestId} = renderComponent();
 		const triggerButton = getByTestId('custom-trigger');
-		fireEvent.click(triggerButton);
-		expect(
-			mockUseMarketplaceContext.modal.onOpenChange
-		).toHaveBeenCalledWith(true);
+
+		userEvent.click(triggerButton);
+
+		await waitFor(() => {
+			expect(
+				mockUseMarketplaceContext.modal.onOpenChange
+			).toHaveBeenCalledWith(true);
+		});
 	});
 
-	it('calls setView when view is PURCHASE', () => {
+	it('calls setView when view is PURCHASE', async () => {
 		require('@liferay/marketplace-js-components-web').useMarketplaceContext.mockReturnValue(
 			{...mockUseMarketplaceContext, view: MarketplaceView.PURCHASE}
 		);
+
 		const {getByTestId} = renderComponent();
 		const triggerButton = getByTestId('custom-trigger');
-		fireEvent.click(triggerButton);
-		expect(mockUseMarketplaceContext.setView).toHaveBeenCalledWith(
-			MarketplaceView.PRODUCTS
-		);
+
+		userEvent.click(triggerButton);
+
+		await waitFor(() => {
+			expect(mockUseMarketplaceContext.setView).toHaveBeenCalledWith(
+				MarketplaceView.PRODUCTS
+			);
+		});
 	});
 
 	it('sets title when view is PURCHASE and product is available', () => {
@@ -152,7 +166,9 @@ describe('MarketplaceModal', () => {
 				view: MarketplaceView.PURCHASE,
 			}
 		);
+
 		renderComponent();
+
 		expect(
 			require('@liferay/marketplace-js-components-web').Marketplace.Modal
 		).toHaveBeenCalledWith(
@@ -170,6 +186,7 @@ describe('MarketplaceModal', () => {
 		require('@liferay/marketplace-js-components-web').useMarketplaceContext.mockReturnValue(
 			{...mockUseMarketplaceContext, product: {name: 'Test Product'}}
 		);
+
 		renderComponent();
 
 		const marketplaceModalProps =
