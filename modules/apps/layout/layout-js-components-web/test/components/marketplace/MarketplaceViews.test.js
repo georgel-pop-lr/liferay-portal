@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-import {act, fireEvent, render, screen} from '@testing-library/react';
+import {render, screen, waitFor} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import '@testing-library/jest-dom/extend-expect';
@@ -91,35 +92,42 @@ describe('MarketplaceViews', () => {
 
 	it('renders products view correctly', () => {
 		renderComponent();
+
 		expect(
 			screen.getByTestId('mock-marketplace-products')
 		).toBeInTheDocument();
+
 		expect(screen.getByText('install')).toBeInTheDocument();
 	});
 
 	it('handles product installation', async () => {
 		renderComponent();
 
-		await act(async () => {
-			fireEvent.click(screen.getByText('install'));
-		});
+		userEvent.click(screen.getByText('install'));
 
-		expect(mockUseMarketplaceContext.setView).toHaveBeenCalledWith(
-			MarketplaceView.PURCHASE
-		);
-		expect(mockUseMarketplaceContext.setProduct).toHaveBeenCalled();
-		expect(
-			mockUseMarketplaceContext.marketplaceRest.createCart
-		).toHaveBeenCalled();
-		expect(
-			mockUseMarketplaceContext.marketplaceRest.checkoutCart
-		).toHaveBeenCalled();
-		expect(
-			require('../../../src/main/resources/META-INF/resources/js/components/import_fragments/importFragmentsZipFile')
-		).toHaveBeenCalled();
-		expect(
-			require('frontend-js-components-web').openToast
-		).toHaveBeenCalledWith(expect.objectContaining({type: 'success'}));
+		await waitFor(() => {
+			expect(mockUseMarketplaceContext.setView).toHaveBeenCalledWith(
+				MarketplaceView.PURCHASE
+			);
+
+			expect(mockUseMarketplaceContext.setProduct).toHaveBeenCalled();
+
+			expect(
+				mockUseMarketplaceContext.marketplaceRest.createCart
+			).toHaveBeenCalled();
+
+			expect(
+				mockUseMarketplaceContext.marketplaceRest.checkoutCart
+			).toHaveBeenCalled();
+
+			expect(
+				require('../../../src/main/resources/META-INF/resources/js/components/import_fragments/importFragmentsZipFile')
+			).toHaveBeenCalled();
+
+			expect(
+				require('frontend-js-components-web').openToast
+			).toHaveBeenCalledWith(expect.objectContaining({type: 'success'}));
+		});
 	});
 
 	it('renders storefront view correctly', async () => {
@@ -131,15 +139,18 @@ describe('MarketplaceViews', () => {
 		);
 
 		renderComponent();
+
 		expect(
 			screen.getByTestId('mock-marketplace-storefront')
 		).toBeInTheDocument();
-		await act(async () => {
-			fireEvent.click(screen.getByText('install'));
+
+		userEvent.click(screen.getByText('install'));
+
+		await waitFor(() => {
+			expect(
+				require('../../../src/main/resources/META-INF/resources/js/components/import_fragments/importFragmentsZipFile')
+			).toHaveBeenCalled();
 		});
-		expect(
-			require('../../../src/main/resources/META-INF/resources/js/components/import_fragments/importFragmentsZipFile')
-		).toHaveBeenCalled();
 	});
 
 	it('renders purchase view correctly', () => {
@@ -151,6 +162,7 @@ describe('MarketplaceViews', () => {
 		);
 
 		renderComponent();
+
 		expect(
 			screen.getByTestId('mock-install-fragment-modal-body')
 		).toBeInTheDocument();
@@ -175,13 +187,14 @@ describe('MarketplaceViews', () => {
 
 		renderComponent();
 
-		await act(async () => {
-			fireEvent.click(screen.getByText('install'));
-		});
+		userEvent.click(screen.getByText('install'));
 
-		expect(
-			require('frontend-js-components-web').openToast
-		).toHaveBeenCalledWith(expect.objectContaining({type: 'danger'}));
-		expect(mockContext.modal.onOpenChange).toHaveBeenCalledWith(false);
+		await waitFor(() => {
+			expect(
+				require('frontend-js-components-web').openToast
+			).toHaveBeenCalledWith(expect.objectContaining({type: 'danger'}));
+
+			expect(mockContext.modal.onOpenChange).toHaveBeenCalledWith(false);
+		});
 	});
 });

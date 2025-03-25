@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-import {fireEvent, render, screen} from '@testing-library/react';
+import {render, screen, waitFor} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import '@testing-library/jest-dom/extend-expect';
@@ -15,6 +16,7 @@ import openModalComponent from '../../../src/main/resources/META-INF/resources/j
 jest.mock(
 	'../../../src/main/resources/META-INF/resources/js/components/modals/openModalComponent'
 );
+
 jest.mock(
 	'../../../src/main/resources/META-INF/resources/js/components/marketplace/MarketplaceModal',
 	() => ({
@@ -26,6 +28,7 @@ jest.mock(
 		)),
 	})
 );
+
 jest.mock(
 	'../../../src/main/resources/META-INF/resources/js/components/marketplace/MarketplacePresentationModal',
 	() => ({
@@ -72,52 +75,69 @@ describe('MarketplaceButton', () => {
 
 	it('renders ClayButtonWithIcon when not visited', () => {
 		renderComponent();
+
 		expect(screen.getByRole('button')).toBeInTheDocument();
 	});
 
 	it('renders MarketplaceModal when visited', () => {
 		renderComponent({...mockProps, isMarketplaceButtonVisited: true});
+
 		expect(
 			screen.getByTestId('mock-marketplace-modal')
 		).toBeInTheDocument();
 	});
 
-	it('opens MarketplacePresentationModal on click', () => {
+	it('opens MarketplacePresentationModal on click', async () => {
 		renderComponent();
-		fireEvent.click(screen.getByRole('button'));
-		expect(openModalComponent).toHaveBeenCalledWith({
-			ModalComponent: MarketplacePresentationModal,
-			modalComponentProps: {
-				body: mockProps.body,
-				fragmentPortletNamespace: mockProps.fragmentPortletNamespace,
-				fragmentsImportURL: mockProps.fragmentsImportURL,
-				heading: mockProps.heading,
-			},
+
+		userEvent.click(screen.getByRole('button'));
+
+		await waitFor(() => {
+			expect(openModalComponent).toHaveBeenCalledWith({
+				ModalComponent: MarketplacePresentationModal,
+				modalComponentProps: {
+					body: mockProps.body,
+					fragmentPortletNamespace:
+						mockProps.fragmentPortletNamespace,
+					fragmentsImportURL: mockProps.fragmentsImportURL,
+					heading: mockProps.heading,
+				},
+			});
 		});
 	});
 
-	it('sets visited state to true on click', () => {
+	it('sets visited state to true on click', async () => {
 		const {rerender} = renderComponent();
-		fireEvent.click(screen.getByRole('button'));
+
+		userEvent.click(screen.getByRole('button'));
+
 		rerender(
 			getComponent({...mockProps, isMarketplaceButtonVisited: true})
 		);
-		expect(
-			screen.getByTestId('mock-marketplace-modal')
-		).toBeInTheDocument();
+
+		await waitFor(() => {
+			expect(
+				screen.getByTestId('mock-marketplace-modal')
+			).toBeInTheDocument();
+		});
 	});
 
-	it('sets session storage on click', () => {
+	it('sets session storage on click', async () => {
 		renderComponent();
-		fireEvent.click(screen.getByRole('button'));
-		expect(Liferay.Util.Session.set).toHaveBeenCalledWith(
-			`${mockProps.portletNamespace}isMarketplaceButtonVisited`,
-			true
-		);
+
+		userEvent.click(screen.getByRole('button'));
+
+		await waitFor(() => {
+			expect(Liferay.Util.Session.set).toHaveBeenCalledWith(
+				`${mockProps.portletNamespace}isMarketplaceButtonVisited`,
+				true
+			);
+		});
 	});
 
 	it('adds notification class when not visited', () => {
 		const {container} = renderComponent();
+
 		expect(container.querySelector('.notification')).toBeInTheDocument();
 	});
 
@@ -126,6 +146,7 @@ describe('MarketplaceButton', () => {
 			...mockProps,
 			isMarketplaceButtonVisited: true,
 		});
+
 		expect(
 			container.querySelector('.notification')
 		).not.toBeInTheDocument();

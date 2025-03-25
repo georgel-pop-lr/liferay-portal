@@ -4,7 +4,8 @@
  */
 
 import '@testing-library/jest-dom/extend-expect';
-import {act, fireEvent, render} from '@testing-library/react';
+import {render, waitFor} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import ImportOptionsModal, {
@@ -23,14 +24,6 @@ const renderComponent = async ({
 };
 
 describe('ImportOptionsModal', () => {
-	afterAll(() => {
-		jest.useRealTimers();
-	});
-
-	beforeAll(() => {
-		jest.useFakeTimers();
-	});
-
 	it('renders text informing the user that some items already exist', async () => {
 		const {findByText} = await renderComponent();
 
@@ -68,14 +61,13 @@ describe('ImportOptionsModal', () => {
 		expect(cancelButton).toBeInTheDocument();
 		expect(importButton).toBeInTheDocument();
 
-		await act(async () => {
-			fireEvent.click(cancelButton);
-			fireEvent.click(importButton);
-			jest.advanceTimersByTime(1000);
-		});
+		userEvent.click(cancelButton);
+		userEvent.click(importButton);
 
-		expect(onCloseModal).toHaveBeenCalled();
-		expect(onImport).toHaveBeenCalled();
+		await waitFor(() => {
+			expect(onCloseModal).toHaveBeenCalled();
+			expect(onImport).toHaveBeenCalled();
+		});
 	});
 });
 

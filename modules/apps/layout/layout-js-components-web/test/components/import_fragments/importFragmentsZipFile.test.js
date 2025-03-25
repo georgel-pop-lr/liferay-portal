@@ -23,6 +23,7 @@ describe('importFragmentZipFile', () => {
 
 	beforeEach(() => {
 		jest.clearAllMocks();
+
 		consoleErrorSpy = jest
 			.spyOn(console, 'error')
 			.mockImplementation(() => {});
@@ -38,6 +39,7 @@ describe('importFragmentZipFile', () => {
 				Promise.resolve({importResults: {test: 'result'}, valid: true}),
 			ok: true,
 		};
+
 		fetch.mockResolvedValue(mockResponse);
 
 		await importFragmentZipFile(mockProps);
@@ -46,10 +48,12 @@ describe('importFragmentZipFile', () => {
 			mockProps.importURL,
 			expect.any(Object)
 		);
+
 		expect(mockProps.handleResponse).toHaveBeenCalledWith(
 			{importResults: {test: 'result'}, valid: true},
 			mockProps.file
 		);
+
 		expect(openToast).not.toHaveBeenCalled();
 	});
 
@@ -58,6 +62,7 @@ describe('importFragmentZipFile', () => {
 			ok: false,
 			status: 404,
 		};
+
 		fetch.mockResolvedValue(mockResponse);
 
 		await importFragmentZipFile(mockProps);
@@ -119,6 +124,7 @@ describe('importFragmentZipFile', () => {
 				Promise.resolve({importResults: {test: 'result'}, valid: true}),
 			ok: true,
 		};
+
 		fetch.mockResolvedValue(mockResponse);
 
 		await importFragmentZipFile({
@@ -134,6 +140,7 @@ describe('importFragmentZipFile', () => {
 		);
 
 		const formData = fetch.mock.calls[0][1].body;
+
 		expect(formData.get(`${mockProps.portletNamespace}importType`)).toBe(
 			'overwrite'
 		);
@@ -143,10 +150,12 @@ describe('importFragmentZipFile', () => {
 		const nullNameFile = new File(['test'], undefined, {
 			type: 'application/zip',
 		});
+
 		const mockResponse = {
 			ok: false,
 			status: 404,
 		};
+
 		fetch.mockResolvedValue(mockResponse);
 
 		await importFragmentZipFile({...mockProps, file: nullNameFile});

@@ -22,7 +22,7 @@ function renderComponent({
 	helpLink,
 	importURL = 'importURL',
 	portletNamespace = 'namespace',
-}) {
+} = {}) {
 	return render(
 		<ImportFragments
 			backURL={backURL}
@@ -34,16 +34,12 @@ function renderComponent({
 }
 
 describe('ImportFragments', () => {
-	beforeAll(() => {
-		jest.useFakeTimers();
-	});
-
 	afterEach(() => {
 		jest.clearAllMocks();
 	});
 
 	it('renders text informing the user should upload a ZIP file', async () => {
-		const {findByText} = renderComponent({});
+		const {findByText} = renderComponent();
 
 		expect(
 			await findByText(
@@ -53,43 +49,41 @@ describe('ImportFragments', () => {
 	});
 
 	it('renders file input', async () => {
-		const {findByLabelText} = renderComponent({});
+		const {findByLabelText} = renderComponent();
 
 		expect(await findByLabelText('file-upload')).toBeInTheDocument();
 	});
 
 	it('renders submit button disabled until file input has a valid value', async () => {
-		const {findByLabelText, findByRole} = renderComponent({});
+		const {findByLabelText, findByRole} = renderComponent();
 
 		const button = await findByRole('button', {name: /import/i});
-		expect(button.disabled).toBeTruthy();
+
+		expect(button).toBeDisabled();
 
 		const file = new File(['(⌐□_□)'], 'example.zip', {
 			type: 'application/zip',
 		});
 
-		fireEvent.change(await findByLabelText('file-upload'), {
-			target: {files: [file]},
-		});
+		await userEvent.upload(await findByLabelText('file-upload'), file);
 
-		expect(button.disabled).toBeFalsy();
+		expect(button).not.toBeDisabled();
 	});
 
 	it('renders cancel button enabled', async () => {
 		const {findByRole} = renderComponent({backURL: 'http://test.com'});
 
 		const button = await findByRole('button', {name: /cancel/i});
-		expect(button.disabled).toBeFalsy();
 
-		await userEvent.click(button, {
-			advanceTimers: jest.advanceTimersByTime,
-		});
+		expect(button).not.toBeDisabled();
+
+		await userEvent.click(button);
 
 		expect(navigate).toHaveBeenCalled();
 	});
 
 	it('shows required validation when a file with an invalid extension is introduced', async () => {
-		const {findByLabelText, findByRole, findByText} = renderComponent({});
+		const {findByLabelText, findByRole, findByText} = renderComponent();
 
 		const button = await findByRole('button', {name: /import/i});
 
@@ -101,7 +95,7 @@ describe('ImportFragments', () => {
 			target: {files: [file]},
 		});
 
-		expect(button.disabled).toBeTruthy();
+		expect(button).toBeDisabled();
 		expect(
 			await findByText('only-zip-files-are-allowed')
 		).toBeInTheDocument();
@@ -116,7 +110,7 @@ describe('ImportFragments', () => {
 	});
 
 	it.skip('renders Import Options modal', async () => {
-		const {findByLabelText, findByRole, findByText} = renderComponent({});
+		const {findByLabelText, findByRole, findByText} = renderComponent();
 
 		const button = await findByRole('button', {name: /import/i});
 
@@ -128,7 +122,7 @@ describe('ImportFragments', () => {
 			target: {files: [file]},
 		});
 
-		expect(button.disabled).toBeFalsy();
+		expect(button).not.toBeDisabled();
 
 		expect(await findByText('import-options')).toBeInTheDocument();
 	});
