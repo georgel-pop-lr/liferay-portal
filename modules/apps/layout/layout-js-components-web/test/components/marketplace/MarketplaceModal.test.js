@@ -199,4 +199,23 @@ describe('MarketplaceModal', () => {
 			})
 		);
 	});
+
+	it('renders null when trigger is null', () => {
+		renderComponent({...mockProps, trigger: null});
+
+		expect(screen.queryByTestId('custom-trigger')).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole('button', {
+				name: Liferay.Language.get('open-marketplace-explorer'),
+			})
+		).not.toBeInTheDocument();
+	});
+
+	it('calls onOpenChange when openOnRender is true', () => {
+		renderComponent({...mockProps, openOnRender: true});
+
+		expect(
+			mockUseMarketplaceContext.modal.onOpenChange
+		).toHaveBeenCalledWith(true);
+	});
 });

@@ -112,34 +112,10 @@ describe('MarketplacePresentationModal', () => {
 			expect.objectContaining({
 				fragmentPortletNamespace: mockProps.fragmentPortletNamespace,
 				fragmentsImportURL: mockProps.fragmentsImportURL,
+				openOnRender: true,
+				trigger: null,
 			}),
 			expect.anything()
-		);
-	});
-
-	it('renders MarketplaceModal with correct trigger', async () => {
-		const {findByRole} = await renderComponent();
-
-		const exploreMarketplaceButton = await findByRole('button', {
-			name: /explore-marketplace/i,
-		});
-
-		expect(exploreMarketplaceButton).toBeInTheDocument();
-
-		userEvent.click(exploreMarketplaceButton);
-
-		await waitFor(() => {
-			expect(
-				screen.getByTestId('mock-marketplace-modal-local')
-			).toBeInTheDocument();
-		});
-
-		const mockMarketPlaceModalCall =
-			require('../../../src/main/resources/META-INF/resources/js/components/marketplace/MarketplaceModal')
-				.default.mock.calls[0][0];
-
-		expect(mockMarketPlaceModalCall.trigger.type.name).toEqual(
-			'OpenMarketplaceModal'
 		);
 	});
 });
