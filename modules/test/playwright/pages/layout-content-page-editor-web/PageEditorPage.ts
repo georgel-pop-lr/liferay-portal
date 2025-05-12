@@ -1173,14 +1173,28 @@ export class PageEditorPage {
 		const isMaster = await this.isMaster();
 
 		const button = isMaster ? this.publishMasterButton : this.publishButton;
-		const successMessage = isMaster
-			? 'Success:The master page was published successfully.'
-			: 'Success:The page was published successfully.';
 
 		await button.waitFor();
 		await button.click();
 
-		await waitForAlert(this.page, successMessage);
+		const mappingMissingModal = this.page.locator('.modal-title', {
+			hasText: 'Fragment Mapping Missing',
+		});
+
+		try {
+			await mappingMissingModal.waitFor({timeout: 2000});
+			if (await mappingMissingModal.isVisible()) {
+				await this.page
+					.locator('.modal-footer')
+					.getByRole('button', {
+						name: 'Publish',
+					})
+					.click();
+			}
+		}
+		catch {}
+
+		await waitForAlert(this.page, 'successfully');
 	}
 
 	async redoAction() {
