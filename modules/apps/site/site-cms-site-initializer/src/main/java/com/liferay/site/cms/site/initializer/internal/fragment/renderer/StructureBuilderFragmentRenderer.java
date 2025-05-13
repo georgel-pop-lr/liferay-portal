@@ -24,6 +24,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.liferay.taglib.ui.SuccessTag;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -51,6 +52,12 @@ public class StructureBuilderFragmentRenderer
 		HttpServletResponse httpServletResponse) {
 
 		try {
+			SuccessTag successTag = new SuccessTag();
+
+			successTag.setKey("displayPagePublished");
+			successTag.setMessage("the-experience-was-updated-successfully");
+			successTag.doTagAsString(httpServletRequest, httpServletResponse);
+
 			PrintWriter printWriter = httpServletResponse.getWriter();
 
 			printWriter.write("<div><span aria-hidden=\"true\" class=\"");
