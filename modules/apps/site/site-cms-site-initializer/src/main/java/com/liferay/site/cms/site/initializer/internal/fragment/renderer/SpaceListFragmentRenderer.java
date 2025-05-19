@@ -79,7 +79,6 @@ public class SpaceListFragmentRenderer extends BaseSectionFragmentRenderer {
 
 			SpaceListDisplayContext spaceListDisplayContext =
 				new SpaceListDisplayContext(
-					themeDisplay,
 					_getSpaceName(objectEntry, themeDisplay.getLocale()));
 
 			componentTag.setProps(spaceListDisplayContext.getProps());
