@@ -6,7 +6,6 @@
 package com.liferay.site.cms.site.initializer.internal.display.context;
 
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 
 import java.util.Map;
@@ -16,17 +15,12 @@ import java.util.Map;
  */
 public class SpaceListDisplayContext {
 
-	public SpaceListDisplayContext(
-		ThemeDisplay themeDisplay, String spaceName) {
-
-		_themeDisplay = themeDisplay;
+	public SpaceListDisplayContext(String spaceName) {
 		_spaceName = spaceName;
 	}
 
 	public Map<String, Object> getProps() throws PortalException {
 		return HashMapBuilder.<String, Object>put(
-			"displayType", "outline-" + (_themeDisplay.getUserId() % 10)
-		).put(
 			"name", _spaceName
 		).put(
 			"size", "sm"
@@ -34,6 +28,5 @@ public class SpaceListDisplayContext {
 	}
 
 	private final String _spaceName;
-	private final ThemeDisplay _themeDisplay;
 
 }
