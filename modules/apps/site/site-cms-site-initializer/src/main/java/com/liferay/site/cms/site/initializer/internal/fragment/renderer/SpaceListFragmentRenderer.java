@@ -23,6 +23,7 @@ import com.liferay.site.cms.site.initializer.internal.display.context.SpaceListD
 import com.liferay.taglib.servlet.PageContextFactoryUtil;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
 import java.util.Locale;
 
@@ -57,6 +58,11 @@ public class SpaceListFragmentRenderer extends BaseSectionFragmentRenderer {
 		throws IOException {
 
 		try {
+			PrintWriter printWriter = httpServletResponse.getWriter();
+
+			printWriter.write("<div><span aria-hidden=\"true\" class=\"");
+			printWriter.write("loading-animation\"></span>");
+
 			ComponentTag componentTag = new ComponentTag();
 
 			componentTag.setModule(
@@ -84,6 +90,8 @@ public class SpaceListFragmentRenderer extends BaseSectionFragmentRenderer {
 			componentTag.doStartTag();
 
 			componentTag.doEndTag();
+
+			printWriter.write("</div>");
 		}
 		catch (Exception exception) {
 			if (_log.isDebugEnabled()) {
