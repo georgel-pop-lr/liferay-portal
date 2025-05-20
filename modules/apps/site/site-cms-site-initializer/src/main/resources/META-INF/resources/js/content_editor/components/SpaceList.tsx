@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
+import ClayForm from '@clayui/form';
 import ClayIcon from '@clayui/icon';
 import React from 'react';
 
@@ -17,22 +18,18 @@ export default function SpaceList({
 	'displayType' | 'name' | 'size'
 >) {
 	return (
-		<div className="align-items-center d-flex">
-			<div className="space-list-title">
-				<ClayIcon className="text-secondary" symbol="box-container" />
+		<ClayForm.Group className="align-items-center c-gap-3 d-flex">
+			<ClayIcon className="mt-0 text-secondary" symbol="box-container" />
 
-				<span className="mx-2 text-black text-weight-semi-bold">
-					{Liferay.Language.get('space')}
-				</span>
-			</div>
+			<label className="m-0">{Liferay.Language.get('space')}</label>
 
-			<div className="mx-4">
+			<div className="d-flex ml-2">
 				<SpaceSticker
 					displayType={displayType}
 					name={name}
 					size={size}
 				/>
 			</div>
-		</div>
+		</ClayForm.Group>
 	);
 }
