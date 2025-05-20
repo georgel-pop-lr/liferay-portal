@@ -82,14 +82,24 @@ public class FragmentCollectionImplTest {
 			ServiceContextTestUtil.getServiceContext(
 				_group.getGroupId(), TestPropsValues.getUserId());
 
-		FileEntry fileEntry = _assertResourcesMap("liferay.png");
+		Map<String, FileEntry> resourcesMap =
+			_fragmentCollection.getResourcesMap();
+
+		Assert.assertEquals(resourcesMap.toString(), 1, resourcesMap.size());
+
+		FileEntry fileEntry = resourcesMap.get("liferay.png");
+
+		Assert.assertNotNull(fileEntry);
 
 		_dlAppService.updateFileEntry(
 			fileEntry.getFileEntryId(), null, null, "liferay", null, null, null,
 			DLVersionNumberIncrease.NONE, (byte[])null, null, null, null,
 			serviceContext);
 
-		_assertResourcesMap("liferay");
+		resourcesMap = _fragmentCollection.getResourcesMap();
+
+		Assert.assertEquals(resourcesMap.toString(), 1, resourcesMap.size());
+		Assert.assertNotNull(resourcesMap.get("liferay"));
 	}
 
 	@Test
@@ -125,19 +135,6 @@ public class FragmentCollectionImplTest {
 		}
 
 		FileUtil.delete(zipWriter.getFile());
-	}
-
-	private FileEntry _assertResourcesMap(String fileTitle) throws Exception {
-		Map<String, FileEntry> resourcesMap =
-			_fragmentCollection.getResourcesMap();
-
-		Assert.assertEquals(resourcesMap.toString(), 1, resourcesMap.size());
-
-		FileEntry fileEntry = resourcesMap.get(fileTitle);
-
-		Assert.assertNotNull(fileEntry);
-
-		return fileEntry;
 	}
 
 	@Inject
