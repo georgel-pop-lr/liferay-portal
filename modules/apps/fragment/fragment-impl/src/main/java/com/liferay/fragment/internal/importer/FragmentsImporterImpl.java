@@ -468,8 +468,8 @@ public class FragmentsImporterImpl implements FragmentsImporter {
 								repository.getRepositoryId(), userId),
 							_getInputStream(
 								zipFile, zipEntryNames.get(fileName)),
-							fileName, MimeTypesUtil.getContentType(fileName),
-							false);
+							fileName, FileUtil.stripExtension(fileName),
+							MimeTypesUtil.getContentType(fileName), false);
 
 						zipEntryNames.remove(fileEntry.getFileName());
 					}
@@ -528,6 +528,7 @@ public class FragmentsImporterImpl implements FragmentsImporter {
 					folderIdsMap, folderPath, repository.getRepositoryId(),
 					userId),
 				_getInputStream(zipFile, entry.getValue()), fileName,
+				FileUtil.stripExtension(fileName),
 				MimeTypesUtil.getContentType(fileName), false);
 		}
 	}
