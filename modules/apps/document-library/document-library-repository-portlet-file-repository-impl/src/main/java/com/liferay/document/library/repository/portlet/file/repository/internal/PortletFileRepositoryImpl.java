@@ -126,7 +126,23 @@ public class PortletFileRepositoryImpl implements PortletFileRepository {
 			boolean indexingEnabled)
 		throws PortalException {
 
-		if (Validator.isNull(fileName)) {
+		return addPortletFileEntry(
+			externalReferenceCode, groupId, userId, className, classPK,
+			portletId, folderId, file, fileName, fileName, mimeType,
+			indexingEnabled);
+	}
+
+	@Override
+	public FileEntry addPortletFileEntry(
+			String externalReferenceCode, long groupId, long userId,
+			String className, long classPK, String portletId, long folderId,
+			File file, String fileName, String title, String mimeType,
+			boolean indexingEnabled)
+		throws PortalException {
+
+		if ((file == null) || Validator.isNull(fileName) ||
+			Validator.isNull(title)) {
+
 			return null;
 		}
 
@@ -162,8 +178,8 @@ public class PortletFileRepositoryImpl implements PortletFileRepository {
 
 			return localRepository.addFileEntry(
 				externalReferenceCode, userId, folderId, fileName, mimeType,
-				fileName, fileName, StringPool.BLANK, StringPool.BLANK, file,
-				null, null, null, serviceContext);
+				title, fileName, StringPool.BLANK, StringPool.BLANK, file, null,
+				null, null, serviceContext);
 		}
 		finally {
 			DLAppHelperThreadLocal.setEnabled(dlAppHelperEnabled);
@@ -190,6 +206,37 @@ public class PortletFileRepositoryImpl implements PortletFileRepository {
 			return addPortletFileEntry(
 				externalReferenceCode, groupId, userId, className, classPK,
 				portletId, folderId, file, fileName, mimeType, indexingEnabled);
+		}
+		catch (IOException ioException) {
+			throw new SystemException(
+				"Unable to write temporary file", ioException);
+		}
+		finally {
+			FileUtil.delete(file);
+		}
+	}
+
+	@Override
+	public FileEntry addPortletFileEntry(
+			String externalReferenceCode, long groupId, long userId,
+			String className, long classPK, String portletId, long folderId,
+			InputStream inputStream, String fileName, String title,
+			String mimeType, boolean indexingEnabled)
+		throws PortalException {
+
+		if (inputStream == null) {
+			return null;
+		}
+
+		File file = null;
+
+		try {
+			file = FileUtil.createTempFile(inputStream);
+
+			return addPortletFileEntry(
+				externalReferenceCode, groupId, userId, className, classPK,
+				portletId, folderId, file, fileName, title, mimeType,
+				indexingEnabled);
 		}
 		catch (IOException ioException) {
 			throw new SystemException(

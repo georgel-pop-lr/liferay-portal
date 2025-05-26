@@ -83,7 +83,23 @@ public class PortletFileRepositoryUtil {
 
 		return portletFileRepository.addPortletFileEntry(
 			externalReferenceCode, groupId, userId, className, classPK,
-			portletId, folderId, inputStream, fileName, mimeType,
+			portletId, folderId, inputStream, fileName, fileName, mimeType,
+			indexingEnabled);
+	}
+
+	public static FileEntry addPortletFileEntry(
+			String externalReferenceCode, long groupId, long userId,
+			String className, long classPK, String portletId, long folderId,
+			InputStream inputStream, String fileName, String title,
+			String mimeType, boolean indexingEnabled)
+		throws PortalException {
+
+		PortletFileRepository portletFileRepository =
+			_portletFileRepositorySnapshot.get();
+
+		return portletFileRepository.addPortletFileEntry(
+			externalReferenceCode, groupId, userId, className, classPK,
+			portletId, folderId, inputStream, fileName, title, mimeType,
 			indexingEnabled);
 	}
 
