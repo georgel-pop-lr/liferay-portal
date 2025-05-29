@@ -583,14 +583,6 @@ public class FragmentDisplayContext {
 			LanguageUtil.get(
 				_httpServletRequest, "marketplace-is-now-in-fragments")
 		).put(
-			"isMarketplaceButtonVisited",
-			GetterUtil.getBoolean(
-				SessionClicks.get(
-					_httpServletRequest,
-					_renderResponse.getNamespace() +
-						"isMarketplaceButtonVisited",
-					"false"))
-		).put(
 			"permissions",
 			HashMapBuilder.<String, Object>put(
 				"installFreeApps",

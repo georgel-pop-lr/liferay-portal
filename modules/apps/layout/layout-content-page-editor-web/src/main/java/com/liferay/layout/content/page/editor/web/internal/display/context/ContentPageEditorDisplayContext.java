@@ -561,13 +561,6 @@ public class ContentPageEditorDisplayContext {
 			).put(
 				"isConversionDraft", _isConversionDraft()
 			).put(
-				"isMarketplaceButtonVisited",
-				GetterUtil.getBoolean(
-					SessionClicks.get(
-						httpServletRequest,
-						getPortletNamespace() + "isMarketplaceButtonVisited",
-						StringPool.BLANK))
-			).put(
 				"isPrivateLayoutsEnabled",
 				() -> {
 					Group group = themeDisplay.getScopeGroup();
