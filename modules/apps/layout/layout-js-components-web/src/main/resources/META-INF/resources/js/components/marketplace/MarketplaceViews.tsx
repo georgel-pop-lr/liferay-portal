@@ -103,6 +103,14 @@ export default function MarketplaceViews({
 							});
 						}
 						else {
+							openToast({
+								message: Liferay.Language.get(
+									'your-request-completed-successfully'
+								),
+								title: Liferay.Language.get('success'),
+								type: 'success',
+							});
+
 							window.location.reload();
 						}
 					},
@@ -131,7 +139,7 @@ export default function MarketplaceViews({
 				);
 
 				if (!blob) {
-					return;
+					throw new Error('Product has no response blob.');
 				}
 
 				const file = new File(
@@ -141,14 +149,6 @@ export default function MarketplaceViews({
 				);
 
 				await handleImportFile(file);
-
-				openToast({
-					message: Liferay.Language.get(
-						'your-request-completed-successfully'
-					),
-					title: Liferay.Language.get('success'),
-					type: 'success',
-				});
 			}
 			catch (error) {
 				console.error('Installation failed:', error);
