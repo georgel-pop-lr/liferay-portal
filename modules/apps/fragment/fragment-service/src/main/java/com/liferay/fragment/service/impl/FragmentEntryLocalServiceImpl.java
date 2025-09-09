@@ -20,7 +20,6 @@ import com.liferay.fragment.processor.FragmentEntryProcessorRegistry;
 import com.liferay.fragment.service.FragmentEntryLinkLocalService;
 import com.liferay.fragment.service.base.FragmentEntryLocalServiceBaseImpl;
 import com.liferay.fragment.service.persistence.FragmentCollectionPersistence;
-import com.liferay.fragment.service.persistence.FragmentEntryLinkPersistence;
 import com.liferay.fragment.validator.FragmentEntryValidator;
 import com.liferay.petra.string.CharPool;
 import com.liferay.petra.string.StringPool;
@@ -28,8 +27,7 @@ import com.liferay.portal.aop.AopService;
 import com.liferay.portal.configuration.module.configuration.ConfigurationProvider;
 import com.liferay.portal.dao.orm.custom.sql.CustomSQL;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
-import com.liferay.portal.kernel.dao.orm.Property;
-import com.liferay.portal.kernel.dao.orm.PropertyFactoryUtil;
+import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.WildcardMode;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONFactory;
@@ -37,6 +35,7 @@ import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.ModelHintsUtil;
 import com.liferay.portal.kernel.model.Repository;
 import com.liferay.portal.kernel.model.ResourceConstants;
@@ -45,6 +44,7 @@ import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.portletfilerepository.PortletFileRepositoryUtil;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.repository.model.Folder;
+import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.ResourceLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
@@ -286,8 +286,10 @@ public class FragmentEntryLocalServiceImpl
 	public FragmentEntry deleteFragmentEntry(FragmentEntry fragmentEntry)
 		throws PortalException {
 
-		long fragmentEntryLinkCount = _fragmentEntryLinkPersistence.countByF_D(
-			fragmentEntry.getFragmentEntryId(), false);
+		long fragmentEntryLinkCount =
+			_fragmentEntryLinkLocalService.
+				getFragmentEntryLinksCountByFragmentEntryId(
+					fragmentEntry.getFragmentEntryId(), false);
 
 		if (fragmentEntryLinkCount > 0) {
 			throw new RequiredFragmentEntryException();
@@ -956,7 +958,7 @@ public class FragmentEntryLocalServiceImpl
 		return name;
 	}
 
-	private void _propagateChanges(long fragmentEntryId)
+	private void _propagateChanges(FragmentEntry fragmentEntry)
 		throws PortalException {
 
 		ActionableDynamicQuery actionableDynamicQuery =
@@ -964,11 +966,29 @@ public class FragmentEntryLocalServiceImpl
 
 		actionableDynamicQuery.setAddCriteriaMethod(
 			dynamicQuery -> {
-				Property fragmentEntryIdProperty = PropertyFactoryUtil.forName(
-					"fragmentEntryId");
+				String fragmentEntryERC = "fragmentEntryExternalReferenceCode";
+				String fragmentEntryScopeERC =
+					"fragmentEntryScopeExternalReferenceCode";
 
-				dynamicQuery.add(fragmentEntryIdProperty.eq(fragmentEntryId));
+				Group group = _groupLocalService.fetchGroup(
+					fragmentEntry.getGroupId());
+
+				dynamicQuery.add(
+					RestrictionsFactoryUtil.and(
+						RestrictionsFactoryUtil.eq(
+							"groupId", fragmentEntry.getGroupId()),
+						RestrictionsFactoryUtil.and(
+							RestrictionsFactoryUtil.eq(
+								fragmentEntryERC,
+								fragmentEntry.getExternalReferenceCode()),
+							RestrictionsFactoryUtil.or(
+								RestrictionsFactoryUtil.eq(
+									fragmentEntryScopeERC,
+									group.getExternalReferenceCode()),
+								RestrictionsFactoryUtil.isNull(
+									fragmentEntryScopeERC)))));
 			});
+
 		actionableDynamicQuery.setPerformActionMethod(
 			(FragmentEntryLink fragmentEntryLink) ->
 				_fragmentEntryLinkLocalService.updateLatestChanges(
@@ -1014,8 +1034,7 @@ public class FragmentEntryLocalServiceImpl
 			!ExportImportThreadLocal.isLayoutImportInProcess() &&
 			!ExportImportThreadLocal.isStagingInProcess()) {
 
-			_propagateChanges(
-				updatedPublishedFragmentEntry.getFragmentEntryId());
+			_propagateChanges(updatedPublishedFragmentEntry);
 		}
 
 		return updatedPublishedFragmentEntry;
@@ -1086,13 +1105,13 @@ public class FragmentEntryLocalServiceImpl
 	private FragmentEntryLinkLocalService _fragmentEntryLinkLocalService;
 
 	@Reference
-	private FragmentEntryLinkPersistence _fragmentEntryLinkPersistence;
-
-	@Reference
 	private FragmentEntryProcessorRegistry _fragmentEntryProcessorRegistry;
 
 	@Reference
 	private FragmentEntryValidator _fragmentEntryValidator;
+
+	@Reference
+	private GroupLocalService _groupLocalService;
 
 	@Reference
 	private JSONFactory _jsonFactory;
