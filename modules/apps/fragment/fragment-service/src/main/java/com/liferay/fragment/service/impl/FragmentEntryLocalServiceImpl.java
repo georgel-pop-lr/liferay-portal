@@ -20,7 +20,6 @@ import com.liferay.fragment.processor.FragmentEntryProcessorRegistry;
 import com.liferay.fragment.service.FragmentEntryLinkLocalService;
 import com.liferay.fragment.service.base.FragmentEntryLocalServiceBaseImpl;
 import com.liferay.fragment.service.persistence.FragmentCollectionPersistence;
-import com.liferay.fragment.service.persistence.FragmentEntryLinkPersistence;
 import com.liferay.fragment.validator.FragmentEntryValidator;
 import com.liferay.petra.string.CharPool;
 import com.liferay.petra.string.StringPool;
@@ -286,8 +285,10 @@ public class FragmentEntryLocalServiceImpl
 	public FragmentEntry deleteFragmentEntry(FragmentEntry fragmentEntry)
 		throws PortalException {
 
-		long fragmentEntryLinkCount = _fragmentEntryLinkPersistence.countByF_D(
-			fragmentEntry.getFragmentEntryId(), false);
+		long fragmentEntryLinkCount =
+			_fragmentEntryLinkLocalService.
+				getFragmentEntryLinksCountByFragmentEntryId(
+					fragmentEntry.getFragmentEntryId(), false);
 
 		if (fragmentEntryLinkCount > 0) {
 			throw new RequiredFragmentEntryException();
@@ -1097,9 +1098,6 @@ public class FragmentEntryLocalServiceImpl
 
 	@Reference
 	private FragmentEntryLinkLocalService _fragmentEntryLinkLocalService;
-
-	@Reference
-	private FragmentEntryLinkPersistence _fragmentEntryLinkPersistence;
 
 	@Reference
 	private FragmentEntryProcessorRegistry _fragmentEntryProcessorRegistry;

@@ -8,6 +8,8 @@ package com.liferay.fragment.service.impl;
 import com.liferay.document.library.util.DLURLHelper;
 import com.liferay.fragment.constants.FragmentEntryLinkConstants;
 import com.liferay.fragment.entry.processor.constants.FragmentEntryProcessorConstants;
+import com.liferay.fragment.exception.NoSuchEntryException;
+import com.liferay.fragment.exception.NoSuchEntryLinkException;
 import com.liferay.fragment.listener.FragmentEntryLinkListener;
 import com.liferay.fragment.listener.FragmentEntryLinkListenerRegistry;
 import com.liferay.fragment.model.FragmentCollection;
@@ -37,12 +39,14 @@ import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.LayoutTable;
 import com.liferay.portal.kernel.model.SystemEventConstants;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.security.auth.PrincipalThreadLocal;
+import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.service.PortletPreferencesLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
@@ -50,7 +54,6 @@ import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.systemevent.SystemEvent;
 import com.liferay.portal.kernel.util.Constants;
-import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.Portal;
@@ -62,7 +65,6 @@ import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -112,9 +114,26 @@ public class FragmentEntryLinkLocalServiceImpl
 			serviceContext.getCreateDate(new Date()));
 		fragmentEntryLink.setModifiedDate(
 			serviceContext.getModifiedDate(new Date()));
-		fragmentEntryLink.setOriginalFragmentEntryLinkId(
+
+		FragmentEntryLink fragmentEntryLinkOriginal = _getFragmentEntryLink(
 			originalFragmentEntryLinkId);
-		fragmentEntryLink.setFragmentEntryId(fragmentEntryId);
+
+		if (fragmentEntryLinkOriginal != null) {
+			fragmentEntryLink.setOriginalFragmentEntryLinkExternalReferenceCode(
+				fragmentEntryLinkOriginal.getExternalReferenceCode());
+		}
+
+		FragmentEntryERCResult fragmentEntryERCResult =
+			_getFragmentEntryERCResult(fragmentEntryId);
+
+		fragmentEntryLink.setFragmentEntryExternalReferenceCode(
+			fragmentEntryERCResult.getExternalReferenceCode());
+
+		if (!Objects.equals(fragmentEntryERCResult.getGroupId(), groupId)) {
+			fragmentEntryLink.setFragmentEntryScopeExternalReferenceCode(
+				fragmentEntryERCResult.getScopeExternalReferenceCode());
+		}
+
 		fragmentEntryLink.setSegmentsExperienceId(segmentsExperienceId);
 		fragmentEntryLink.setClassNameId(_portal.getClassNameId(Layout.class));
 		fragmentEntryLink.setClassPK(plid);
@@ -189,11 +208,8 @@ public class FragmentEntryLinkLocalServiceImpl
 	public FragmentEntryLink deleteFragmentEntryLink(long fragmentEntryLinkId)
 		throws PortalException {
 
-		FragmentEntryLink fragmentEntryLink =
-			fragmentEntryLinkPersistence.findByPrimaryKey(fragmentEntryLinkId);
-
 		return fragmentEntryLinkLocalService.deleteFragmentEntryLink(
-			fragmentEntryLink);
+			_getFragmentEntryLink(fragmentEntryLinkId));
 	}
 
 	@Override
@@ -244,8 +260,20 @@ public class FragmentEntryLinkLocalServiceImpl
 	public void deleteFragmentEntryLinksByFragmentEntryId(
 		long fragmentEntryId) {
 
+		FragmentEntryERCResult fragmentEntryERCResult =
+			_getFragmentEntryERCResult(fragmentEntryId);
+
 		List<FragmentEntryLink> fragmentEntryLinks =
-			fragmentEntryLinkPersistence.findByFragmentEntryId(fragmentEntryId);
+			fragmentEntryLinkPersistence.findByFEERC_FESERC(
+				fragmentEntryERCResult.getExternalReferenceCode(),
+				fragmentEntryERCResult.getScopeExternalReferenceCode());
+
+		List<FragmentEntryLink> fragmentEntryLinksNullScopeERC =
+			fragmentEntryLinkPersistence.findByG_FEERC_FESERC(
+				fragmentEntryERCResult.getGroupId(),
+				fragmentEntryERCResult.getExternalReferenceCode(), null);
+
+		fragmentEntryLinks.addAll(fragmentEntryLinksNullScopeERC);
 
 		for (FragmentEntryLink fragmentEntryLink : fragmentEntryLinks) {
 			fragmentEntryLinkLocalService.deleteFragmentEntryLink(
@@ -257,8 +285,22 @@ public class FragmentEntryLinkLocalServiceImpl
 	public void deleteFragmentEntryLinksByFragmentEntryId(
 		long fragmentEntryId, boolean deleted) {
 
+		FragmentEntryERCResult fragmentEntryERCResult =
+			_getFragmentEntryERCResult(fragmentEntryId);
+
 		List<FragmentEntryLink> fragmentEntryLinks =
-			fragmentEntryLinkPersistence.findByF_D(fragmentEntryId, deleted);
+			fragmentEntryLinkPersistence.findByFEERC_FESERC_D(
+				fragmentEntryERCResult.getExternalReferenceCode(),
+				fragmentEntryERCResult.getScopeExternalReferenceCode(),
+				deleted);
+
+		List<FragmentEntryLink> fragmentEntryLinksNullScopeERC =
+			fragmentEntryLinkPersistence.findByG_FEERC_FESERC_D(
+				fragmentEntryERCResult.getGroupId(),
+				fragmentEntryERCResult.getExternalReferenceCode(), null,
+				deleted);
+
+		fragmentEntryLinks.addAll(fragmentEntryLinksNullScopeERC);
 
 		for (FragmentEntryLink fragmentEntryLink : fragmentEntryLinks) {
 			fragmentEntryLinkLocalService.deleteFragmentEntryLink(
@@ -349,6 +391,9 @@ public class FragmentEntryLinkLocalServiceImpl
 	public int getAllFragmentEntryLinksCountByFragmentEntryId(
 		long groupId, long fragmentEntryId) {
 
+		FragmentEntryERCResult fragmentEntryERCResult =
+			_getFragmentEntryERCResult(fragmentEntryId);
+
 		return fragmentEntryLinkPersistence.dslQueryCount(
 			DSLQueryFactoryUtil.count(
 			).from(
@@ -361,8 +406,22 @@ public class FragmentEntryLinkLocalServiceImpl
 					FragmentEntryLinkTable.INSTANCE.groupId.eq(
 						groupId
 					).and(
-						FragmentEntryLinkTable.INSTANCE.fragmentEntryId.eq(
-							fragmentEntryId)
+						FragmentEntryLinkTable.INSTANCE.
+							fragmentEntryExternalReferenceCode.eq(
+								fragmentEntryERCResult.
+									getExternalReferenceCode())
+					).and(
+						FragmentEntryLinkTable.INSTANCE.
+							fragmentEntryScopeExternalReferenceCode.eq(
+								fragmentEntryERCResult.
+									getScopeExternalReferenceCode())
+					).or(
+						FragmentEntryLinkTable.INSTANCE.
+							fragmentEntryScopeExternalReferenceCode.isNull(
+							).and(
+								FragmentEntryLinkTable.INSTANCE.groupId.eq(
+									fragmentEntryERCResult.getGroupId())
+							)
 					).and(
 						FragmentEntryLinkTable.INSTANCE.deleted.eq(false)
 					)
@@ -389,8 +448,18 @@ public class FragmentEntryLinkLocalServiceImpl
 	public FragmentEntryLink getFragmentEntryLink(
 		long groupId, long originalFragmentEntryLinkId, long plid) {
 
-		return fragmentEntryLinkPersistence.fetchByG_OFELI_P_First(
-			groupId, originalFragmentEntryLinkId, plid, null);
+		FragmentEntryLink fragmentEntryLinkOriginal = _getFragmentEntryLink(
+			originalFragmentEntryLinkId);
+
+		String fragmentEntryLinkERC = null;
+
+		if (fragmentEntryLinkOriginal != null) {
+			fragmentEntryLinkERC =
+				fragmentEntryLinkOriginal.getExternalReferenceCode();
+		}
+
+		return fragmentEntryLinkPersistence.fetchByG_OFELERC_P_First(
+			groupId, fragmentEntryLinkERC, plid, null);
 	}
 
 	@Override
@@ -398,17 +467,8 @@ public class FragmentEntryLinkLocalServiceImpl
 		int type, int start, int end,
 		OrderByComparator<FragmentEntryLink> orderByComparator) {
 
-		List<FragmentEntry> fragmentEntries =
-			_fragmentEntryPersistence.findByType(type);
-
-		if (fragmentEntries.isEmpty()) {
-			return Collections.emptyList();
-		}
-
-		return fragmentEntryLinkPersistence.findByFragmentEntryId(
-			ListUtil.toLongArray(
-				fragmentEntries, FragmentEntry.FRAGMENT_ENTRY_ID_ACCESSOR),
-			start, end, orderByComparator);
+		return fragmentEntryLinkPersistence.findByType(
+			type, start, end, orderByComparator);
 	}
 
 	/**
@@ -447,15 +507,46 @@ public class FragmentEntryLinkLocalServiceImpl
 	public List<FragmentEntryLink> getFragmentEntryLinksByFragmentEntryId(
 		long fragmentEntryId) {
 
-		return fragmentEntryLinkPersistence.findByFragmentEntryId(
-			fragmentEntryId);
+		FragmentEntryERCResult fragmentEntryERCResult =
+			_getFragmentEntryERCResult(fragmentEntryId);
+
+		List<FragmentEntryLink> fragmentEntryLinks =
+			fragmentEntryLinkPersistence.findByFEERC_FESERC(
+				fragmentEntryERCResult.getExternalReferenceCode(),
+				fragmentEntryERCResult.getScopeExternalReferenceCode());
+
+		List<FragmentEntryLink> fragmentEntryLinksNullScopeERC =
+			fragmentEntryLinkPersistence.findByG_FEERC_FESERC(
+				fragmentEntryERCResult.getGroupId(),
+				fragmentEntryERCResult.getExternalReferenceCode(), null);
+
+		fragmentEntryLinks.addAll(fragmentEntryLinksNullScopeERC);
+
+		return fragmentEntryLinks;
 	}
 
 	@Override
 	public List<FragmentEntryLink> getFragmentEntryLinksByFragmentEntryId(
 		long fragmentEntryId, boolean deleted) {
 
-		return fragmentEntryLinkPersistence.findByF_D(fragmentEntryId, deleted);
+		FragmentEntryERCResult fragmentEntryERCResult =
+			_getFragmentEntryERCResult(fragmentEntryId);
+
+		List<FragmentEntryLink> fragmentEntryLinks =
+			fragmentEntryLinkPersistence.findByFEERC_FESERC_D(
+				fragmentEntryERCResult.getExternalReferenceCode(),
+				fragmentEntryERCResult.getScopeExternalReferenceCode(),
+				deleted);
+
+		List<FragmentEntryLink> fragmentEntryLinksNullScopeERC =
+			fragmentEntryLinkPersistence.findByG_FEERC_FESERC_D(
+				fragmentEntryERCResult.getGroupId(),
+				fragmentEntryERCResult.getExternalReferenceCode(), null,
+				deleted);
+
+		fragmentEntryLinks.addAll(fragmentEntryLinksNullScopeERC);
+
+		return fragmentEntryLinks;
 	}
 
 	@Override
@@ -511,24 +602,63 @@ public class FragmentEntryLinkLocalServiceImpl
 	public int getFragmentEntryLinksCountByFragmentEntryId(
 		long fragmentEntryId) {
 
-		return fragmentEntryLinkPersistence.countByFragmentEntryId(
-			fragmentEntryId);
+		FragmentEntryERCResult fragmentEntryERCResult =
+			_getFragmentEntryERCResult(fragmentEntryId);
+
+		int countByFEERC_FESERC =
+			fragmentEntryLinkPersistence.countByFEERC_FESERC(
+				fragmentEntryERCResult.getExternalReferenceCode(),
+				fragmentEntryERCResult.getScopeExternalReferenceCode());
+
+		int countByG_FEERC_FESERC =
+			fragmentEntryLinkPersistence.countByG_FEERC_FESERC(
+				fragmentEntryERCResult.getGroupId(),
+				fragmentEntryERCResult.getExternalReferenceCode(), null);
+
+		return countByFEERC_FESERC + countByG_FEERC_FESERC;
 	}
 
 	@Override
 	public int getFragmentEntryLinksCountByFragmentEntryId(
 		long fragmentEntryId, boolean deleted) {
 
-		return fragmentEntryLinkPersistence.countByF_D(
-			fragmentEntryId, deleted);
+		FragmentEntryERCResult fragmentEntryERCResult =
+			_getFragmentEntryERCResult(fragmentEntryId);
+
+		int countByFEERC_FESERC_D =
+			fragmentEntryLinkPersistence.countByFEERC_FESERC_D(
+				fragmentEntryERCResult.getExternalReferenceCode(),
+				fragmentEntryERCResult.getScopeExternalReferenceCode(),
+				deleted);
+
+		int countByG_FEERC_FESERC_D =
+			fragmentEntryLinkPersistence.countByG_FEERC_FESERC_D(
+				fragmentEntryERCResult.getGroupId(),
+				fragmentEntryERCResult.getExternalReferenceCode(), null,
+				deleted);
+
+		return countByFEERC_FESERC_D + countByG_FEERC_FESERC_D;
 	}
 
 	@Override
 	public int getFragmentEntryLinksCountByFragmentEntryId(
 		long groupId, long fragmentEntryId, boolean deleted) {
 
-		return fragmentEntryLinkPersistence.countByG_F_D(
-			groupId, fragmentEntryId, deleted);
+		FragmentEntryERCResult fragmentEntryERCResult =
+			_getFragmentEntryERCResult(fragmentEntryId);
+
+		int countByG_FEERC_FESERC_D =
+			fragmentEntryLinkPersistence.countByG_FEERC_FESERC_D(
+				groupId, fragmentEntryERCResult.getExternalReferenceCode(),
+				fragmentEntryERCResult.getScopeExternalReferenceCode(),
+				deleted);
+
+		int countByG_FEERC_FESERC_D_ScopeNull =
+			fragmentEntryLinkPersistence.countByG_FEERC_FESERC_D(
+				groupId, fragmentEntryERCResult.getExternalReferenceCode(),
+				null, deleted);
+
+		return countByG_FEERC_FESERC_D + countByG_FEERC_FESERC_D_ScopeNull;
 	}
 
 	@Override
@@ -548,6 +678,9 @@ public class FragmentEntryLinkLocalServiceImpl
 	@Override
 	public int getLayoutFragmentEntryLinksCountByFragmentEntryId(
 		long groupId, long fragmentEntryId) {
+
+		FragmentEntryERCResult fragmentEntryERCResult =
+			_getFragmentEntryERCResult(fragmentEntryId);
 
 		Table<LayoutTable> tempLayoutTableTable = DSLQueryFactoryUtil.select(
 			LayoutTable.INSTANCE.plid
@@ -580,8 +713,21 @@ public class FragmentEntryLinkLocalServiceImpl
 				FragmentEntryLinkTable.INSTANCE.groupId.eq(
 					groupId
 				).and(
-					FragmentEntryLinkTable.INSTANCE.fragmentEntryId.eq(
-						fragmentEntryId)
+					FragmentEntryLinkTable.INSTANCE.
+						fragmentEntryExternalReferenceCode.eq(
+							fragmentEntryERCResult.getExternalReferenceCode())
+				).and(
+					FragmentEntryLinkTable.INSTANCE.
+						fragmentEntryScopeExternalReferenceCode.eq(
+							fragmentEntryERCResult.
+								getScopeExternalReferenceCode())
+				).or(
+					FragmentEntryLinkTable.INSTANCE.
+						fragmentEntryScopeExternalReferenceCode.isNull(
+						).and(
+							FragmentEntryLinkTable.INSTANCE.groupId.eq(
+								fragmentEntryERCResult.getGroupId())
+						)
 				).and(
 					FragmentEntryLinkTable.INSTANCE.deleted.eq(false)
 				)
@@ -603,6 +749,9 @@ public class FragmentEntryLinkLocalServiceImpl
 	@Override
 	public int getLayoutPageTemplateFragmentEntryLinksCountByFragmentEntryId(
 		long groupId, long fragmentEntryId, int layoutPageTemplateType) {
+
+		FragmentEntryERCResult fragmentEntryERCResult =
+			_getFragmentEntryERCResult(fragmentEntryId);
 
 		Table<LayoutTable> tempLayoutTableTable = DSLQueryFactoryUtil.select(
 			LayoutTable.INSTANCE.plid
@@ -636,8 +785,21 @@ public class FragmentEntryLinkLocalServiceImpl
 				FragmentEntryLinkTable.INSTANCE.groupId.eq(
 					groupId
 				).and(
-					FragmentEntryLinkTable.INSTANCE.fragmentEntryId.eq(
-						fragmentEntryId)
+					FragmentEntryLinkTable.INSTANCE.
+						fragmentEntryExternalReferenceCode.eq(
+							fragmentEntryERCResult.getExternalReferenceCode())
+				).and(
+					FragmentEntryLinkTable.INSTANCE.
+						fragmentEntryScopeExternalReferenceCode.eq(
+							fragmentEntryERCResult.
+								getScopeExternalReferenceCode())
+				).or(
+					FragmentEntryLinkTable.INSTANCE.
+						fragmentEntryScopeExternalReferenceCode.isNull(
+						).and(
+							FragmentEntryLinkTable.INSTANCE.groupId.eq(
+								fragmentEntryERCResult.getGroupId())
+						)
 				).and(
 					FragmentEntryLinkTable.INSTANCE.deleted.eq(false)
 				)
@@ -666,10 +828,14 @@ public class FragmentEntryLinkLocalServiceImpl
 			long userId, long fragmentEntryLinkId, boolean deleted)
 		throws PortalException {
 
-		FragmentEntryLink fragmentEntryLink =
-			fragmentEntryLinkPersistence.findByPrimaryKey(fragmentEntryLinkId);
+		FragmentEntryLink fragmentEntryLink = _getFragmentEntryLink(
+			fragmentEntryLinkId);
 
-		_checkUnlockedLayout(fragmentEntryLink.getPlid(), userId);
+		_checkUnlockedLayout(
+			Objects.requireNonNull(
+				fragmentEntryLink
+			).getPlid(),
+			userId);
 
 		fragmentEntryLink.setDeleted(deleted);
 
@@ -711,9 +877,29 @@ public class FragmentEntryLinkLocalServiceImpl
 		fragmentEntryLink.setUserName(user.getFullName());
 		fragmentEntryLink.setModifiedDate(
 			serviceContext.getModifiedDate(new Date()));
-		fragmentEntryLink.setOriginalFragmentEntryLinkId(
+
+		FragmentEntryLink fragmentEntryLinkOriginal = _getFragmentEntryLink(
 			originalFragmentEntryLinkId);
-		fragmentEntryLink.setFragmentEntryId(fragmentEntryId);
+
+		if (fragmentEntryLinkOriginal != null) {
+			fragmentEntryLink.setOriginalFragmentEntryLinkExternalReferenceCode(
+				fragmentEntryLinkOriginal.getExternalReferenceCode());
+		}
+
+		FragmentEntryERCResult fragmentEntryERCResult =
+			_getFragmentEntryERCResult(fragmentEntryId);
+
+		fragmentEntryLink.setFragmentEntryExternalReferenceCode(
+			fragmentEntryERCResult.getExternalReferenceCode());
+
+		if (!Objects.equals(
+				fragmentEntryERCResult.getGroupId(),
+				fragmentEntryLink.getGroupId())) {
+
+			fragmentEntryLink.setFragmentEntryScopeExternalReferenceCode(
+				fragmentEntryERCResult.getScopeExternalReferenceCode());
+		}
+
 		fragmentEntryLink.setClassNameId(_portal.getClassNameId(Layout.class));
 		fragmentEntryLink.setClassPK(plid);
 		fragmentEntryLink.setPlid(plid);
@@ -864,14 +1050,13 @@ public class FragmentEntryLinkLocalServiceImpl
 	public void updateLatestChanges(long fragmentEntryLinkId)
 		throws PortalException {
 
-		FragmentEntryLink fragmentEntryLink =
-			fragmentEntryLinkPersistence.findByPrimaryKey(fragmentEntryLinkId);
+		FragmentEntryLink fragmentEntryLink = Objects.requireNonNull(
+			_getFragmentEntryLink(fragmentEntryLinkId));
 
-		FragmentEntry fragmentEntry =
-			_fragmentEntryPersistence.findByPrimaryKey(
-				fragmentEntryLink.getFragmentEntryId());
-
-		updateLatestChanges(fragmentEntry, fragmentEntryLink);
+		updateLatestChanges(
+			Objects.requireNonNull(
+				_getFragmentEntry(fragmentEntryLink.getFragmentEntryId())),
+			fragmentEntryLink);
 	}
 
 	private void _checkUnlockedLayout(long plid, long userId)
@@ -882,6 +1067,70 @@ public class FragmentEntryLinkLocalServiceImpl
 		if ((layout != null) && !layout.isUnlocked(Constants.EDIT, userId)) {
 			throw new LockedLayoutException();
 		}
+	}
+
+	private FragmentEntry _getFragmentEntry(long fragmentEntryId) {
+		if (fragmentEntryId == 0) {
+			return null;
+		}
+
+		FragmentEntry fragmentEntry;
+
+		try {
+			fragmentEntry = _fragmentEntryPersistence.findByPrimaryKey(
+				fragmentEntryId);
+		}
+		catch (NoSuchEntryException noSuchEntryException) {
+			throw new RuntimeException(
+				"Unable to get fragment entry id " + fragmentEntryId,
+				noSuchEntryException);
+		}
+
+		return fragmentEntry;
+	}
+
+	private FragmentEntryERCResult _getFragmentEntryERCResult(
+		long fragmentEntryId) {
+
+		FragmentEntry fragmentEntry = _getFragmentEntry(fragmentEntryId);
+
+		String externalReferenceCode = null;
+		long groupId = 0;
+		String scopeExternalReferenceCode = null;
+
+		if (fragmentEntry != null) {
+			externalReferenceCode = fragmentEntry.getExternalReferenceCode();
+			groupId = fragmentEntry.getGroupId();
+
+			Group group = _groupLocalService.fetchGroup(
+				fragmentEntry.getGroupId());
+
+			scopeExternalReferenceCode = group.getExternalReferenceCode();
+		}
+
+		return new FragmentEntryERCResult(
+			externalReferenceCode, groupId, scopeExternalReferenceCode);
+	}
+
+	private FragmentEntryLink _getFragmentEntryLink(long fragmentEntryLinkId) {
+		if (fragmentEntryLinkId == 0) {
+			return null;
+		}
+
+		FragmentEntryLink fragmentEntryLinkOriginal;
+
+		try {
+			fragmentEntryLinkOriginal =
+				fragmentEntryLinkPersistence.findByPrimaryKey(
+					fragmentEntryLinkId);
+		}
+		catch (NoSuchEntryLinkException noSuchEntryLinkException) {
+			throw new RuntimeException(
+				"Unable to get fragment entry link id " + fragmentEntryLinkId,
+				noSuchEntryLinkException);
+		}
+
+		return fragmentEntryLinkOriginal;
 	}
 
 	private String _getProcessedHTML(
@@ -1070,6 +1319,9 @@ public class FragmentEntryLinkLocalServiceImpl
 	private FragmentEntryProcessorRegistry _fragmentEntryProcessorRegistry;
 
 	@Reference
+	private GroupLocalService _groupLocalService;
+
+	@Reference
 	private JSONFactory _jsonFactory;
 
 	@Reference
@@ -1083,5 +1335,34 @@ public class FragmentEntryLinkLocalServiceImpl
 
 	@Reference
 	private UserLocalService _userLocalService;
+
+	private static final class FragmentEntryERCResult {
+
+		public FragmentEntryERCResult(
+			String externalReferenceCode, long groupId,
+			String scopeExternalReferenceCode) {
+
+			_externalReferenceCode = externalReferenceCode;
+			_groupId = groupId;
+			_scopeExternalReferenceCode = scopeExternalReferenceCode;
+		}
+
+		public String getExternalReferenceCode() {
+			return _externalReferenceCode;
+		}
+
+		public long getGroupId() {
+			return _groupId;
+		}
+
+		public String getScopeExternalReferenceCode() {
+			return _scopeExternalReferenceCode;
+		}
+
+		private final String _externalReferenceCode;
+		private final long _groupId;
+		private final String _scopeExternalReferenceCode;
+
+	}
 
 }
