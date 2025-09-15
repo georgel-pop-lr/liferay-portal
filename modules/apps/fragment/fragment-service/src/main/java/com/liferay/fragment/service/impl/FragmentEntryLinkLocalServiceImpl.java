@@ -526,30 +526,6 @@ public class FragmentEntryLinkLocalServiceImpl
 	}
 
 	@Override
-	public List<FragmentEntryLink> getFragmentEntryLinksByFragmentEntryId(
-		long fragmentEntryId, boolean deleted) {
-
-		FragmentEntryERCResult fragmentEntryERCResult =
-			_getFragmentEntryERCResult(fragmentEntryId);
-
-		List<FragmentEntryLink> fragmentEntryLinks =
-			fragmentEntryLinkPersistence.findByFEERC_FESERC_D(
-				fragmentEntryERCResult.getExternalReferenceCode(),
-				fragmentEntryERCResult.getScopeExternalReferenceCode(),
-				deleted);
-
-		List<FragmentEntryLink> fragmentEntryLinksNullScopeERC =
-			fragmentEntryLinkPersistence.findByG_FEERC_FESERC_D(
-				fragmentEntryERCResult.getGroupId(),
-				fragmentEntryERCResult.getExternalReferenceCode(), null,
-				deleted);
-
-		fragmentEntryLinks.addAll(fragmentEntryLinksNullScopeERC);
-
-		return fragmentEntryLinks;
-	}
-
-	@Override
 	public List<FragmentEntryLink> getFragmentEntryLinksByPlid(
 		long groupId, long plid) {
 
@@ -844,21 +820,6 @@ public class FragmentEntryLinkLocalServiceImpl
 
 	@Override
 	public FragmentEntryLink updateFragmentEntryLink(
-			long userId, long fragmentEntryLinkId, int position)
-		throws PortalException {
-
-		FragmentEntryLink fragmentEntryLink = fetchFragmentEntryLink(
-			fragmentEntryLinkId);
-
-		_checkUnlockedLayout(fragmentEntryLink.getPlid(), userId);
-
-		fragmentEntryLink.setPosition(position);
-
-		return fragmentEntryLinkPersistence.update(fragmentEntryLink);
-	}
-
-	@Override
-	public FragmentEntryLink updateFragmentEntryLink(
 			long userId, long fragmentEntryLinkId,
 			long originalFragmentEntryLinkId, long fragmentEntryId, long plid,
 			String css, String html, String js, String configuration,
@@ -917,15 +878,6 @@ public class FragmentEntryLinkLocalServiceImpl
 		fragmentEntryLink.setType(type);
 
 		return fragmentEntryLinkPersistence.update(fragmentEntryLink);
-	}
-
-	@Override
-	public FragmentEntryLink updateFragmentEntryLink(
-			long userId, long fragmentEntryLinkId, String editableValues)
-		throws PortalException {
-
-		return updateFragmentEntryLink(
-			userId, fragmentEntryLinkId, editableValues, true);
 	}
 
 	@Override
