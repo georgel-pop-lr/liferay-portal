@@ -27,6 +27,7 @@ import com.liferay.portal.aop.AopService;
 import com.liferay.portal.configuration.module.configuration.ConfigurationProvider;
 import com.liferay.portal.dao.orm.custom.sql.CustomSQL;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
+import com.liferay.portal.kernel.dao.orm.Criterion;
 import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.WildcardMode;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -956,27 +957,32 @@ public class FragmentEntryLocalServiceImpl
 
 		actionableDynamicQuery.setAddCriteriaMethod(
 			dynamicQuery -> {
-				String fragmentEntryERC = "fragmentEntryExternalReferenceCode";
-				String fragmentEntryScopeERC =
-					"fragmentEntryScopeExternalReferenceCode";
-
 				Group group = _groupLocalService.fetchGroup(
 					fragmentEntry.getGroupId());
 
+				Criterion groupIdRestriction = RestrictionsFactoryUtil.eq(
+					"groupId", fragmentEntry.getGroupId());
+
+				Criterion fragmentEntryERCRestriction =
+					RestrictionsFactoryUtil.eq(
+						"fragmentEntryExternalReferenceCode",
+						fragmentEntry.getExternalReferenceCode());
+
+				Criterion scopeERCRestriction = RestrictionsFactoryUtil.or(
+					RestrictionsFactoryUtil.eq(
+						"fragmentEntryScopeExternalReferenceCode",
+						group.getExternalReferenceCode()),
+					RestrictionsFactoryUtil.isNull(
+						"fragmentEntryScopeExternalReferenceCode"));
+
+				Criterion fragmentEntryAndScopeERCRestriction =
+					RestrictionsFactoryUtil.and(
+						fragmentEntryERCRestriction, scopeERCRestriction);
+
 				dynamicQuery.add(
 					RestrictionsFactoryUtil.and(
-						RestrictionsFactoryUtil.eq(
-							"groupId", fragmentEntry.getGroupId()),
-						RestrictionsFactoryUtil.and(
-							RestrictionsFactoryUtil.eq(
-								fragmentEntryERC,
-								fragmentEntry.getExternalReferenceCode()),
-							RestrictionsFactoryUtil.or(
-								RestrictionsFactoryUtil.eq(
-									fragmentEntryScopeERC,
-									group.getExternalReferenceCode()),
-								RestrictionsFactoryUtil.isNull(
-									fragmentEntryScopeERC)))));
+						groupIdRestriction,
+						fragmentEntryAndScopeERCRestriction));
 			});
 
 		actionableDynamicQuery.setPerformActionMethod(
