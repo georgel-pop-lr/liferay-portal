@@ -98,7 +98,8 @@ public class LayoutClassedModelUsageUpgradeProcessTest
 		FragmentEntryLink publishedFragmentEntryLink =
 			_fragmentEntryLinkLocalService.getFragmentEntryLink(
 				_group.getGroupId(),
-				draftFragmentEntryLink.getFragmentEntryLinkId(),
+				draftFragmentEntryLink.
+					getOriginalFragmentEntryLinkExternalReferenceCode(),
 				_layout.getPlid());
 
 		_assertLayoutClassedModelUsages(

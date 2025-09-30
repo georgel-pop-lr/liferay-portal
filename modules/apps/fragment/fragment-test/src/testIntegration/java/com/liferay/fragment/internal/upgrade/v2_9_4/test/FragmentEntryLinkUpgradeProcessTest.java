@@ -101,13 +101,13 @@ public class FragmentEntryLinkUpgradeProcessTest
 		FragmentEntryLink publishedLayoutFragmentEntryLink =
 			_fragmentEntryLinkLocalService.getFragmentEntryLink(
 				_group.getGroupId(),
-				draftLayoutFragmentEntryLink.getFragmentEntryLinkId(),
+				draftLayoutFragmentEntryLink.getExternalReferenceCode(),
 				_layout.getPlid());
 
 		FragmentEntryLink publishedLayoutPortletFragmentEntryLink =
 			_fragmentEntryLinkLocalService.getFragmentEntryLink(
 				_group.getGroupId(),
-				draftLayoutPortletFragmentEntryLink.getFragmentEntryLinkId(),
+				draftLayoutPortletFragmentEntryLink.getExternalReferenceCode(),
 				_layout.getPlid());
 
 		_updateFragmentEntryLinksType(
