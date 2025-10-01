@@ -268,12 +268,16 @@ public class AddSegmentsExperienceMVCActionCommandTest {
 			_fragmentEntryLinkLocalService.getFragmentEntryLink(
 				GetterUtil.getLong(iterator.next()));
 
-		Assert.assertEquals(
-			0, targetFragmentEntryLink.getOriginalFragmentEntryLinkId());
+		Assert.assertNull(
+			targetFragmentEntryLink.
+				getOriginalFragmentEntryLinkExternalReferenceCode());
 
 		Assert.assertEquals(
-			sourceFragmentEntryLink.getFragmentEntryId(),
-			targetFragmentEntryLink.getFragmentEntryId());
+			sourceFragmentEntryLink.getFragmentEntryExternalReferenceCode(),
+			targetFragmentEntryLink.getFragmentEntryExternalReferenceCode());
+		Assert.assertEquals(
+			sourceFragmentEntryLink.getFragmentEntryGroupId(),
+			targetFragmentEntryLink.getFragmentEntryGroupId());
 		Assert.assertEquals(
 			sourceFragmentEntryLink.getHtml(),
 			targetFragmentEntryLink.getHtml());

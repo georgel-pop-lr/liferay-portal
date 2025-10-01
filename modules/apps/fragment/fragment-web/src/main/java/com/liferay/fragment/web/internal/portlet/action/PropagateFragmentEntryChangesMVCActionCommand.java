@@ -6,8 +6,10 @@
 package com.liferay.fragment.web.internal.portlet.action;
 
 import com.liferay.fragment.constants.FragmentPortletKeys;
+import com.liferay.fragment.model.FragmentEntry;
 import com.liferay.fragment.model.FragmentEntryLink;
 import com.liferay.fragment.service.FragmentEntryLinkLocalService;
+import com.liferay.fragment.service.FragmentEntryLocalService;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.Property;
 import com.liferay.portal.kernel.dao.orm.PropertyFactoryUtil;
@@ -50,20 +52,29 @@ public class PropagateFragmentEntryChangesMVCActionCommand
 			ActionableDynamicQuery actionableDynamicQuery =
 				_fragmentEntryLinkLocalService.getActionableDynamicQuery();
 
+			FragmentEntry fragmentEntry =
+				_fragmentEntryLocalService.
+					fetchFragmentEntryByExternalReferenceCode(
+						fragmentEntryLink.
+							getFragmentEntryExternalReferenceCode(),
+						fragmentEntryLink.getFragmentEntryGroupId());
+
 			actionableDynamicQuery.setAddCriteriaMethod(
 				dynamicQuery -> {
 					Property fragmentEntryIdProperty =
-						PropertyFactoryUtil.forName("fragmentEntryId");
+						PropertyFactoryUtil.forName(
+							"fragmentEntryExternalReferenceCode");
 
 					dynamicQuery.add(
 						fragmentEntryIdProperty.eq(
-							fragmentEntryLink.getFragmentEntryId()));
+							fragmentEntry.getExternalReferenceCode()));
 
 					Property plidProperty = PropertyFactoryUtil.forName("plid");
 
 					dynamicQuery.add(
 						plidProperty.eq(fragmentEntryLink.getPlid()));
 				});
+
 			actionableDynamicQuery.setCompanyId(
 				fragmentEntryLink.getCompanyId());
 			actionableDynamicQuery.setGroupId(fragmentEntryLink.getGroupId());
@@ -78,5 +89,8 @@ public class PropagateFragmentEntryChangesMVCActionCommand
 
 	@Reference
 	private FragmentEntryLinkLocalService _fragmentEntryLinkLocalService;
+
+	@Reference
+	private FragmentEntryLocalService _fragmentEntryLocalService;
 
 }

@@ -648,8 +648,11 @@ public class CopyItemsMVCActionCommandTest {
 		throws Exception {
 
 		Assert.assertEquals(
-			fragmentEntryLink.getFragmentEntryId(),
-			copiedFragmentEntryLink.getFragmentEntryId());
+			fragmentEntryLink.getExternalReferenceCode(),
+			copiedFragmentEntryLink.getFragmentEntryExternalReferenceCode());
+		Assert.assertEquals(
+			fragmentEntryLink.getGroupId(),
+			copiedFragmentEntryLink.getFragmentEntryGroupId());
 		Assert.assertNotEquals(
 			copiedFragmentEntryLink.getFragmentEntryLinkId(),
 			fragmentEntryLink.getFragmentEntryLinkId());
@@ -658,8 +661,9 @@ public class CopyItemsMVCActionCommandTest {
 		Assert.assertNotEquals(
 			fragmentEntryLink.getNamespace(),
 			copiedFragmentEntryLink.getNamespace());
-		Assert.assertEquals(
-			0, copiedFragmentEntryLink.getOriginalFragmentEntryLinkId());
+		Assert.assertNull(
+			copiedFragmentEntryLink.
+				getOriginalFragmentEntryLinkExternalReferenceCode());
 		Assert.assertEquals(
 			copiedFragmentEntryLink.getType(),
 			copiedFragmentEntryLink.getType());
