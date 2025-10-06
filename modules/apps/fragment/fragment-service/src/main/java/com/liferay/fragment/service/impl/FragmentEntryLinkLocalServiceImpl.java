@@ -363,41 +363,8 @@ public class FragmentEntryLinkLocalServiceImpl
 	public int getAllFragmentEntryLinksCountByFragmentEntryERCScopeERC(
 		long groupId, String fragmentEntryERC, String fragmentEntryScopeERC) {
 
-		Predicate fragmentEntryScopeERCPredicate =
-			FragmentEntryLinkTable.INSTANCE.
-				fragmentEntryScopeExternalReferenceCode.eq(
-					fragmentEntryScopeERC);
-
-		if (Validator.isNull(fragmentEntryScopeERC)) {
-			fragmentEntryScopeERCPredicate =
-				FragmentEntryLinkTable.INSTANCE.
-					fragmentEntryScopeExternalReferenceCode.isNull();
-		}
-
-		return fragmentEntryLinkPersistence.dslQueryCount(
-			DSLQueryFactoryUtil.count(
-			).from(
-				DSLQueryFactoryUtil.selectDistinct(
-					FragmentEntryLinkTable.INSTANCE.classNameId,
-					FragmentEntryLinkTable.INSTANCE.classPK
-				).from(
-					FragmentEntryLinkTable.INSTANCE
-				).where(
-					FragmentEntryLinkTable.INSTANCE.groupId.eq(
-						groupId
-					).and(
-						FragmentEntryLinkTable.INSTANCE.
-							fragmentEntryExternalReferenceCode.eq(
-								fragmentEntryERC)
-					).and(
-						fragmentEntryScopeERCPredicate
-					).and(
-						FragmentEntryLinkTable.INSTANCE.deleted.eq(false)
-					)
-				).as(
-					"tempFragmentEntryLinkTable"
-				)
-			));
+		return fragmentEntryLinkPersistence.countByG_FEERC_FESERC_D(
+			groupId, fragmentEntryERC, fragmentEntryScopeERC, false);
 	}
 
 	/**
