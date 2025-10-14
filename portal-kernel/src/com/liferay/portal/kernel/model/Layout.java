@@ -162,6 +162,15 @@ public interface Layout extends LayoutModel, PersistedModel {
 
 	public java.util.List<Portlet> getEmbeddedPortlets(long groupId);
 
+	/**
+	 * Returns the favicon file entry ID of this layout.
+	 *
+	 * @return the favicon file entry ID of this layout
+	 * @deprecated As of Cavanaugh (7.4.x), with no direct replacement
+	 */
+	@Deprecated
+	public long getFaviconFileEntryId();
+
 	public String getFaviconURL();
 
 	/**
@@ -453,6 +462,15 @@ public interface Layout extends LayoutModel, PersistedModel {
 	public boolean matches(
 		jakarta.servlet.http.HttpServletRequest httpServletRequest,
 		String friendlyURL);
+
+	/**
+	 * Sets the favicon file entry ID of this layout.
+	 *
+	 * @param faviconFileEntryId the favicon file entry ID of this layout
+	 * @deprecated As of Cavanaugh (7.4.x), with no direct replacement
+	 */
+	@Deprecated
+	public void setFaviconFileEntryId(long faviconFileEntryId);
 
 	public void setLayoutSet(LayoutSet layoutSet);
 

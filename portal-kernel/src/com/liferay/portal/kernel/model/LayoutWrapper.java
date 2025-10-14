@@ -705,6 +705,18 @@ public class LayoutWrapper
 	}
 
 	/**
+	 * Returns the favicon file entry ID of this layout.
+	 *
+	 * @return the favicon file entry ID of this layout
+	 * @deprecated As of Cavanaugh (7.4.x), with no direct replacement
+	 */
+	@Deprecated
+	@Override
+	public long getFaviconFileEntryId() {
+		return model.getFaviconFileEntryId();
+	}
+
+	/**
 	 * Returns the favicon file entry scope erc of this layout.
 	 *
 	 * @return the favicon file entry scope erc of this layout
@@ -2137,6 +2149,18 @@ public class LayoutWrapper
 	@Override
 	public void setFaviconFileEntryERC(String faviconFileEntryERC) {
 		model.setFaviconFileEntryERC(faviconFileEntryERC);
+	}
+
+	/**
+	 * Sets the favicon file entry ID of this layout.
+	 *
+	 * @param faviconFileEntryId the favicon file entry ID of this layout
+	 * @deprecated As of Cavanaugh (7.4.x), with no direct replacement
+	 */
+	@Deprecated
+	@Override
+	public void setFaviconFileEntryId(long faviconFileEntryId) {
+		model.setFaviconFileEntryId(faviconFileEntryId);
 	}
 
 	/**
