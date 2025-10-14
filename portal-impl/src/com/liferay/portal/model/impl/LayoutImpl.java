@@ -5,7 +5,9 @@
 
 package com.liferay.portal.model.impl;
 
+import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.document.library.kernel.service.DLAppServiceUtil;
+import com.liferay.document.library.kernel.service.DLFileEntryLocalServiceUtil;
 import com.liferay.layout.page.template.kernel.provider.util.LayoutPageTemplateEntryLayoutProviderUtil;
 import com.liferay.petra.reflect.ReflectionUtil;
 import com.liferay.petra.string.CharPool;
@@ -550,6 +552,44 @@ public class LayoutImpl extends LayoutBaseImpl {
 		}
 
 		return portlets;
+	}
+
+	/**
+	 * Returns the favicon file entry ID of this layout.
+	 *
+	 * @return the favicon file entry ID of this layout
+	 * @deprecated As of Cavanaugh (7.4.x), with no direct replacement
+	 */
+	@Deprecated
+	@Override
+	public long getFaviconFileEntryId() {
+		if (Validator.isNull(getFaviconFileEntryERC())) {
+			return 0;
+		}
+
+		long dlFileEntryGroupId = getGroupId();
+
+		if (Validator.isNotNull(getFaviconFileEntryScopeERC())) {
+			Group dlFileEntryGroup =
+				GroupLocalServiceUtil.fetchGroupByExternalReferenceCode(
+					getFaviconFileEntryScopeERC(), getCompanyId());
+
+			dlFileEntryGroupId = dlFileEntryGroup.getGroupId();
+		}
+
+		DLFileEntry dlFileEntry;
+
+		try {
+			dlFileEntry =
+				DLFileEntryLocalServiceUtil.
+					getDLFileEntryByExternalReferenceCode(
+						getFaviconFileEntryERC(), dlFileEntryGroupId);
+		}
+		catch (PortalException portalException) {
+			throw new RuntimeException(portalException);
+		}
+
+		return dlFileEntry.getFileEntryId();
 	}
 
 	@Override
@@ -1582,6 +1622,46 @@ public class LayoutImpl extends LayoutBaseImpl {
 
 		return layoutTypeController.matches(
 			httpServletRequest, friendlyURL, this);
+	}
+
+	/**
+	 * Sets the favicon file entry ID of this layout.
+	 *
+	 * @param faviconFileEntryId the favicon file entry ID of this layout
+	 * @deprecated As of Cavanaugh (7.4.x), with no direct replacement
+	 */
+	@Deprecated
+	@Override
+	public void setFaviconFileEntryId(long faviconFileEntryId) {
+		if (faviconFileEntryId == 0) {
+			setFaviconFileEntryERC(null);
+			setFaviconFileEntryScopeERC(null);
+		}
+		else {
+			DLFileEntry dlFileEntry;
+
+			try {
+				dlFileEntry = DLFileEntryLocalServiceUtil.getDLFileEntry(
+					faviconFileEntryId);
+			}
+			catch (PortalException portalException) {
+				throw new RuntimeException(portalException);
+			}
+
+			setFaviconFileEntryERC(dlFileEntry.getExternalReferenceCode());
+
+			String faviconFileEntryScopeERC = null;
+
+			if (dlFileEntry.getGroupId() != getGroupId()) {
+				Group dlFileEntryGroup = GroupLocalServiceUtil.fetchGroup(
+					dlFileEntry.getGroupId());
+
+				faviconFileEntryScopeERC =
+					dlFileEntryGroup.getExternalReferenceCode();
+			}
+
+			setFaviconFileEntryScopeERC(faviconFileEntryScopeERC);
+		}
 	}
 
 	@Override
