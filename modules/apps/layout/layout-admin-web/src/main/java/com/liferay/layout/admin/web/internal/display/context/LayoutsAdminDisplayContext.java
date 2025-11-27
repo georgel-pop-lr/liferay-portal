@@ -15,6 +15,8 @@ import com.liferay.client.extension.type.CET;
 import com.liferay.client.extension.type.item.selector.CETItemSelectorCriterion;
 import com.liferay.client.extension.type.item.selector.CETItemSelectorReturnType;
 import com.liferay.client.extension.type.manager.CETManager;
+import com.liferay.document.library.kernel.model.DLFileEntry;
+import com.liferay.document.library.kernel.service.DLFileEntryLocalServiceUtil;
 import com.liferay.exportimport.kernel.staging.LayoutStagingUtil;
 import com.liferay.frontend.taglib.clay.servlet.taglib.LinkTag;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
@@ -518,7 +520,13 @@ public class LayoutsAdminDisplayContext {
 				Layout selLayout = getSelLayout();
 
 				if (selLayout != null) {
-					return selLayout.getFaviconFileEntryId();
+					DLFileEntry dlFileEntry =
+						DLFileEntryLocalServiceUtil.
+							getDLFileEntryByExternalReferenceCode(
+								selLayout.getFaviconFileEntryERC(),
+								selLayout.getFaviconFileEntryGroupId());
+
+					return dlFileEntry.getFileEntryId();
 				}
 
 				LayoutSet selLayoutSet = getSelLayoutSet();
@@ -1722,7 +1730,7 @@ public class LayoutsAdminDisplayContext {
 		Layout selLayout = getSelLayout();
 
 		if (selLayout != null) {
-			if (selLayout.getFaviconFileEntryId() > 0) {
+			if (Validator.isNotNull(selLayout.getFaviconFileEntryERC())) {
 				return true;
 			}
 
@@ -2119,7 +2127,8 @@ public class LayoutsAdminDisplayContext {
 								ClientExtensionEntryConstants.
 									TYPE_THEME_FAVICON);
 
-					if ((masterLayout.getFaviconFileEntryId() > 0) ||
+					if (Validator.isNotNull(
+							masterLayout.getFaviconFileEntryERC()) ||
 						(clientExtensionEntryRel != null)) {
 
 						return LanguageUtil.get(

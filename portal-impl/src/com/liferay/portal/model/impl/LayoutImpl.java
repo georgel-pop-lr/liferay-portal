@@ -576,7 +576,7 @@ public class LayoutImpl extends LayoutBaseImpl {
 			return _faviconURL;
 		}
 
-		String faviconURL = _getFaviconURL(getFaviconFileEntryId());
+		String faviconURL = _getFaviconURL();
 
 		if (faviconURL != null) {
 			_faviconURL = faviconURL;
@@ -1699,14 +1699,15 @@ public class LayoutImpl extends LayoutBaseImpl {
 			getCompanyId(), getThemeId(), getColorSchemeId());
 	}
 
-	private String _getFaviconURL(long faviconFileEntryId) {
-		if (faviconFileEntryId <= 0) {
+	private String _getFaviconURL() {
+		if (Validator.isNotNull(getFaviconFileEntryERC())) {
 			return null;
 		}
 
 		try {
-			FileEntry fileEntry = DLAppServiceUtil.getFileEntry(
-				faviconFileEntryId);
+			FileEntry fileEntry =
+				DLAppServiceUtil.getFileEntryByExternalReferenceCode(
+					getFaviconFileEntryERC(), getFaviconFileEntryGroupId());
 
 			return HtmlUtil.escape(
 				StringBundler.concat(
