@@ -835,7 +835,7 @@ public class LayoutLocalServiceStagingAdvice {
 
 					serviceContext = (ServiceContext)arguments[15];
 				}
-				else if (arguments.length == 18) {
+				else {
 					styleBookEntryERC = (String)arguments[14];
 					faviconFileEntryId = (Long)arguments[15];
 					masterLayoutPageTemplateEntryERC = (String)arguments[16];
