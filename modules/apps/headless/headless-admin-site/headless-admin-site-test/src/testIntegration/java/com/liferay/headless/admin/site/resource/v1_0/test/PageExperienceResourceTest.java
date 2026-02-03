@@ -14,6 +14,7 @@ import com.liferay.headless.admin.site.resource.v1_0.test.util.ReferencesTestUti
 import com.liferay.layout.test.util.LayoutTestUtil;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.test.rule.FeatureFlag;
 import com.liferay.portal.test.rule.Inject;
@@ -172,7 +173,25 @@ public class PageExperienceResourceTest
 				_draftLayout.getExternalReferenceCode(), 3,
 				testGroup.getGroupId(),
 				SegmentsTestUtil.addSegmentsEntry(testCompany.getGroupId())));
+
+		//global y otro para current site con lazy referencing
+
+		Group companyGroup = GroupLocalServiceUtil.getGroup(testCompany.getGroupId());
+		testCompany.getE
 	}
+
+	_testMissingOptionalReference(
+			1,
+				() -> _testPatchSitePageSpecification(
+		contentPageSpecification,
+				() -> new ContentPageSpecification() {
+		{
+			setPageExperiences(
+				contentPageSpecification::getPageExperiences);
+			setStatus(PageSpecification.Status.DRAFT);
+			setType(() -> Type.CONTENT_PAGE_SPECIFICATION);
+		}
+	}));
 
 	@Override
 	@Test
