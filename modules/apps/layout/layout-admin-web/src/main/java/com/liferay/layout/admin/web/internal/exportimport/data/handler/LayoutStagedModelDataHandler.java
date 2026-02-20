@@ -1333,10 +1333,27 @@ public class LayoutStagedModelDataHandler
 		FileEntry faviconFileEntry = null;
 
 		try {
+			Long groupId = ScopeUtil.getItemGroupId(
+				layout.getCompanyId(), layout.getFaviconFileEntryScopeERC(),
+				layout.getGroupId());
+
+			if (groupId == null) {
+				if (_log.isWarnEnabled()) {
+					_log.warn(
+						StringBundler.concat(
+							"Unable to resolve group ID for favicon file ",
+							"entry in layout with PLID ", layout.getPlid(),
+							" using favicon file entry scope external ",
+							"reference code ",
+							layout.getFaviconFileEntryScopeERC()));
+				}
+
+				return;
+			}
+
 			faviconFileEntry =
 				_dlAppLocalService.getFileEntryByExternalReferenceCode(
-					layout.getFaviconFileEntryERC(),
-					layout.getFaviconFileEntryGroupId());
+					layout.getFaviconFileEntryERC(), groupId);
 		}
 		catch (PortalException portalException) {
 			if (_log.isWarnEnabled()) {
