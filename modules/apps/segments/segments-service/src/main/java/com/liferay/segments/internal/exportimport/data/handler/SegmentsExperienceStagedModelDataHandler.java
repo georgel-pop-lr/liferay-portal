@@ -20,6 +20,7 @@ import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.util.MapUtil;
+import com.liferay.portal.kernel.util.ScopeUtil;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.segments.constants.SegmentsPortletKeys;
 import com.liferay.segments.model.SegmentsEntry;
@@ -81,16 +82,34 @@ public class SegmentsExperienceStagedModelDataHandler
 		if (ExportImportThreadLocal.isStagingInProcess() &&
 			group.isStagedPortlet(SegmentsPortletKeys.SEGMENTS)) {
 
-			SegmentsEntry segmentsEntry =
-				_segmentsEntryLocalService.
-					fetchSegmentsEntryByExternalReferenceCode(
-						segmentsExperience.getSegmentsEntryERC(),
-						segmentsExperience.getSegmentsEntryGroupId());
+			Long groupId = ScopeUtil.getItemGroupId(
+				segmentsExperience.getCompanyId(),
+				segmentsExperience.getSegmentsEntryScopeERC(),
+				segmentsExperience.getGroupId());
 
-			if (segmentsEntry != null) {
-				StagedModelDataHandlerUtil.exportReferenceStagedModel(
-					portletDataContext, segmentsExperience, segmentsEntry,
-					PortletDataContext.REFERENCE_TYPE_PARENT);
+			if (groupId == null) {
+				if (_log.isWarnEnabled()) {
+					_log.warn(
+						StringBundler.concat(
+							"Unable to resolve group ID for segments ",
+							"experience ",
+							segmentsExperience.getSegmentsExperienceId(),
+							" with segments entry scope external reference ",
+							"code ",
+							segmentsExperience.getSegmentsEntryScopeERC()));
+				}
+			}
+			else {
+				SegmentsEntry segmentsEntry =
+					_segmentsEntryLocalService.
+						fetchSegmentsEntryByExternalReferenceCode(
+							segmentsExperience.getSegmentsEntryERC(), groupId);
+
+				if (segmentsEntry != null) {
+					StagedModelDataHandlerUtil.exportReferenceStagedModel(
+						portletDataContext, segmentsExperience, segmentsEntry,
+						PortletDataContext.REFERENCE_TYPE_PARENT);
+				}
 			}
 		}
 
