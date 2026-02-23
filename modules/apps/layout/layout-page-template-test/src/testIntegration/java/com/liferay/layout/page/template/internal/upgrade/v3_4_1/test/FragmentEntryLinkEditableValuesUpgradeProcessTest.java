@@ -262,14 +262,13 @@ public class FragmentEntryLinkEditableValuesUpgradeProcessTest
 			null, TestPropsValues.getUserId(), _group.getGroupId(), null,
 			fragmentEntry.getExternalReferenceCode(),
 			fragmentEntry.getScopeERC(), _segmentsExperienceId,
-			_layout.getPlid(), fragmentEntry.getCss(), fragmentEntry.getHtml(),
-			fragmentEntry.getJs(), fragmentEntry.getConfiguration(),
+			_draftLayout.getPlid(), fragmentEntry.getCss(),
+			fragmentEntry.getHtml(), fragmentEntry.getJs(),
+			fragmentEntry.getConfiguration(),
 			JSONUtil.put(
 				FragmentEntryProcessorConstants.
 					KEY_FREEMARKER_FRAGMENT_ENTRY_PROCESSOR,
-				JSONUtil.put(
-					RandomTestUtil.randomString(),
-					RandomTestUtil.randomString())
+				JSONUtil.put("buttonAlign", RandomTestUtil.randomString())
 			).toString(),
 			StringPool.BLANK, 0, fragmentEntry.getFragmentEntryKey(),
 			fragmentEntry.getType(),
@@ -303,9 +302,7 @@ public class FragmentEntryLinkEditableValuesUpgradeProcessTest
 			JSONUtil.put(
 				FragmentEntryProcessorConstants.
 					KEY_FREEMARKER_FRAGMENT_ENTRY_PROCESSOR,
-				JSONUtil.put(
-					RandomTestUtil.randomString(),
-					RandomTestUtil.randomString())
+				JSONUtil.put("buttonAlign", RandomTestUtil.randomString())
 			).toString(),
 			true);
 	}

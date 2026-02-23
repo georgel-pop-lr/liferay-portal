@@ -102,15 +102,13 @@ public class FragmentEntryLinkEditableValuesUpgradeProcessTest
 			null, TestPropsValues.getUserId(), _group.getGroupId(), null,
 			_fragmentEntry.getExternalReferenceCode(),
 			_fragmentEntry.getScopeERC(), _segmentsExperienceId,
-			_layout.getPlid(), _fragmentEntry.getCss(),
+			_draftLayout.getPlid(), _fragmentEntry.getCss(),
 			_fragmentEntry.getHtml(), _fragmentEntry.getJs(),
 			_fragmentEntry.getConfiguration(),
 			JSONUtil.put(
 				FragmentEntryProcessorConstants.
 					KEY_FREEMARKER_FRAGMENT_ENTRY_PROCESSOR,
-				JSONUtil.put(
-					RandomTestUtil.randomString(),
-					RandomTestUtil.randomString())
+				JSONUtil.put("verticalSpace", RandomTestUtil.randomString())
 			).toString(),
 			StringPool.BLANK, 0, _fragmentEntry.getFragmentEntryKey(),
 			_fragmentEntry.getType(),
@@ -144,9 +142,7 @@ public class FragmentEntryLinkEditableValuesUpgradeProcessTest
 			JSONUtil.put(
 				FragmentEntryProcessorConstants.
 					KEY_FREEMARKER_FRAGMENT_ENTRY_PROCESSOR,
-				JSONUtil.put(
-					RandomTestUtil.randomString(),
-					RandomTestUtil.randomString())
+				JSONUtil.put("verticalSpace", RandomTestUtil.randomString())
 			).toString(),
 			true);
 	}
