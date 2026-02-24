@@ -3281,9 +3281,10 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 	@Override
 	public Layout updateLayout(
 			long groupId, boolean privateLayout, long layoutId,
-			String typeSettings, String iconImageERC, byte[] iconBytes, String themeId,
-			String colorSchemeId, String styleBookEntryERC, String css,
-			String faviconFileEntryERC, String faviconFileEntryScopeERC,
+			String typeSettings, String iconImageERC, byte[] iconBytes,
+			String themeId, String colorSchemeId, String styleBookEntryERC,
+			String css, String faviconFileEntryERC,
+			String faviconFileEntryScopeERC,
 			String masterLayoutPageTemplateEntryERC)
 		throws PortalException {
 

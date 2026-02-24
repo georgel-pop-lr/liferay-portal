@@ -1346,17 +1346,20 @@ public class LayoutLocalServiceWrapper
 
 			Image image = _sourceLayout.getIconImage();
 
+			String imageERC = null;
 			byte[] imageBytes = null;
 
 			if (image != null) {
+				imageERC = image.getExternalReferenceCode();
 				imageBytes = image.getTextObj();
 			}
 
 			return updateLayout(
 				_targetLayout.getGroupId(), _targetLayout.isPrivateLayout(),
 				_targetLayout.getLayoutId(),
-				_getTypeSettings(_sourceLayout, _targetLayout), imageBytes,
-				_sourceLayout.getThemeId(), _sourceLayout.getColorSchemeId(),
+				_getTypeSettings(_sourceLayout, _targetLayout), imageERC,
+				imageBytes, _sourceLayout.getThemeId(),
+				_sourceLayout.getColorSchemeId(),
 				_sourceLayout.getStyleBookEntryERC(), _sourceLayout.getCss(),
 				_sourceLayout.getFaviconFileEntryERC(),
 				_sourceLayout.getFaviconFileEntryScopeERC(),

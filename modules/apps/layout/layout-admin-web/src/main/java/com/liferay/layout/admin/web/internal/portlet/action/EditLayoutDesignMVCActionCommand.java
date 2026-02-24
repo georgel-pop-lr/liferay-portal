@@ -203,10 +203,13 @@ public class EditLayoutDesignMVCActionCommand extends BaseMVCActionCommand {
 			long fileEntryId = ParamUtil.getLong(
 				uploadPortletRequest, "fileEntryId");
 
-			if (fileEntryId > 0) {
+			String fileEntryERC = null;
+
+			if (!deleteLogo && (fileEntryId > 0)) {
 				FileEntry fileEntry = _dlAppLocalService.getFileEntry(
 					fileEntryId);
 
+				fileEntryERC = fileEntry.getExternalReferenceCode();
 				iconBytes = FileUtil.getBytes(fileEntry.getContentStream());
 			}
 
@@ -258,7 +261,7 @@ public class EditLayoutDesignMVCActionCommand extends BaseMVCActionCommand {
 				layout.getTitleMap(), layout.getDescriptionMap(),
 				layout.getKeywordsMap(), layout.getRobotsMap(),
 				layout.getType(), layout.isHidden(), layout.getFriendlyURLMap(),
-				!deleteLogo, iconBytes, styleBookEntryERC, faviconFileEntryERC,
+				fileEntryERC, iconBytes, styleBookEntryERC, faviconFileEntryERC,
 				faviconFileEntryScopeERC, masterLayoutPageTemplateEntryERC,
 				serviceContext);
 
@@ -284,7 +287,7 @@ public class EditLayoutDesignMVCActionCommand extends BaseMVCActionCommand {
 					draftLayout.getDescriptionMap(),
 					draftLayout.getKeywordsMap(), draftLayout.getRobotsMap(),
 					draftLayout.getType(), draftLayout.isHidden(),
-					draftLayout.getFriendlyURLMap(), !deleteLogo, iconBytes,
+					draftLayout.getFriendlyURLMap(), fileEntryERC, iconBytes,
 					styleBookEntryERC, faviconFileEntryERC,
 					faviconFileEntryScopeERC,
 					draftLayout.getMasterLayoutPageTemplateEntryERC(),

@@ -180,7 +180,7 @@ public class SitesImpl implements Sites {
 				targetLayout.getDescriptionMap(), targetLayout.getKeywordsMap(),
 				targetLayout.getRobotsMap(), layoutPrototypeLayout.getType(),
 				targetLayout.isHidden(), targetLayout.getFriendlyURLMap(),
-				layoutPrototypeLayout.hasIconImage(), iconBytes, null, null,
+				layoutPrototypeLayout.getIconImageERC(), iconBytes, null, null,
 				null,
 				layoutPrototypeLayout.getMasterLayoutPageTemplateEntryERC(),
 				serviceContext);

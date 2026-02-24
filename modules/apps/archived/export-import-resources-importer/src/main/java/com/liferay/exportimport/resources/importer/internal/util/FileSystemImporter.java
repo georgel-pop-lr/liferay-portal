@@ -1371,7 +1371,7 @@ public class FileSystemImporter extends BaseImporter {
 					parentLayoutId, nameMap, titleMap,
 					layout.getDescriptionMap(), layout.getKeywordsMap(),
 					layout.getRobotsMap(), type, hidden, friendlyURLMap,
-					layout.hasIconImage(), null, null, null, null, null,
+					layout.getIconImageERC(), null, null, null, null, null,
 					serviceContext);
 			}
 

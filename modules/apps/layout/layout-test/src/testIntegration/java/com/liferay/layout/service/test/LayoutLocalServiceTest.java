@@ -299,7 +299,7 @@ public class LayoutLocalServiceTest {
 				layout.getNameMap(), layout.getTitleMap(),
 				layout.getDescriptionMap(), layout.getKeywordsMap(),
 				layout.getRobotsMap(), layout.getType(), false,
-				layout.getFriendlyURLMap(), layout.hasIconImage(), null,
+				layout.getFriendlyURLMap(), layout.getIconImageERC(), null,
 				layout.getStyleBookEntryERC(), layout.getFaviconFileEntryERC(),
 				layout.getFaviconFileEntryScopeERC(),
 				layout.getMasterLayoutPageTemplateEntryERC(), _serviceContext);
@@ -401,7 +401,7 @@ public class LayoutLocalServiceTest {
 			layout.getParentLayoutId(), layout.getNameMap(),
 			layout.getTitleMap(), layout.getDescriptionMap(),
 			layout.getKeywordsMap(), layout.getRobotsMap(), layout.getType(),
-			layout.isHidden(), friendlyURLMap, layout.hasIconImage(), null,
+			layout.isHidden(), friendlyURLMap, layout.getIconImageERC(), null,
 			layout.getStyleBookEntryERC(), layout.getFaviconFileEntryERC(),
 			layout.getFaviconFileEntryScopeERC(),
 			layout.getMasterLayoutPageTemplateEntryERC(), _serviceContext);
@@ -468,7 +468,7 @@ public class LayoutLocalServiceTest {
 			HashMapBuilder.put(
 				LocaleUtil.US, "/friendly-url-2"
 			).build(),
-			false, null, layout1.getStyleBookEntryERC(),
+			null, null, layout1.getStyleBookEntryERC(),
 			layout1.getFaviconFileEntryERC(),
 			layout1.getFaviconFileEntryScopeERC(),
 			layout1.getMasterLayoutPageTemplateEntryERC(), _serviceContext);
@@ -787,7 +787,7 @@ public class LayoutLocalServiceTest {
 			HashMapBuilder.put(
 				LocaleUtil.US, "/friendly-url-2"
 			).build(),
-			false, null, layout.getStyleBookEntryERC(),
+			null, null, layout.getStyleBookEntryERC(),
 			layout.getFaviconFileEntryERC(),
 			layout.getFaviconFileEntryScopeERC(),
 			layout.getMasterLayoutPageTemplateEntryERC(), _serviceContext);
@@ -800,8 +800,8 @@ public class LayoutLocalServiceTest {
 			draftLayout.getNameMap(), draftLayout.getTitleMap(),
 			draftLayout.getDescriptionMap(), draftLayout.getKeywordsMap(),
 			draftLayout.getRobotsMap(), draftLayout.getType(),
-			draftLayout.isHidden(), draftLayout.getFriendlyURLMap(), false,
-			null, draftLayout.getStyleBookEntryERC(),
+			draftLayout.isHidden(), draftLayout.getFriendlyURLMap(), null, null,
+			draftLayout.getStyleBookEntryERC(),
 			draftLayout.getFaviconFileEntryERC(),
 			draftLayout.getFaviconFileEntryScopeERC(),
 			draftLayout.getMasterLayoutPageTemplateEntryERC(), _serviceContext);
@@ -833,7 +833,7 @@ public class LayoutLocalServiceTest {
 			layout.getParentLayoutId(), layout.getNameMap(),
 			layout.getTitleMap(), layout.getDescriptionMap(),
 			layout.getKeywordsMap(), layout.getRobotsMap(), layout.getType(),
-			layout.isHidden(), friendlyURLMap, layout.hasIconImage(), null,
+			layout.isHidden(), friendlyURLMap, layout.getIconImageERC(), null,
 			null, null, null, null, serviceContext);
 
 		Assert.assertEquals(
@@ -861,7 +861,7 @@ public class LayoutLocalServiceTest {
 			).put(
 				LocaleUtil.US, ""
 			).build(),
-			false, null, layout.getStyleBookEntryERC(),
+			null, null, layout.getStyleBookEntryERC(),
 			layout.getFaviconFileEntryERC(),
 			layout.getFaviconFileEntryScopeERC(),
 			layout.getMasterLayoutPageTemplateEntryERC(), serviceContext);
@@ -891,7 +891,7 @@ public class LayoutLocalServiceTest {
 			layout.getTitleMap(), layout.getDescriptionMap(),
 			layout.getKeywordsMap(), layout.getRobotsMap(), layout.getType(),
 			layout.isHidden(), layout.getFriendlyURLMap(),
-			layout.hasIconImage(), null, layout.getStyleBookEntryERC(),
+			layout.getIconImageERC(), null, layout.getStyleBookEntryERC(),
 			layout.getFaviconFileEntryERC(),
 			layout.getFaviconFileEntryScopeERC(),
 			layoutPageTemplateEntry.getExternalReferenceCode(),
@@ -1083,7 +1083,7 @@ public class LayoutLocalServiceTest {
 			layout.getTitleMap(), layout.getDescriptionMap(),
 			layout.getKeywordsMap(), layout.getRobotsMap(), layout.getType(),
 			layout.isHidden(), layout.getFriendlyURLMap(),
-			layout.hasIconImage(), null, null, null, null, null,
+			layout.getIconImageERC(), null, null, null, null, null,
 			serviceContext);
 
 		Layout updatedLayout = _layoutLocalService.getLayout(layout.getPlid());

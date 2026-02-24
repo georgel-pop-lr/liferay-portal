@@ -869,7 +869,7 @@ public class FriendlyURLServletTest {
 				LocaleUtil.getSiteDefault(),
 				StringPool.SLASH + RandomTestUtil.randomString()
 			).build(),
-			layout.hasIconImage(), null, layout.getStyleBookEntryERC(),
+			layout.getIconImageERC(), null, layout.getStyleBookEntryERC(),
 			layout.getFaviconFileEntryERC(),
 			layout.getFaviconFileEntryScopeERC(),
 			layout.getMasterLayoutPageTemplateEntryERC(),

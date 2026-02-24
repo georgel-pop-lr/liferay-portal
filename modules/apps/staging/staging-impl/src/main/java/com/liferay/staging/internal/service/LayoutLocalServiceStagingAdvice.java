@@ -859,7 +859,7 @@ public class LayoutLocalServiceStagingAdvice {
 					(Map<Locale, String>)arguments[7],
 					(Map<Locale, String>)arguments[8], (String)arguments[9],
 					(Boolean)arguments[10], friendlyURLMap,
-					(Boolean)arguments[12], (byte[])arguments[13],
+					(String)arguments[12], (byte[])arguments[13],
 					styleBookEntryERC, faviconFileEntryERC,
 					faviconFileEntryScopeERC, masterLayoutPageTemplateEntryERC,
 					serviceContext);

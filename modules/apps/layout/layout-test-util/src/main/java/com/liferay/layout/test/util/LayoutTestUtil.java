@@ -591,7 +591,7 @@ public class LayoutTestUtil {
 			layout.getParentLayoutId(), layout.getNameMap(),
 			layout.getTitleMap(), layout.getDescriptionMap(),
 			layout.getKeywordsMap(), layout.getRobotsMap(), layout.getType(),
-			layout.isHidden(), friendlyURLMap, layout.hasIconImage(), null,
+			layout.isHidden(), friendlyURLMap, layout.getIconImageERC(), null,
 			layout.getStyleBookEntryERC(), layout.getFaviconFileEntryERC(),
 			layout.getFaviconFileEntryScopeERC(),
 			layout.getMasterLayoutPageTemplateEntryERC(),
