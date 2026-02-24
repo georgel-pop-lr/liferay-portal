@@ -1891,7 +1891,7 @@ public class LayoutLocalServiceWrapper
 	 * @param friendlyURLMap the layout's locales and localized friendly URLs.
 	 To see how the URL is normalized when accessed, see {@link
 	 FriendlyURLNormalizerUtil#normalize(String)}.
-	 * @param hasIconImage whether the icon image will be updated
+	 * @param iconImageERC external reference code of icon image
 	 * @param iconBytes the byte array of the layout's new icon image
 	 * @param styleBookEntryERC the external reference code of the style book
 	 entry
@@ -1924,7 +1924,7 @@ public class LayoutLocalServiceWrapper
 			java.util.Map<java.util.Locale, String> robotsMap, String type,
 			boolean hidden,
 			java.util.Map<java.util.Locale, String> friendlyURLMap,
-			boolean hasIconImage, byte[] iconBytes, String styleBookEntryERC,
+			String iconImageERC, byte[] iconBytes, String styleBookEntryERC,
 			String faviconFileEntryERC, String faviconFileEntryScopeERC,
 			String masterLayoutPageTemplateEntryERC,
 			ServiceContext serviceContext)
@@ -1933,7 +1933,7 @@ public class LayoutLocalServiceWrapper
 		return _layoutLocalService.updateLayout(
 			groupId, privateLayout, layoutId, parentLayoutId, nameMap, titleMap,
 			descriptionMap, keywordsMap, robotsMap, type, hidden,
-			friendlyURLMap, hasIconImage, iconBytes, styleBookEntryERC,
+			friendlyURLMap, iconImageERC, iconBytes, styleBookEntryERC,
 			faviconFileEntryERC, faviconFileEntryScopeERC,
 			masterLayoutPageTemplateEntryERC, serviceContext);
 	}
@@ -1941,16 +1941,18 @@ public class LayoutLocalServiceWrapper
 	@Override
 	public Layout updateLayout(
 			long groupId, boolean privateLayout, long layoutId,
-			String typeSettings, byte[] iconBytes, String themeId,
-			String colorSchemeId, String styleBookEntryERC, String css,
-			String faviconFileEntryERC, String faviconFileEntryScopeERC,
+			String typeSettings, String iconImageERC, byte[] iconBytes,
+			String themeId, String colorSchemeId, String styleBookEntryERC,
+			String css, String faviconFileEntryERC,
+			String faviconFileEntryScopeERC,
 			String masterLayoutPageTemplateEntryERC)
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		return _layoutLocalService.updateLayout(
-			groupId, privateLayout, layoutId, typeSettings, iconBytes, themeId,
-			colorSchemeId, styleBookEntryERC, css, faviconFileEntryERC,
-			faviconFileEntryScopeERC, masterLayoutPageTemplateEntryERC);
+			groupId, privateLayout, layoutId, typeSettings, iconImageERC,
+			iconBytes, themeId, colorSchemeId, styleBookEntryERC, css,
+			faviconFileEntryERC, faviconFileEntryScopeERC,
+			masterLayoutPageTemplateEntryERC);
 	}
 
 	@Override

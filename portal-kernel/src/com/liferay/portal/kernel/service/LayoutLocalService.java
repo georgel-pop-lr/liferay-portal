@@ -1414,7 +1414,7 @@ public interface LayoutLocalService
 	 * @param friendlyURLMap the layout's locales and localized friendly URLs.
 	 To see how the URL is normalized when accessed, see {@link
 	 FriendlyURLNormalizerUtil#normalize(String)}.
-	 * @param hasIconImage whether the icon image will be updated
+	 * @param iconImageERC external reference code of icon image
 	 * @param iconBytes the byte array of the layout's new icon image
 	 * @param styleBookEntryERC the external reference code of the style book
 	 entry
@@ -1442,7 +1442,7 @@ public interface LayoutLocalService
 			Map<Locale, String> titleMap, Map<Locale, String> descriptionMap,
 			Map<Locale, String> keywordsMap, Map<Locale, String> robotsMap,
 			String type, boolean hidden, Map<Locale, String> friendlyURLMap,
-			boolean hasIconImage, byte[] iconBytes, String styleBookEntryERC,
+			String iconImageERC, byte[] iconBytes, String styleBookEntryERC,
 			String faviconFileEntryERC, String faviconFileEntryScopeERC,
 			String masterLayoutPageTemplateEntryERC,
 			ServiceContext serviceContext)
@@ -1450,9 +1450,10 @@ public interface LayoutLocalService
 
 	public Layout updateLayout(
 			long groupId, boolean privateLayout, long layoutId,
-			String typeSettings, byte[] iconBytes, String themeId,
-			String colorSchemeId, String styleBookEntryERC, String css,
-			String faviconFileEntryERC, String faviconFileEntryScopeERC,
+			String typeSettings, String iconImageERC, byte[] iconBytes,
+			String themeId, String colorSchemeId, String styleBookEntryERC,
+			String css, String faviconFileEntryERC,
+			String faviconFileEntryScopeERC,
 			String masterLayoutPageTemplateEntryERC)
 		throws PortalException;
 

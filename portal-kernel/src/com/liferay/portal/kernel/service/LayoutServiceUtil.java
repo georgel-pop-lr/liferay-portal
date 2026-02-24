@@ -888,7 +888,7 @@ public class LayoutServiceUtil {
 	 To see how the URL is normalized when accessed see {@link
 	 com.liferay.portal.kernel.util.FriendlyURLNormalizerUtil#normalize(
 	 String)}.
-	 * @param hasIconImage if the layout has a custom icon image
+	 * @param iconImageERC external reference code of icon image
 	 * @param iconBytes the byte array of the layout's new icon image
 	 * @param styleBookEntryERC the external reference code of the style book
 	 entry
@@ -911,7 +911,7 @@ public class LayoutServiceUtil {
 			Map<java.util.Locale, String> keywordsMap,
 			Map<java.util.Locale, String> robotsMap, String type,
 			boolean hidden, Map<java.util.Locale, String> friendlyURLMap,
-			boolean hasIconImage, byte[] iconBytes, String styleBookEntryERC,
+			String iconImageERC, byte[] iconBytes, String styleBookEntryERC,
 			String faviconFileEntryERC, String faviconFileEntryScopeERC,
 			String masterLayoutPageTemplateEntryERC,
 			ServiceContext serviceContext)
@@ -920,7 +920,7 @@ public class LayoutServiceUtil {
 		return getService().updateLayout(
 			groupId, privateLayout, layoutId, parentLayoutId, localeNamesMap,
 			localeTitlesMap, descriptionMap, keywordsMap, robotsMap, type,
-			hidden, friendlyURLMap, hasIconImage, iconBytes, styleBookEntryERC,
+			hidden, friendlyURLMap, iconImageERC, iconBytes, styleBookEntryERC,
 			faviconFileEntryERC, faviconFileEntryScopeERC,
 			masterLayoutPageTemplateEntryERC, serviceContext);
 	}

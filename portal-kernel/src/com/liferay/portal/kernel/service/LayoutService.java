@@ -715,7 +715,7 @@ public interface LayoutService extends BaseService {
 	 To see how the URL is normalized when accessed see {@link
 	 com.liferay.portal.kernel.util.FriendlyURLNormalizerUtil#normalize(
 	 String)}.
-	 * @param hasIconImage if the layout has a custom icon image
+	 * @param iconImageERC external reference code of icon image
 	 * @param iconBytes the byte array of the layout's new icon image
 	 * @param styleBookEntryERC the external reference code of the style book
 	 entry
@@ -736,7 +736,7 @@ public interface LayoutService extends BaseService {
 			Map<Locale, String> localeTitlesMap,
 			Map<Locale, String> descriptionMap, Map<Locale, String> keywordsMap,
 			Map<Locale, String> robotsMap, String type, boolean hidden,
-			Map<Locale, String> friendlyURLMap, boolean hasIconImage,
+			Map<Locale, String> friendlyURLMap, String iconImageERC,
 			byte[] iconBytes, String styleBookEntryERC,
 			String faviconFileEntryERC, String faviconFileEntryScopeERC,
 			String masterLayoutPageTemplateEntryERC,

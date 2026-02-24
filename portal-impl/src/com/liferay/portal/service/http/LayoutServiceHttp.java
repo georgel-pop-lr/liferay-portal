@@ -2346,7 +2346,7 @@ public class LayoutServiceHttp {
 			java.util.Map<java.util.Locale, String> robotsMap, String type,
 			boolean hidden,
 			java.util.Map<java.util.Locale, String> friendlyURLMap,
-			boolean hasIconImage, byte[] iconBytes, String styleBookEntryERC,
+			String iconImageERC, byte[] iconBytes, String styleBookEntryERC,
 			String faviconFileEntryERC, String faviconFileEntryScopeERC,
 			String masterLayoutPageTemplateEntryERC,
 			com.liferay.portal.kernel.service.ServiceContext serviceContext)
@@ -2360,7 +2360,7 @@ public class LayoutServiceHttp {
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, groupId, privateLayout, layoutId, parentLayoutId,
 				localeNamesMap, localeTitlesMap, descriptionMap, keywordsMap,
-				robotsMap, type, hidden, friendlyURLMap, hasIconImage,
+				robotsMap, type, hidden, friendlyURLMap, iconImageERC,
 				iconBytes, styleBookEntryERC, faviconFileEntryERC,
 				faviconFileEntryScopeERC, masterLayoutPageTemplateEntryERC,
 				serviceContext);
@@ -3043,7 +3043,7 @@ public class LayoutServiceHttp {
 			long.class, boolean.class, long.class, long.class,
 			java.util.Map.class, java.util.Map.class, java.util.Map.class,
 			java.util.Map.class, java.util.Map.class, String.class,
-			boolean.class, java.util.Map.class, boolean.class, byte[].class,
+			boolean.class, java.util.Map.class, String.class, byte[].class,
 			String.class, String.class, String.class, String.class,
 			com.liferay.portal.kernel.service.ServiceContext.class
 		};
