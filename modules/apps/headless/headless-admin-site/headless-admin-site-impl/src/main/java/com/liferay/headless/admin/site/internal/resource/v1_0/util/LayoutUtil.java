@@ -18,6 +18,7 @@ import com.liferay.headless.admin.site.dto.v1_0.FavIcon;
 import com.liferay.headless.admin.site.dto.v1_0.FavIconClientExtension;
 import com.liferay.headless.admin.site.dto.v1_0.FavIconItemExternalReference;
 import com.liferay.headless.admin.site.dto.v1_0.GeneralConfig;
+import com.liferay.headless.admin.site.dto.v1_0.IconImageURLReference;
 import com.liferay.headless.admin.site.dto.v1_0.ItemExternalReference;
 import com.liferay.headless.admin.site.dto.v1_0.NestedApplicationsWidgetPageWidgetInstance;
 import com.liferay.headless.admin.site.dto.v1_0.NestedWidgetSection;
@@ -436,7 +437,7 @@ public class LayoutUtil {
 				layout.getFaviconFileEntryERC(),
 				layout.getFaviconFileEntryScopeERC(),
 				layout.getMasterLayoutPageTemplateEntryERC(), friendlyURLMap,
-				serviceContext);
+				layout.getIconImageERC(), serviceContext);
 		}
 
 		PageSpecification[] sortedContentPageSpecifications =
@@ -546,7 +547,7 @@ public class LayoutUtil {
 
 		return _updateLayout(
 			layout, nameMap, null, null, null, null, null, null, null, null,
-			friendlyURLMap, serviceContext);
+			friendlyURLMap, null, serviceContext);
 	}
 
 	public static Layout updatePortletLayout(
@@ -1007,26 +1008,37 @@ public class LayoutUtil {
 
 		String faviconFileEntryERC = null;
 		String faviconFileEntryScopeERC = null;
+		String iconImageERC = null;
 
-		if ((settings != null) && (settings.getFavIcon() != null)) {
-			FavIcon favIcon = settings.getFavIcon();
+		if (settings != null) {
+			if (settings.getFavIcon() != null) {
+				FavIcon favIcon = settings.getFavIcon();
 
-			if (favIcon instanceof
-					FavIconItemExternalReference favIconItemExternalReference) {
+				if (favIcon instanceof
+						FavIconItemExternalReference
+							favIconItemExternalReference) {
 
-				faviconFileEntryERC =
-					favIconItemExternalReference.getExternalReferenceCode();
+					faviconFileEntryERC =
+						favIconItemExternalReference.getExternalReferenceCode();
 
-				faviconFileEntryScopeERC =
-					ItemScopeUtil.getItemScopeExternalReferenceCode(
+					faviconFileEntryScopeERC =
+						ItemScopeUtil.getItemScopeExternalReferenceCode(
+							favIconItemExternalReference.getScope(),
+							serviceContext.getScopeGroupId());
+
+					FileEntryUtil.fetchFileEntryByExternalReferenceCode(
+						serviceContext.getCompanyId(),
+						favIconItemExternalReference.getExternalReferenceCode(),
 						favIconItemExternalReference.getScope(),
 						serviceContext.getScopeGroupId());
+				}
+			}
 
-				FileEntryUtil.fetchFileEntryByExternalReferenceCode(
-					serviceContext.getCompanyId(),
-					favIconItemExternalReference.getExternalReferenceCode(),
-					favIconItemExternalReference.getScope(),
-					serviceContext.getScopeGroupId());
+			IconImageURLReference iconImageURLReference =
+				settings.getIconImageURLReference();
+
+			if (iconImageURLReference != null) {
+				iconImageERC = iconImageURLReference.getExternalReferenceCode();
 			}
 		}
 
@@ -1037,7 +1049,7 @@ public class LayoutUtil {
 			faviconFileEntryERC, faviconFileEntryScopeERC,
 			_getMasterLayoutPageTemplateEntryERC(
 				serviceContext.getScopeGroupId(), layout, settings),
-			friendlyURLMap, serviceContext);
+			friendlyURLMap, iconImageERC, serviceContext);
 
 		return _updateLookAndFeel(layout, settings);
 	}
@@ -1049,7 +1061,8 @@ public class LayoutUtil {
 			String styleBookEntryERC, String faviconFileEntryERC,
 			String faviconFileEntryScopeERC,
 			String masterLayoutPageTemplateEntryERC,
-			Map<Locale, String> friendlyURLMap, ServiceContext serviceContext)
+			Map<Locale, String> friendlyURLMap, String iconImageERC,
+			ServiceContext serviceContext)
 		throws Exception {
 
 		if (layout.isTypeAssetDisplay() || layout.isTypeUtility()) {
@@ -1066,7 +1079,7 @@ public class LayoutUtil {
 			layout.getType(),
 			GetterUtil.getBoolean(
 				serviceContext.getAttribute("hidden"), layout.isHidden()),
-			friendlyURLMap, layout.hasIconImage(), null, styleBookEntryERC,
+			friendlyURLMap, iconImageERC, null, styleBookEntryERC,
 			faviconFileEntryERC, faviconFileEntryScopeERC,
 			masterLayoutPageTemplateEntryERC, serviceContext);
 	}
