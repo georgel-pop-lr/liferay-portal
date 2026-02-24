@@ -121,7 +121,7 @@ public class LayoutLocalServiceStagingAdvice {
 			Map<Locale, String> nameMap, Map<Locale, String> titleMap,
 			Map<Locale, String> descriptionMap, Map<Locale, String> keywordsMap,
 			Map<Locale, String> robotsMap, String type, boolean hidden,
-			Map<Locale, String> friendlyURLMap, boolean hasIconImage,
+			Map<Locale, String> friendlyURLMap, String iconImageERC,
 			byte[] iconBytes, String styleBookEntryERC,
 			String faviconFileEntryERC, String faviconFileEntryScopeERC,
 			String masterLayoutPageTemplateEntryERC,
@@ -182,7 +182,7 @@ public class LayoutLocalServiceStagingAdvice {
 			return layoutLocalService.updateLayout(
 				groupId, privateLayout, layoutId, parentLayoutId, nameMap,
 				titleMap, descriptionMap, keywordsMap, robotsMap, type, hidden,
-				friendlyURLMap, hasIconImage, iconBytes, styleBookEntryERC,
+				friendlyURLMap, iconImageERC, iconBytes, styleBookEntryERC,
 				faviconFileEntryERC, faviconFileEntryScopeERC,
 				masterLayoutPageTemplateEntryERC, serviceContext);
 		}
@@ -213,13 +213,13 @@ public class LayoutLocalServiceStagingAdvice {
 		layout.setFriendlyURL(
 			layoutFriendlyURLMap.get(LocaleUtil.getSiteDefault()));
 
-		if (!hasIconImage) {
+		if (Validator.isNull(iconImageERC)) {
 			layout.setIconImageERC(null);
 			layoutRevision.setIconImageId(0);
 		}
 		else {
 			_portal.updateImageERC(
-				layout, hasIconImage, iconBytes, "iconImageERC", 0, 0, 0,
+				layout, iconImageERC, iconBytes, "iconImageERC", 0, 0, 0,
 				layout::deleteUnusedIconImage);
 		}
 

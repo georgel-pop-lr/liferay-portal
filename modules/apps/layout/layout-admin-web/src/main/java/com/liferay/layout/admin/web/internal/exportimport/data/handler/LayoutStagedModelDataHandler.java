@@ -912,7 +912,7 @@ public class LayoutStagedModelDataHandler
 		}
 
 		_portal.updateImageERC(
-			importedLayout, layout.hasIconImage(), iconBytes, "iconImageERC", 0,
+			importedLayout, layout.getIconImageERC(), iconBytes, "iconImageERC", 0,
 			0, 0, importedLayout::deleteUnusedIconImage);
 
 		_importStyleBookEntry(importedLayout, layout, portletDataContext);

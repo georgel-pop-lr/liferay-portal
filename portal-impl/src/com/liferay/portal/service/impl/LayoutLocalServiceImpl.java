@@ -821,7 +821,7 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 			layout.getParentLayoutId(), nameMap, layout.getTitleMap(),
 			layout.getDescriptionMap(), layout.getKeywordsMap(),
 			layout.getRobotsMap(), type, false, layout.getFriendlyURLMap(),
-			layout.hasIconImage(), null, layout.getStyleBookEntryERC(),
+			layout.getIconImageERC(), null, layout.getStyleBookEntryERC(),
 			layout.getFaviconFileEntryERC(),
 			layout.getFaviconFileEntryScopeERC(),
 			masterLayoutPageTemplateEntryERC, serviceContext);
@@ -3011,7 +3011,7 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 		}
 
 		PortalUtil.updateImageERC(
-			layout, bytes != null, bytes, "iconImageERC", 0, 0, 0,
+			layout, layout.getIconImageERC(), bytes, "iconImageERC", 0, 0, 0,
 			layout::deleteUnusedIconImage);
 
 		return layoutLocalService.updateLayout(layout);
@@ -3090,7 +3090,7 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 	 * @param  friendlyURLMap the layout's locales and localized friendly URLs.
 	 *         To see how the URL is normalized when accessed, see {@link
 	 *         FriendlyURLNormalizerUtil#normalize(String)}.
-	 * @param  hasIconImage whether the icon image will be updated
+	 * @param  iconImageERC external reference code of icon image
 	 * @param  iconBytes the byte array of the layout's new icon image
 	 * @param  styleBookEntryERC the external reference code of the style book
 	 *         entry
@@ -3119,7 +3119,7 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 			Map<Locale, String> titleMap, Map<Locale, String> descriptionMap,
 			Map<Locale, String> keywordsMap, Map<Locale, String> robotsMap,
 			String type, boolean hidden, Map<Locale, String> friendlyURLMap,
-			boolean hasIconImage, byte[] iconBytes, String styleBookEntryERC,
+			String iconImageERC, byte[] iconBytes, String styleBookEntryERC,
 			String faviconFileEntryERC, String faviconFileEntryScopeERC,
 			String masterLayoutPageTemplateEntryERC,
 			ServiceContext serviceContext)
@@ -3187,7 +3187,7 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 		layout.setFriendlyURL(friendlyURLMap.get(LocaleUtil.getSiteDefault()));
 
 		PortalUtil.updateImageERC(
-			layout, hasIconImage, iconBytes, "iconImageERC", 0, 0, 0,
+			layout, iconImageERC, iconBytes, "iconImageERC", 0, 0, 0,
 			layout::deleteUnusedIconImage);
 
 		layout.setStyleBookEntryERC(styleBookEntryERC);
@@ -3281,7 +3281,7 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 	@Override
 	public Layout updateLayout(
 			long groupId, boolean privateLayout, long layoutId,
-			String typeSettings, byte[] iconBytes, String themeId,
+			String typeSettings, String iconImageERC, byte[] iconBytes, String themeId,
 			String colorSchemeId, String styleBookEntryERC, String css,
 			String faviconFileEntryERC, String faviconFileEntryScopeERC,
 			String masterLayoutPageTemplateEntryERC)
@@ -3312,7 +3312,7 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 			masterLayoutPageTemplateEntryERC);
 
 		PortalUtil.updateImageERC(
-			layout, iconBytes != null, iconBytes, "iconImageERC", 0, 0, 0,
+			layout, iconImageERC, iconBytes, "iconImageERC", 0, 0, 0,
 			layout::deleteUnusedIconImage);
 
 		return layoutPersistence.update(layout);
