@@ -1833,14 +1833,14 @@ public class PortalUtil {
 	}
 
 	public static void updateImageERC(
-			BaseModel<?> baseModel, boolean hasImage, byte[] bytes,
+			BaseModel<?> baseModel, String iconImageERC, byte[] bytes,
 			String fieldName, long maxSize, int maxHeight, int maxWidth,
 			Runnable deleteStrategy)
 		throws PortalException {
 
 		_portal.updateImageERC(
-			baseModel, hasImage, bytes, fieldName, maxSize, maxHeight, maxWidth,
-			deleteStrategy);
+			baseModel, iconImageERC, bytes, fieldName, maxSize, maxHeight,
+			maxWidth, deleteStrategy);
 	}
 
 	public static void updateImageId(

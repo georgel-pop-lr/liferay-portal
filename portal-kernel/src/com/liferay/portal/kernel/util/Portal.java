@@ -1118,7 +1118,7 @@ public interface Portal {
 	public String transformSQL(String sql);
 
 	public void updateImageERC(
-			BaseModel<?> baseModel, boolean hasImage, byte[] bytes,
+			BaseModel<?> baseModel, String iconImageERC, byte[] bytes,
 			String fieldName, long maxSize, int maxHeight, int maxWidth,
 			Runnable deleteStrategy)
 		throws PortalException;

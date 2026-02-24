@@ -6285,15 +6285,15 @@ public class PortalImpl implements Portal {
 
 	@Override
 	public void updateImageERC(
-			BaseModel<?> baseModel, boolean hasImage, byte[] bytes,
+			BaseModel<?> baseModel, String iconImageERC, byte[] bytes,
 			String fieldName, long maxSize, int maxHeight, int maxWidth,
 			Runnable deleteStrategy)
 		throws PortalException {
 
-		String externalReferenceCode = BeanPropertiesUtil.getString(
-			baseModel, fieldName);
+		if (Validator.isNull(iconImageERC) && ArrayUtil.isEmpty(bytes)) {
+			String externalReferenceCode = BeanPropertiesUtil.getString(
+				baseModel, fieldName);
 
-		if (!hasImage) {
 			if (deleteStrategy != null) {
 				deleteStrategy.run();
 			}
@@ -6315,7 +6315,27 @@ public class PortalImpl implements Portal {
 			return;
 		}
 
+		long companyId = BeanPropertiesUtil.getLong(baseModel, "companyId");
+
 		if (ArrayUtil.isEmpty(bytes)) {
+			if (Validator.isNotNull(iconImageERC)) {
+				BeanPropertiesUtil.setProperty(
+					baseModel, fieldName, iconImageERC);
+
+				Image image =
+					ImageLocalServiceUtil.fetchImageByExternalReferenceCode(
+						iconImageERC, companyId);
+
+				if (image == null) {
+					if (_log.isWarnEnabled()) {
+						_log.warn(
+							StringBundler.concat(
+								"No image exists with external reference code ",
+								iconImageERC, " for company ", companyId));
+					}
+				}
+			}
+
 			return;
 		}
 
@@ -6346,11 +6366,9 @@ public class PortalImpl implements Portal {
 
 		Image image = null;
 
-		long companyId = BeanPropertiesUtil.getLong(baseModel, "companyId");
-
-		if (Validator.isNotNull(externalReferenceCode)) {
+		if (Validator.isNotNull(iconImageERC)) {
 			image = ImageLocalServiceUtil.fetchImageByExternalReferenceCode(
-				externalReferenceCode, companyId);
+				iconImageERC, companyId);
 		}
 
 		if (image != null) {
@@ -6362,6 +6380,15 @@ public class PortalImpl implements Portal {
 		else {
 			image = ImageLocalServiceUtil.updateImage(
 				companyId, CounterLocalServiceUtil.increment(), bytes);
+
+			if (Validator.isNotNull(iconImageERC) &&
+				!Objects.equals(
+					iconImageERC, image.getExternalReferenceCode())) {
+
+				image.setExternalReferenceCode(iconImageERC);
+
+				image = ImageLocalServiceUtil.updateImage(image);
+			}
 		}
 
 		BeanPropertiesUtil.setProperty(
