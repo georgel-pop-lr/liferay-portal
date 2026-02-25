@@ -22,7 +22,6 @@ import com.liferay.object.service.ObjectDefinitionLocalService;
 import com.liferay.object.service.ObjectEntryFolderLocalService;
 import com.liferay.object.service.ObjectEntryLocalService;
 import com.liferay.petra.string.StringBundler;
-import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.security.auth.PrincipalThreadLocal;
@@ -335,11 +334,9 @@ public class DownloadObjectEntryFolderServletTest {
 
 		MockHttpServletRequest mockHttpServletRequest =
 			_getMockHttpServletRequest(
-				_jsonFactory.createJSONObject(
-				).put(
+				JSONUtil.put(
 					"selectionScope",
-					_jsonFactory.createJSONObject(
-					).put(
+					JSONUtil.put(
 						"selectAll", true
 					)
 				).put(
@@ -381,9 +378,6 @@ public class DownloadObjectEntryFolderServletTest {
 	private DLFileEntryLocalService _dlFileEntryLocalService;
 
 	private Group _group;
-
-	@Inject
-	private JSONFactory _jsonFactory;
 
 	@Inject
 	private ObjectDefinitionLocalService _objectDefinitionLocalService;
