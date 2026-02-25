@@ -310,15 +310,14 @@ public class PreupgradeVerifyDatabaseStateTest
 			Assert.fail();
 		}
 		catch (Exception exception) {
-			Set<String> tableNames = DBResourceUtil.parseCreateTableSQL(
-				originalData);
-
 			Set<String> normalizedTableNames = new HashSet<>();
 
 			try (Connection connection = DataAccess.getConnection()) {
 				DBInspector dbInspector = new DBInspector(connection);
 
-				for (String tableName : tableNames) {
+				for (String tableName :
+						DBResourceUtil.parseCreateTableSQL(originalData)) {
+
 					normalizedTableNames.add(
 						dbInspector.normalizeName(tableName));
 				}
