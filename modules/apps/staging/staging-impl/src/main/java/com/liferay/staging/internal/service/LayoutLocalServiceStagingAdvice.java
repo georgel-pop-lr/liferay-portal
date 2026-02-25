@@ -220,7 +220,7 @@ public class LayoutLocalServiceStagingAdvice {
 		else {
 			_portal.updateImageERC(
 				layout, hasIconImage, iconBytes, "iconImageERC", 0, 0, 0,
-				layout::deleteUnusedIconImage);
+				_getIconImageDeleteStrategy(layout));
 		}
 
 		layout.setPortletLayoutPageTemplateEntryLinkEnabled(
@@ -642,6 +642,10 @@ public class LayoutLocalServiceStagingAdvice {
 		}
 
 		return returnValue;
+	}
+
+	private Runnable _getIconImageDeleteStrategy(Layout layout) {
+		return () -> _layoutLocalService.deleteUnusedIconImage(layout);
 	}
 
 	private String _getLayoutPageTemplateEntryName(Layout layout) {

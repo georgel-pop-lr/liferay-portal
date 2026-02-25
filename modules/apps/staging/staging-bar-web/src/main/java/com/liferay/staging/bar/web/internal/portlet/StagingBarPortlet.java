@@ -107,7 +107,7 @@ public class StagingBarPortlet extends MVCPortlet {
 		Layout layout = _layoutLocalService.fetchLayout(
 			layoutRevision.getPlid());
 
-		layout.deleteUnusedIconImage();
+		_layoutLocalService.deleteUnusedIconImage(layout);
 
 		boolean updateRecentLayoutRevisionId = ParamUtil.getBoolean(
 			actionRequest, "updateRecentLayoutRevisionId");

@@ -913,7 +913,7 @@ public class LayoutStagedModelDataHandler
 
 		_portal.updateImageERC(
 			importedLayout, layout.hasIconImage(), iconBytes, "iconImageERC", 0,
-			0, 0, importedLayout::deleteUnusedIconImage);
+			0, 0, _getIconImageDeleteStrategy(importedLayout));
 
 		_importStyleBookEntry(importedLayout, layout, portletDataContext);
 
@@ -1852,6 +1852,10 @@ public class LayoutStagedModelDataHandler
 			_layoutFriendlyURLEntryHelper.getClassNameId(
 				layoutFriendlyURL.isPrivateLayout()),
 			layoutFriendlyURL.getPlid());
+	}
+
+	private Runnable _getIconImageDeleteStrategy(Layout layout) {
+		return () -> _layoutLocalService.deleteUnusedIconImage(layout);
 	}
 
 	private Layout _getLinkedLayout(long groupId, Layout layout) {
