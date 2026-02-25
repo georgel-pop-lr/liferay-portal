@@ -551,6 +551,10 @@ public class LayoutLocalServiceUtil {
 		return getService().deletePersistedModel(persistedModel);
 	}
 
+	public static void deleteUnusedIconImage(Layout layout) {
+		getService().deleteUnusedIconImage(layout);
+	}
+
 	public static <T> T dslQuery(DSLQuery dslQuery) {
 		return getService().dslQuery(dslQuery);
 	}

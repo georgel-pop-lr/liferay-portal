@@ -65,8 +65,6 @@ public interface Layout extends LayoutModel, PersistedModel {
 
 		};
 
-	public void deleteUnusedIconImage();
-
 	public Layout fetchDraftLayout();
 
 	/**

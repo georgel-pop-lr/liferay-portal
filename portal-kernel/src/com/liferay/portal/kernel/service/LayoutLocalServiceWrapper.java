@@ -568,6 +568,11 @@ public class LayoutLocalServiceWrapper
 	}
 
 	@Override
+	public void deleteUnusedIconImage(Layout layout) {
+		_layoutLocalService.deleteUnusedIconImage(layout);
+	}
+
+	@Override
 	public <T> T dslQuery(com.liferay.petra.sql.dsl.query.DSLQuery dslQuery) {
 		return _layoutLocalService.dslQuery(dslQuery);
 	}
