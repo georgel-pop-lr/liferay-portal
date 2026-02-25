@@ -298,12 +298,12 @@ public class BatchEnginePortletDataHandlerUtil {
 		ClassNameLocalService classNameLocalService, String modelClassName,
 		PortletDataContext portletDataContext) {
 
-		long changesetCollectionId = MapUtil.getLong(
-			portletDataContext.getParameterMap(), "changesetCollectionId");
-
 		Set<String> externalReferenceCodes = new HashSet<>();
 
 		externalReferenceCodes.add("");
+
+		long changesetCollectionId = MapUtil.getLong(
+			portletDataContext.getParameterMap(), "changesetCollectionId");
 
 		if (changesetCollectionId > 0) {
 			List<ChangesetEntry> changesetEntries =
@@ -312,12 +312,14 @@ public class BatchEnginePortletDataHandlerUtil {
 					classNameLocalService.getClassNameId(modelClassName));
 
 			for (ChangesetEntry changesetEntry : changesetEntries) {
-				if (!Validator.isBlank(
+				if (Validator.isBlank(
 						changesetEntry.getClassExternalReferenceCode())) {
 
-					externalReferenceCodes.add(
-						changesetEntry.getClassExternalReferenceCode());
+					continue;
 				}
+
+				externalReferenceCodes.add(
+					changesetEntry.getClassExternalReferenceCode());
 			}
 		}
 
