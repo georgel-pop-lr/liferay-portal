@@ -29,6 +29,7 @@ import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.Property;
 import com.liferay.portal.kernel.dao.orm.PropertyFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
+import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
 import com.liferay.portal.kernel.exception.LayoutJavaScriptException;
 import com.liferay.portal.kernel.exception.LayoutNameException;
 import com.liferay.portal.kernel.exception.LayoutTypeException;
@@ -48,6 +49,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.CustomizedPages;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.GroupConstants;
+import com.liferay.portal.kernel.model.Image;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.LayoutConstants;
 import com.liferay.portal.kernel.model.LayoutFriendlyURL;
@@ -86,6 +88,8 @@ import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.ImageLocalService;
 import com.liferay.portal.kernel.service.LayoutFriendlyURLLocalService;
 import com.liferay.portal.kernel.service.LayoutPrototypeLocalService;
+import com.liferay.portal.kernel.service.LayoutRevisionLocalService;
+import com.liferay.portal.kernel.service.LayoutRevisionService;
 import com.liferay.portal.kernel.service.LayoutSetLocalService;
 import com.liferay.portal.kernel.service.LayoutSetPrototypeLocalService;
 import com.liferay.portal.kernel.service.PortalPreferenceValueLocalService;
@@ -1016,7 +1020,7 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 
 		// Icon
 
-		layout.deleteUnusedIconImage();
+		deleteUnusedIconImage(layout);
 
 		// Scope group
 
@@ -1180,6 +1184,59 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 		// Counter
 
 		counterLocalService.reset(getCounterName(groupId, privateLayout));
+	}
+
+	public void deleteUnusedIconImage(Layout layout) {
+		Image image = layout.getIconImage();
+
+		if (image == null) {
+			return;
+		}
+
+		DynamicQuery layoutRevisionDynamicQuery =
+			_layoutRevisionLocalService.dynamicQuery();
+
+		layoutRevisionDynamicQuery.add(
+			RestrictionsFactoryUtil.eq("companyId", layout.getCompanyId()));
+
+		layoutRevisionDynamicQuery.add(
+			RestrictionsFactoryUtil.eq("iconImageId", image.getImageId()));
+
+		long sameImageCount = _layoutRevisionLocalService.dynamicQueryCount(
+			layoutRevisionDynamicQuery);
+
+		if (sameImageCount > 0) {
+			return;
+		}
+
+		if (Validator.isNotNull(layout.getIconImageERC())) {
+			DynamicQuery layoutDynamicQuery = layoutLocalService.dynamicQuery();
+
+			layoutDynamicQuery.add(
+				RestrictionsFactoryUtil.eq("companyId", layout.getCompanyId()));
+
+			layoutDynamicQuery.add(
+				RestrictionsFactoryUtil.eq(
+					"iconImageERC", image.getExternalReferenceCode()));
+
+			layoutDynamicQuery.add(
+				RestrictionsFactoryUtil.ne("plid", layout.getPlid()));
+
+			sameImageCount += layoutLocalService.dynamicQueryCount(
+				layoutDynamicQuery);
+		}
+
+		if (sameImageCount > 0) {
+			return;
+		}
+
+		if (image.getCompanyId() == layout.getCompanyId()) {
+			_imageLocalService.deleteImage(image);
+
+			layout.setIconImageERC(null);
+
+			layoutLocalService.updateLayout(layout);
+		}
 	}
 
 	@Override
@@ -3012,7 +3069,7 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 
 		PortalUtil.updateImageERC(
 			layout, bytes != null, bytes, "iconImageERC", 0, 0, 0,
-			layout::deleteUnusedIconImage);
+			_getIconImageDeleteStrategy(layout));
 
 		return layoutLocalService.updateLayout(layout);
 	}
@@ -3188,7 +3245,7 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 
 		PortalUtil.updateImageERC(
 			layout, hasIconImage, iconBytes, "iconImageERC", 0, 0, 0,
-			layout::deleteUnusedIconImage);
+			_getIconImageDeleteStrategy(layout));
 
 		layout.setStyleBookEntryERC(styleBookEntryERC);
 		layout.setFaviconFileEntryERC(faviconFileEntryERC);
@@ -3313,7 +3370,7 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 
 		PortalUtil.updateImageERC(
 			layout, iconBytes != null, iconBytes, "iconImageERC", 0, 0, 0,
-			layout::deleteUnusedIconImage);
+			_getIconImageDeleteStrategy(layout));
 
 		return layoutPersistence.update(layout);
 	}
@@ -4403,6 +4460,10 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 		);
 	}
 
+	private Runnable _getIconImageDeleteStrategy(Layout layout) {
+		return () -> deleteUnusedIconImage(layout);
+	}
+
 	private long _getParentPlid(
 		long groupId, boolean privateLayout, long parentLayoutId) {
 
@@ -4748,6 +4809,9 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 
 	@BeanReference(type = LayoutPrototypePersistence.class)
 	private LayoutPrototypePersistence _layoutPrototypePersistence;
+
+	@BeanReference(type = LayoutRevisionService.class)
+	private LayoutRevisionLocalService _layoutRevisionLocalService;
 
 	@BeanReference(type = LayoutSetLocalService.class)
 	private LayoutSetLocalService _layoutSetLocalService;
