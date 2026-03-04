@@ -41,6 +41,12 @@ public class FileEntryUtil {
 			return 0;
 		}
 
+		String url = thumbnailURLReference.getUrl();
+
+		if (Validator.isNotNull(url) && url.startsWith("lar:")) {
+			return 0;
+		}
+
 		FileEntry fileEntry =
 			PortletFileRepositoryUtil.
 				fetchPortletFileEntryByExternalReferenceCode(
