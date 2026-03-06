@@ -33,6 +33,7 @@ import com.liferay.portal.kernel.json.JSONException;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
+import com.liferay.portal.kernel.json.UnmodifiableJSONObjectWrapper;
 import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -349,10 +350,18 @@ public class FragmentEntryConfigurationParserImpl
 			return null;
 		}
 
-		JSONArray fieldSetsJSONArray = jsonObject.getJSONArray("fieldSets");
+		JSONObject translatedJSONObject = jsonObject;
+
+		if (jsonObject instanceof UnmodifiableJSONObjectWrapper) {
+			translatedJSONObject = _jsonFactory.safeCreateJSONObject(
+				jsonObject.toString());
+		}
+
+		JSONArray fieldSetsJSONArray = translatedJSONObject.getJSONArray(
+			"fieldSets");
 
 		if (fieldSetsJSONArray == null) {
-			return null;
+			return translatedJSONObject;
 		}
 
 		Iterator<JSONObject> iterator = fieldSetsJSONArray.iterator();
@@ -377,7 +386,7 @@ public class FragmentEntryConfigurationParserImpl
 						fieldJSONObject, resourceBundle));
 			});
 
-		return jsonObject;
+		return translatedJSONObject;
 	}
 
 	private String _getColorPickerCssVariable(String fieldValue) {

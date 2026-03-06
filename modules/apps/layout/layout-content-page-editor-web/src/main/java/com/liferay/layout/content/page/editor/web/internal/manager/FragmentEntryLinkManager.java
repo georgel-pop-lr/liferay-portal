@@ -46,6 +46,7 @@ import com.liferay.portal.kernel.json.JSONException;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
+import com.liferay.portal.kernel.json.UnmodifiableJSONObjectWrapper;
 import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -178,8 +179,8 @@ public class FragmentEntryLinkManager {
 		themeDisplay.setIsolated(true);
 
 		try {
-			JSONObject editableValuesJSONObject =
-				fragmentEntryLink.getEditableValuesJSONObject();
+			JSONObject editableValuesJSONObject = _getMutableJSONObject(
+				fragmentEntryLink.getEditableValuesJSONObject());
 
 			String content = _getContent(
 				defaultFragmentRendererContext, editableValuesJSONObject,
@@ -237,8 +238,7 @@ public class FragmentEntryLinkManager {
 				).put(
 					"editableTypes", Collections.emptyMap()
 				).put(
-					"editableValues",
-					fragmentEntryLink.getEditableValuesJSONObject()
+					"editableValues", editableValuesJSONObject
 				).put(
 					"fragmentEntryId", 0
 				).put(
@@ -437,42 +437,49 @@ public class FragmentEntryLinkManager {
 		JSONObject defaultEditableValuesJSONObject,
 		JSONObject editableValuesJSONObject) {
 
+		JSONObject mutableEditableValuesJSONObject = _getMutableJSONObject(
+			editableValuesJSONObject);
+
 		for (String fragmentEntryProcessorKey :
 				_FRAGMENT_ENTRY_PROCESSOR_KEYS) {
 
-			JSONObject editableFragmentEntryProcessorJSONObject =
-				editableValuesJSONObject.getJSONObject(
-					fragmentEntryProcessorKey);
-
-			JSONObject defaultEditableFragmentEntryProcessorJSONObject =
+			JSONObject defaultProcessorJSONObject =
 				defaultEditableValuesJSONObject.getJSONObject(
 					fragmentEntryProcessorKey);
 
-			if (defaultEditableFragmentEntryProcessorJSONObject == null) {
+			if (defaultProcessorJSONObject == null) {
 				continue;
 			}
 
-			if (editableFragmentEntryProcessorJSONObject != null) {
-				Iterator<String> iterator =
-					defaultEditableFragmentEntryProcessorJSONObject.keys();
+			JSONObject editableProcessorJSONObject =
+				mutableEditableValuesJSONObject.getJSONObject(
+					fragmentEntryProcessorKey);
 
-				while (iterator.hasNext()) {
-					String key = iterator.next();
+			if (editableProcessorJSONObject == null) {
+				mutableEditableValuesJSONObject.put(
+					fragmentEntryProcessorKey,
+					_getMutableJSONObject(defaultProcessorJSONObject));
 
-					if (editableFragmentEntryProcessorJSONObject.has(key)) {
-						defaultEditableFragmentEntryProcessorJSONObject.put(
-							key,
-							editableFragmentEntryProcessorJSONObject.get(key));
-					}
-				}
+				continue;
 			}
 
-			editableValuesJSONObject.put(
-				fragmentEntryProcessorKey,
-				defaultEditableFragmentEntryProcessorJSONObject);
+			JSONObject mergedProcessorJSONObject = _getMutableJSONObject(
+				defaultProcessorJSONObject);
+
+			Iterator<String> iterator = editableProcessorJSONObject.keys();
+
+			while (iterator.hasNext()) {
+				String key = iterator.next();
+
+				mergedProcessorJSONObject.put(
+					key, editableProcessorJSONObject.get(key));
+			}
+
+			mutableEditableValuesJSONObject.put(
+				fragmentEntryProcessorKey, mergedProcessorJSONObject);
 		}
 
-		return editableValuesJSONObject;
+		return mutableEditableValuesJSONObject;
 	}
 
 	@Activate
@@ -711,6 +718,14 @@ public class FragmentEntryLinkManager {
 		return _getInfoForm(
 			(FormStyledLayoutStructureItem)layoutStructureItem,
 			fragmentEntryLink.getGroupId());
+	}
+
+	private JSONObject _getMutableJSONObject(JSONObject jsonObject) {
+		if (jsonObject instanceof UnmodifiableJSONObjectWrapper) {
+			return _jsonFactory.safeCreateJSONObject(jsonObject.toString());
+		}
+
+		return jsonObject;
 	}
 
 	private static final String[] _FRAGMENT_ENTRY_PROCESSOR_KEYS = {
