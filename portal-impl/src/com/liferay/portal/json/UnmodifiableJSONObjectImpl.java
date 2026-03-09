@@ -13,7 +13,6 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -23,9 +22,7 @@ public class UnmodifiableJSONObjectImpl extends JSONObjectImpl {
 
 	@Override
 	public Iterator<String> keys() {
-		List<String> list = Collections.emptyList();
-
-		return list.iterator();
+		return Collections.emptyIterator();
 	}
 
 	@Override
@@ -35,93 +32,66 @@ public class UnmodifiableJSONObjectImpl extends JSONObjectImpl {
 
 	@Override
 	public JSONObject put(String key, boolean value) {
-		if (_log.isWarnEnabled()) {
-			_log.warn("Modifications are unsupported");
-		}
-
-		return this;
+		return _warnModification();
 	}
 
 	@Override
 	public JSONObject put(String key, Date value) {
-		if (_log.isWarnEnabled()) {
-			_log.warn("Modifications are unsupported");
-		}
-
-		return this;
+		return _warnModification();
 	}
 
 	@Override
 	public JSONObject put(String key, double value) {
-		if (_log.isWarnEnabled()) {
-			_log.warn("Modifications are unsupported");
-		}
-
-		return this;
+		return _warnModification();
 	}
 
 	@Override
 	public JSONObject put(String key, int value) {
-		if (_log.isWarnEnabled()) {
-			_log.warn("Modifications are unsupported");
-		}
-
-		return this;
+		return _warnModification();
 	}
 
 	@Override
 	public JSONObject put(String key, JSONArray jsonArray) {
-		if (_log.isWarnEnabled()) {
-			_log.warn("Modifications are unsupported");
-		}
-
-		return this;
+		return _warnModification();
 	}
 
 	@Override
 	public JSONObject put(String key, JSONObject jsonObject) {
-		if (_log.isWarnEnabled()) {
-			_log.warn("Modifications are unsupported");
-		}
-
-		return this;
+		return _warnModification();
 	}
 
 	@Override
 	public JSONObject put(String key, long value) {
-		if (_log.isWarnEnabled()) {
-			_log.warn("Modifications are unsupported");
-		}
-
-		return this;
+		return _warnModification();
 	}
 
 	@Override
 	public JSONObject put(String key, String value) {
-		if (_log.isWarnEnabled()) {
-			_log.warn("Modifications are unsupported");
-		}
-
-		return this;
+		return _warnModification();
 	}
 
 	@Override
 	public JSONObject putException(Exception exception) {
+		return _warnModification();
+	}
+
+	@Override
+	public Object remove(String key) {
+		_warnModification();
+
+		return null;
+	}
+
+	private JSONObject _warnModification() {
 		if (_log.isWarnEnabled()) {
-			_log.warn("Modifications are unsupported");
+			_log.warn(_WARN_MODIFICATIONS);
 		}
 
 		return this;
 	}
 
-	@Override
-	public Object remove(String key) {
-		if (_log.isWarnEnabled()) {
-			_log.warn("Modifications are unsupported");
-		}
-
-		return null;
-	}
+	private static final String _WARN_MODIFICATIONS =
+		"Modifications are unsupported";
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		UnmodifiableJSONObjectImpl.class);
