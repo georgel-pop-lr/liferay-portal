@@ -323,21 +323,31 @@ public class FragmentEntryConfigurationParserImpl
 		List<FragmentConfigurationField> fragmentConfigurationFields =
 			new ArrayList<>();
 
-		Iterator<JSONObject> iterator1 = fieldSetsJSONArray.iterator();
+		for (int i = 0; i < fieldSetsJSONArray.length(); i++) {
+			JSONObject fieldSetJSONObject = fieldSetsJSONArray.getJSONObject(i);
 
-		iterator1.forEachRemaining(
-			fieldSetJSONObject -> {
-				JSONArray fieldSetFieldsJSONArray =
-					fieldSetJSONObject.getJSONArray("fields");
+			if (fieldSetJSONObject == null) {
+				continue;
+			}
 
-				Iterator<JSONObject> iterator2 =
-					fieldSetFieldsJSONArray.iterator();
+			JSONArray fieldSetFieldsJSONArray = fieldSetJSONObject.getJSONArray(
+				"fields");
 
-				iterator2.forEachRemaining(
-					fieldSetFieldsJSONObject -> fragmentConfigurationFields.add(
+			if (fieldSetFieldsJSONArray == null) {
+				continue;
+			}
+
+			for (int j = 0; j < fieldSetFieldsJSONArray.length(); j++) {
+				JSONObject fieldSetFieldJSONObject =
+					fieldSetFieldsJSONArray.getJSONObject(j);
+
+				if (fieldSetFieldJSONObject != null) {
+					fragmentConfigurationFields.add(
 						new FragmentConfigurationField(
-							fieldSetFieldsJSONObject)));
-			});
+							fieldSetFieldJSONObject));
+				}
+			}
+		}
 
 		return fragmentConfigurationFields;
 	}
@@ -364,27 +374,35 @@ public class FragmentEntryConfigurationParserImpl
 			return translatedJSONObject;
 		}
 
-		Iterator<JSONObject> iterator = fieldSetsJSONArray.iterator();
+		for (int i = 0; i < fieldSetsJSONArray.length(); i++) {
+			JSONObject fieldSetJSONObject = fieldSetsJSONArray.getJSONObject(i);
 
-		iterator.forEachRemaining(
-			fieldSetJSONObject -> {
-				String fieldSetLabel = fieldSetJSONObject.getString("label");
+			if (fieldSetJSONObject == null) {
+				continue;
+			}
 
-				fieldSetJSONObject.put(
-					"label",
-					_language.get(
-						resourceBundle, fieldSetLabel, fieldSetLabel));
+			String fieldSetLabel = fieldSetJSONObject.getString("label");
 
-				JSONArray fieldsJSONArray = fieldSetJSONObject.getJSONArray(
-					"fields");
+			fieldSetJSONObject.put(
+				"label",
+				_language.get(resourceBundle, fieldSetLabel, fieldSetLabel));
 
-				Iterator<JSONObject> fieldsIterator =
-					fieldsJSONArray.iterator();
+			JSONArray fieldsJSONArray = fieldSetJSONObject.getJSONArray(
+				"fields");
 
-				fieldsIterator.forEachRemaining(
-					fieldJSONObject -> _translateConfigurationField(
-						fieldJSONObject, resourceBundle));
-			});
+			if (fieldsJSONArray == null) {
+				continue;
+			}
+
+			for (int j = 0; j < fieldsJSONArray.length(); j++) {
+				JSONObject fieldJSONObject = fieldsJSONArray.getJSONObject(j);
+
+				if (fieldJSONObject != null) {
+					_translateConfigurationField(
+						fieldJSONObject, resourceBundle);
+				}
+			}
+		}
 
 		return translatedJSONObject;
 	}
