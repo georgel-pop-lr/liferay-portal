@@ -37,10 +37,18 @@ public class JSONObjectImpl implements JSONObject {
 		throws JSONException {
 
 		try {
-			JSONObjectImpl jsonObjectImpl = (JSONObjectImpl)jsonObject;
+			org.json.JSONObject orgJSONObject = null;
 
-			_jsonObject = new org.json.JSONObject(
-				jsonObjectImpl.getJSONObject(), names);
+			if (jsonObject instanceof JSONObjectImpl) {
+				JSONObjectImpl jsonObjectImpl = (JSONObjectImpl)jsonObject;
+
+				orgJSONObject = jsonObjectImpl.getJSONObject();
+			}
+			else {
+				orgJSONObject = new org.json.JSONObject(jsonObject.toString());
+			}
+
+			_jsonObject = new org.json.JSONObject(orgJSONObject, names);
 		}
 		catch (Exception exception) {
 			throw new JSONException(exception);
@@ -261,9 +269,18 @@ public class JSONObjectImpl implements JSONObject {
 	@Override
 	public JSONObject put(String key, JSONArray jsonArray) {
 		try {
-			JSONArrayImpl jsonArrayImpl = (JSONArrayImpl)jsonArray;
+			if (jsonArray == null) {
+				_jsonObject.put(key, (Object)null);
+			}
+			else if (jsonArray instanceof JSONArrayImpl) {
+				JSONArrayImpl jsonArrayImpl = (JSONArrayImpl)jsonArray;
 
-			_jsonObject.put(key, jsonArrayImpl.getJSONArray());
+				_jsonObject.put(key, jsonArrayImpl.getJSONArray());
+			}
+			else {
+				_jsonObject.put(
+					key, new org.json.JSONArray(jsonArray.toString()));
+			}
 		}
 		catch (Exception exception) {
 			if (_log.isWarnEnabled()) {
@@ -277,9 +294,18 @@ public class JSONObjectImpl implements JSONObject {
 	@Override
 	public JSONObject put(String key, JSONObject jsonObject) {
 		try {
-			JSONObjectImpl jsonObjectImpl = (JSONObjectImpl)jsonObject;
+			if (jsonObject == null) {
+				_jsonObject.put(key, (Object)null);
+			}
+			else if (jsonObject instanceof JSONObjectImpl) {
+				JSONObjectImpl jsonObjectImpl = (JSONObjectImpl)jsonObject;
 
-			_jsonObject.put(key, jsonObjectImpl.getJSONObject());
+				_jsonObject.put(key, jsonObjectImpl.getJSONObject());
+			}
+			else {
+				_jsonObject.put(
+					key, new org.json.JSONObject(jsonObject.toString()));
+			}
 		}
 		catch (Exception exception) {
 			if (_log.isWarnEnabled()) {
