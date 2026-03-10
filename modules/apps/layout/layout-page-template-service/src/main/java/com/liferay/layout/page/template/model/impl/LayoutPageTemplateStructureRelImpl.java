@@ -21,17 +21,7 @@ public class LayoutPageTemplateStructureRelImpl
 	@Override
 	public JSONObject getDataJSONObject() {
 		if (_dataJSONObject == null) {
-			try {
-				_dataJSONObject = JSONFactoryUtil.createJSONObject(getData());
-
-				dataJSONObjectUpdateEntityCacheBiConsumer.accept(
-					this, _dataJSONObject);
-			}
-			catch (JSONException jsonException) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(jsonException);
-				}
-			}
+			_dataJSONObject = _updateCachedDataJSONObject();
 		}
 
 		return _dataJSONObject;
@@ -41,7 +31,24 @@ public class LayoutPageTemplateStructureRelImpl
 	public void setData(String data) {
 		super.setData(data);
 
-		_dataJSONObject = null;
+		_dataJSONObject = _updateCachedDataJSONObject();
+	}
+
+	private JSONObject _updateCachedDataJSONObject() {
+		JSONObject dataJSONObject = null;
+
+		try {
+			dataJSONObject = JSONFactoryUtil.createJSONObject(getData());
+		}
+		catch (JSONException jsonException) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(jsonException);
+			}
+		}
+
+		dataJSONObjectUpdateEntityCacheBiConsumer.accept(this, dataJSONObject);
+
+		return dataJSONObject;
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(

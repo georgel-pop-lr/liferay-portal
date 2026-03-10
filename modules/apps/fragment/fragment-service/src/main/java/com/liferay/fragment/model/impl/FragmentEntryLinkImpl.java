@@ -8,6 +8,7 @@ package com.liferay.fragment.model.impl;
 import com.liferay.fragment.constants.FragmentConstants;
 import com.liferay.fragment.contributor.FragmentCollectionContributorRegistry;
 import com.liferay.fragment.model.FragmentEntry;
+import com.liferay.fragment.model.FragmentEntryLink;
 import com.liferay.fragment.service.FragmentEntryLocalServiceUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
@@ -21,6 +22,7 @@ import com.liferay.portal.kernel.util.Validator;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 /**
  * @author Eudaldo Alonso
@@ -51,17 +53,10 @@ public class FragmentEntryLinkImpl extends FragmentEntryLinkBaseImpl {
 
 	@Override
 	public JSONObject getConfigurationJSONObject() {
-		return getConfigurationJSONObject(false);
-	}
-
-	@Override
-	public JSONObject getConfigurationJSONObject(boolean strict) {
 		if (_configurationJSONObject == null) {
-			_configurationJSONObject = JSONFactoryUtil.safeCreateJSONObject(
-				getConfiguration(), strict);
-
-			configurationJSONObjectUpdateEntityCacheBiConsumer.accept(
-				this, _configurationJSONObject);
+			_configurationJSONObject = _updateCachedJSONObject(
+				getConfiguration(),
+				configurationJSONObjectUpdateEntityCacheBiConsumer);
 		}
 
 		return _configurationJSONObject;
@@ -69,17 +64,10 @@ public class FragmentEntryLinkImpl extends FragmentEntryLinkBaseImpl {
 
 	@Override
 	public JSONObject getEditableValuesJSONObject() {
-		return getEditableValuesJSONObject(false);
-	}
-
-	@Override
-	public JSONObject getEditableValuesJSONObject(boolean strict) {
 		if (_editableValuesJSONObject == null) {
-			_editableValuesJSONObject = JSONFactoryUtil.safeCreateJSONObject(
-				getEditableValues(), strict);
-
-			editableValuesJSONObjectUpdateEntityCacheBiConsumer.accept(
-				this, _editableValuesJSONObject);
+			_editableValuesJSONObject = _updateCachedJSONObject(
+				getEditableValues(),
+				editableValuesJSONObjectUpdateEntityCacheBiConsumer);
 		}
 
 		return _editableValuesJSONObject;
@@ -200,14 +188,30 @@ public class FragmentEntryLinkImpl extends FragmentEntryLinkBaseImpl {
 	public void setConfiguration(String configuration) {
 		super.setConfiguration(configuration);
 
-		_configurationJSONObject = null;
+		_configurationJSONObject = _updateCachedJSONObject(
+			getConfiguration(),
+			configurationJSONObjectUpdateEntityCacheBiConsumer);
 	}
 
 	@Override
 	public void setEditableValues(String editableValues) {
 		super.setEditableValues(editableValues);
 
-		_editableValuesJSONObject = null;
+		_editableValuesJSONObject = _updateCachedJSONObject(
+			getEditableValues(),
+			editableValuesJSONObjectUpdateEntityCacheBiConsumer);
+	}
+
+	private JSONObject _updateCachedJSONObject(
+		String jsonString,
+		BiConsumer<FragmentEntryLink, JSONObject> updateEntityCacheBiConsumer) {
+
+		JSONObject jsonObject = JSONFactoryUtil.safeCreateJSONObject(
+			jsonString);
+
+		updateEntityCacheBiConsumer.accept(this, jsonObject);
+
+		return jsonObject;
 	}
 
 	private static final Snapshot<FragmentCollectionContributorRegistry>
