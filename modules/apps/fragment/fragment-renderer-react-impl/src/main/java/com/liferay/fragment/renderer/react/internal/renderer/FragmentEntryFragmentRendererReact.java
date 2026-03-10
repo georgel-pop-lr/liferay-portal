@@ -68,7 +68,11 @@ public class FragmentEntryFragmentRendererReact implements FragmentRenderer {
 		FragmentEntryLink fragmentEntryLink =
 			fragmentRendererContext.getFragmentEntryLink();
 
-		return fragmentEntryLink.getConfigurationJSONObject(true);
+		if (fragmentEntryLink == null) {
+			return null;
+		}
+
+		return fragmentEntryLink.getConfigurationJSONObject();
 	}
 
 	@Override
