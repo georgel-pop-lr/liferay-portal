@@ -12,6 +12,8 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.cache.CacheField;
 
+import java.util.Objects;
+
 /**
  * @author Eudaldo Alonso
  */
@@ -29,6 +31,10 @@ public class LayoutPageTemplateStructureRelImpl
 
 	@Override
 	public void setData(String data) {
+		if (Objects.equals(data, getData())) {
+			return;
+		}
+
 		super.setData(data);
 
 		_dataJSONObject = _updateCachedDataJSONObject();

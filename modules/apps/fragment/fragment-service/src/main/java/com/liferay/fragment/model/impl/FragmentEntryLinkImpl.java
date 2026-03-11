@@ -22,6 +22,7 @@ import com.liferay.portal.kernel.util.Validator;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 
 /**
@@ -186,6 +187,10 @@ public class FragmentEntryLinkImpl extends FragmentEntryLinkBaseImpl {
 
 	@Override
 	public void setConfiguration(String configuration) {
+		if (Objects.equals(configuration, getConfiguration())) {
+			return;
+		}
+
 		super.setConfiguration(configuration);
 
 		_configurationJSONObject = _updateCachedJSONObject(
@@ -195,6 +200,10 @@ public class FragmentEntryLinkImpl extends FragmentEntryLinkBaseImpl {
 
 	@Override
 	public void setEditableValues(String editableValues) {
+		if (Objects.equals(editableValues, getEditableValues())) {
+			return;
+		}
+
 		super.setEditableValues(editableValues);
 
 		_editableValuesJSONObject = _updateCachedJSONObject(
