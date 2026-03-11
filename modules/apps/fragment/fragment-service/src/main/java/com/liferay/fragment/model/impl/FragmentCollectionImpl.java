@@ -131,6 +131,34 @@ public class FragmentCollectionImpl extends FragmentCollectionBaseImpl {
 	}
 
 	@Override
+	public boolean hasExportableItems() {
+		List<FragmentComposition> fragmentCompositions =
+			FragmentCompositionLocalServiceUtil.getFragmentCompositions(
+				getFragmentCollectionId());
+
+		for (FragmentComposition fragmentComposition : fragmentCompositions) {
+			if (!fragmentComposition.isMarketplace()) {
+				return true;
+			}
+		}
+
+		List<FragmentEntry> fragmentEntries =
+			FragmentEntryLocalServiceUtil.getFragmentEntries(
+				getFragmentCollectionId(), QueryUtil.ALL_POS,
+				QueryUtil.ALL_POS);
+
+		for (FragmentEntry fragmentEntry : fragmentEntries) {
+			if (!fragmentEntry.isMarketplace() &&
+				!fragmentEntry.isTypeReact()) {
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	@Override
 	public boolean hasResources() throws PortalException {
 		Repository repository = _getRepository(true);
 
