@@ -182,6 +182,10 @@ public class FragmentEntryValidatorImpl implements FragmentEntryValidator {
 			JSONObject configurationJSONObject, JSONObject valuesJSONObject)
 		throws Exception {
 
+		if (JSONUtil.isEmpty(configurationJSONObject)) {
+			return;
+		}
+
 		_configurationJSONValidator.validate(
 			_jsonFactory.toString(configurationJSONObject));
 
