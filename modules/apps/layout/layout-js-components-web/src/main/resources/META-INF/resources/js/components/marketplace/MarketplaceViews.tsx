@@ -17,7 +17,11 @@ import {openToast} from 'frontend-js-components-web';
 import {sub} from 'frontend-js-web';
 import React, {useCallback} from 'react';
 
+import ImportOptionsModal, {
+	OverwriteStrategy,
+} from '../import/ImportOptionsModal';
 import importZipFile from '../import/importZipFile';
+import openModalComponent from '../modals/openModalComponent';
 import {InstallFragmentModalBody} from './InstallFragmentModal';
 
 async function fetchFragmentBlob(
@@ -83,16 +87,46 @@ export default function MarketplaceViews({
 	} = useMarketplaceContext();
 
 	const handleImportFile = useCallback(
-		async (file: File) => {
+		async (file: File, overwriteStrategy?: OverwriteStrategy) => {
+			let awaitingResolution = false;
+
 			try {
 				await importZipFile({
 					file,
-					handleResponse: ({importResults}, file) => {
+					handleResponse: ({hasConflicts, importResults}, file) => {
+						if (hasConflicts) {
+							awaitingResolution = true;
+							onOpenChange(false);
+
+							openModalComponent({
+								ModalComponent: ImportOptionsModal,
+								modalComponentProps: {
+									onImport: (
+										overwriteStrategy?: OverwriteStrategy
+									) => {
+										setView(MarketplaceView.PURCHASE);
+										onOpenChange(true);
+
+										handleImportFile(
+											file,
+											overwriteStrategy
+										).then((awaitingResolution) => {
+											if (!awaitingResolution) {
+												onOpenChange(false);
+											}
+										});
+									},
+								},
+							});
+
+							return;
+						}
+
 						if (!Object.keys(importResults).length) {
 							openToast({
 								message: sub(
 									Liferay.Language.get(
-										'no-new-items-were-imported'
+										'no-new-items-were-installed'
 									),
 									file.name
 								),
@@ -113,7 +147,7 @@ export default function MarketplaceViews({
 					},
 					importURL: fragmentsImportURL,
 					marketplace: true,
-					overwriteStrategy: 'keep_both',
+					overwriteStrategy,
 					portletNamespace: fragmentPortletNamespace,
 				});
 			}
@@ -122,12 +156,16 @@ export default function MarketplaceViews({
 					console.error('Import failed:', error);
 				}
 			}
+
+			return awaitingResolution;
 		},
-		[fragmentsImportURL, fragmentPortletNamespace]
+		[fragmentsImportURL, fragmentPortletNamespace, onOpenChange, setView]
 	);
 
 	const handleInstallProduct = useCallback(
 		async (product: Product) => {
+			let awaitingResolution = false;
+
 			setView(MarketplaceView.PURCHASE);
 			setProduct(product);
 
@@ -147,7 +185,7 @@ export default function MarketplaceViews({
 					{type: 'application/zip'}
 				);
 
-				await handleImportFile(file);
+				awaitingResolution = await handleImportFile(file);
 			}
 			catch (error) {
 				if (process.env.NODE_ENV === 'development') {
@@ -162,7 +200,9 @@ export default function MarketplaceViews({
 				});
 			}
 			finally {
-				onOpenChange(false);
+				if (!awaitingResolution) {
+					onOpenChange(false);
+				}
 			}
 		},
 		[marketplaceRest, setProduct, setView, handleImportFile, onOpenChange]
