@@ -566,11 +566,17 @@ public class FragmentDisplayContext {
 
 	public Map<String, Object> getMarketplaceProps() throws PortalException {
 		return HashMapBuilder.<String, Object>put(
+			"addFragmentCollectionURL",
+			getAdditionalProps().get("addFragmentCollectionURL")
+		).put(
 			"body",
 			LanguageUtil.get(
 				_httpServletRequest,
 				"we-are-excited-to-share-that-marketplace-is-now-part-of-" +
 					"fragments")
+		).put(
+			"fragmentCollections",
+			getAdditionalProps().get("fragmentCollections")
 		).put(
 			"fragmentPortletNamespace", _renderResponse.getNamespace()
 		).put(

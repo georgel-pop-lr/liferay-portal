@@ -5,6 +5,7 @@
 
 package com.liferay.fragment.web.internal.portlet.action;
 
+import com.liferay.fragment.constants.FragmentExportImportConstants;
 import com.liferay.fragment.constants.FragmentPortletKeys;
 import com.liferay.fragment.importer.FragmentsImportStrategy;
 import com.liferay.fragment.importer.FragmentsImporter;
@@ -33,8 +34,11 @@ import jakarta.portlet.ResourceResponse;
 import java.io.File;
 
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -70,10 +74,25 @@ public class ImportMVCResourceCommand extends BaseMVCResourceCommand {
 		File file = uploadPortletRequest.getFile("file");
 
 		String importType = ParamUtil.getString(resourceRequest, "importType");
+		boolean marketplace = ParamUtil.getBoolean(
+			resourceRequest, "marketplace");
+
+		jsonObject.put("needsFragmentCollection", false);
 
 		boolean validFragmentEntries = true;
 
 		if (Validator.isNull(importType)) {
+			if ((marketplace || (fragmentCollectionId <= 0)) &&
+				!_containsFragmentCollection(file)) {
+
+				jsonObject.put("needsFragmentCollection", true);
+
+				JSONPortletResponseUtil.writeJSON(
+					resourceRequest, resourceResponse, jsonObject);
+
+				return;
+			}
+
 			validFragmentEntries = _fragmentsImporter.validateFragmentEntries(
 				themeDisplay.getUserId(), themeDisplay.getScopeGroupId(),
 				fragmentCollectionId, file);
@@ -88,9 +107,6 @@ public class ImportMVCResourceCommand extends BaseMVCResourceCommand {
 					FragmentsImportStrategy.DO_NOT_OVERWRITE;
 			}
 
-			boolean marketplace = ParamUtil.getBoolean(
-				resourceRequest, "marketplace");
-
 			jsonObject = _importFragmentEntries(
 				file, fragmentCollectionId, themeDisplay.getScopeGroupId(),
 				fragmentsImportStrategy, themeDisplay.getLocale(), marketplace,
@@ -102,6 +118,27 @@ public class ImportMVCResourceCommand extends BaseMVCResourceCommand {
 
 		JSONPortletResponseUtil.writeJSON(
 			resourceRequest, resourceResponse, jsonObject);
+	}
+
+	private boolean _containsFragmentCollection(File file) throws Exception {
+		try (ZipFile zipFile = new ZipFile(file)) {
+			Enumeration<? extends ZipEntry> enumeration = zipFile.entries();
+
+			while (enumeration.hasMoreElements()) {
+				ZipEntry zipEntry = enumeration.nextElement();
+
+				String zipEntryName = zipEntry.getName();
+
+				if (!zipEntry.isDirectory() &&
+					zipEntryName.endsWith(
+						FragmentExportImportConstants.FILE_NAME_COLLECTION)) {
+
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	private String _getKey(FragmentsImporterResultEntry.Status status) {
