@@ -10,6 +10,7 @@ import React from 'react';
 import '@testing-library/jest-dom';
 import {MarketplaceView} from '@liferay/marketplace-js-components-web';
 
+import importZipFile from '../../../src/main/resources/META-INF/resources/js/components/import/importZipFile';
 import MarketplaceViews from '../../../src/main/resources/META-INF/resources/js/components/marketplace/MarketplaceViews';
 
 const mockUseMarketplaceContext = {
@@ -92,6 +93,7 @@ jest.mock(
 	() =>
 		jest.fn(({handleResponse}) => {
 			handleResponse({
+				hasConflicts: false,
 				importResults: {'some-fragment-id': 'some-fragment-name'},
 			});
 
@@ -170,7 +172,11 @@ describe('MarketplaceViews', () => {
 		await waitFor(() => {
 			expect(
 				require('../../../src/main/resources/META-INF/resources/js/components/import/importZipFile')
-			).toHaveBeenCalled();
+			).toHaveBeenCalledWith(
+				expect.objectContaining({
+					overwriteStrategy: undefined,
+				})
+			);
 		});
 
 		const backButton = screen.queryByRole('button', {name: 'back-to-list'});
@@ -216,6 +222,39 @@ describe('MarketplaceViews', () => {
 			).toHaveBeenCalledWith(expect.objectContaining({type: 'success'}));
 
 			expect(mockReload).toHaveBeenCalledTimes(1);
+			expect(
+				mockUseMarketplaceContext.modal.onOpenChange
+			).toHaveBeenCalledWith(false);
+		});
+	});
+
+	it('open import options modal when marketplace items already exist', async () => {
+		importZipFile.mockImplementationOnce(({handleResponse}) => {
+			handleResponse(
+				{
+					hasConflicts: true,
+					importResults: {},
+				},
+				new File(['test'], 'test-product.zip', {
+					type: 'application/zip',
+				})
+			);
+
+			return Promise.resolve();
+		});
+
+		renderComponent();
+
+		userEvent.click(screen.getByRole('button', {name: 'install'}));
+
+		expect(
+			await screen.findByText('manage-existing-items')
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole('radio', {name: 'replace-existing-items'})
+		).toBeInTheDocument();
+
+		await waitFor(() => {
 			expect(
 				mockUseMarketplaceContext.modal.onOpenChange
 			).toHaveBeenCalledWith(false);

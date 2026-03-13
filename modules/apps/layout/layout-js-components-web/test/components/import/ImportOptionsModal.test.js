@@ -27,9 +27,10 @@ describe('ImportOptionsModal', () => {
 	it('renders text informing the user that some items already exist', async () => {
 		const {findByText} = await renderComponent();
 
+		expect(await findByText('manage-existing-items')).toBeInTheDocument();
 		expect(
 			await findByText(
-				'one-or-more-items-from-the-zip-already-exist-in-this-location'
+				'one-or-more-items-you-are-trying-to-add-already-exist-in-your-fragment-sets.-what-action-do-you-want-to-take'
 			)
 		).toBeInTheDocument();
 	});
@@ -39,10 +40,10 @@ describe('ImportOptionsModal', () => {
 
 		expect((await findAllByRole('radio')).length).toBe(3);
 		expect(
-			await findByRole('radio', {name: /do-not-import-existing-items/i})
+			await findByRole('radio', {name: /do-not-add-existing-items/i})
 		).toBeInTheDocument();
 		expect(
-			await findByRole('radio', {name: /overwrite-existing-items/i})
+			await findByRole('radio', {name: /replace-existing-items/i})
 		).toBeInTheDocument();
 		expect(
 			await findByRole('radio', {name: /keep-both/i})
@@ -56,7 +57,7 @@ describe('ImportOptionsModal', () => {
 		const {findByRole} = await renderComponent({onCloseModal, onImport});
 
 		const cancelButton = await findByRole('button', {name: /cancel/i});
-		const importButton = await findByRole('button', {name: /import/i});
+		const importButton = await findByRole('button', {name: /save/i});
 
 		expect(cancelButton).toBeInTheDocument();
 		expect(importButton).toBeInTheDocument();
@@ -78,7 +79,7 @@ describe('ImportOptionsModal Accessibility', () => {
 				onClose={jest.fn()}
 				onImport={jest.fn()}
 				onOptionChange={jest.fn()}
-				selectedOption={IMPORT_OPTIONS[0]}
+				selectedOption={IMPORT_OPTIONS[0].value}
 			/>
 		);
 
