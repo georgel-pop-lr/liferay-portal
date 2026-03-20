@@ -12,6 +12,8 @@ import {MarketplaceView} from '@liferay/marketplace-js-components-web';
 
 import importZipFile from '../../../src/main/resources/META-INF/resources/js/components/import/importZipFile';
 import MarketplaceViews from '../../../src/main/resources/META-INF/resources/js/components/marketplace/MarketplaceViews';
+import FragmentSetModal from '../../../src/main/resources/META-INF/resources/js/components/modals/FragmentSetModal';
+import openModalComponent from '../../../src/main/resources/META-INF/resources/js/components/modals/openModalComponent';
 
 const mockUseMarketplaceContext = {
 	marketplaceRest: {
@@ -89,12 +91,17 @@ jest.mock('frontend-js-components-web', () => ({
 }));
 
 jest.mock(
+	'../../../src/main/resources/META-INF/resources/js/components/modals/openModalComponent'
+);
+
+jest.mock(
 	'../../../src/main/resources/META-INF/resources/js/components/import/importZipFile',
 	() =>
 		jest.fn(({handleResponse}) => {
 			handleResponse({
 				hasConflicts: false,
 				importResults: {'some-fragment-id': 'some-fragment-name'},
+				needsFragmentCollection: false,
 			});
 
 			return Promise.resolve();
@@ -113,6 +120,8 @@ jest.mock(
 );
 
 const mockProps = {
+	addFragmentCollectionURL: '/o/test/add_fragment_collection',
+	fragmentCollections: [{fragmentCollectionId: 1, name: 'Set Name'}],
 	fragmentPortletNamespace: 'testNamespace',
 	fragmentsImportURL: '/testImportURL',
 	hideBackButton: false,
@@ -127,6 +136,16 @@ describe('MarketplaceViews', () => {
 
 	beforeEach(() => {
 		jest.clearAllMocks();
+
+		require('@liferay/marketplace-js-components-web').MarketplaceProduct =
+			jest.fn().mockImplementation((product) => ({
+				...product,
+				hasPermissionToInstall: jest.fn().mockReturnValue(true),
+			}));
+
+		require('@liferay/marketplace-js-components-web').useMarketplaceContext.mockReturnValue(
+			mockUseMarketplaceContext
+		);
 
 		consoleErrorSpy = jest
 			.spyOn(console, 'error')
@@ -170,12 +189,8 @@ describe('MarketplaceViews', () => {
 		userEvent.click(installButton);
 
 		await waitFor(() => {
-			expect(
-				require('../../../src/main/resources/META-INF/resources/js/components/import/importZipFile')
-			).toHaveBeenCalledWith(
-				expect.objectContaining({
-					overwriteStrategy: undefined,
-				})
+			expect(mockContext.setView).toHaveBeenCalledWith(
+				MarketplaceView.PURCHASE
 			);
 		});
 
@@ -215,7 +230,11 @@ describe('MarketplaceViews', () => {
 
 			expect(
 				require('../../../src/main/resources/META-INF/resources/js/components/import/importZipFile')
-			).toHaveBeenCalled();
+			).toHaveBeenCalledWith(
+				expect.not.objectContaining({
+					fragmentCollectionId: expect.anything(),
+				})
+			);
 
 			expect(
 				require('frontend-js-components-web').openToast
@@ -228,12 +247,13 @@ describe('MarketplaceViews', () => {
 		});
 	});
 
-	it('open import options modal when marketplace items already exist', async () => {
+	it('opens import options modal when marketplace items already exist', async () => {
 		importZipFile.mockImplementationOnce(({handleResponse}) => {
 			handleResponse(
 				{
 					hasConflicts: true,
 					importResults: {},
+					needsFragmentCollection: false,
 				},
 				new File(['test'], 'test-product.zip', {
 					type: 'application/zip',
@@ -245,16 +265,16 @@ describe('MarketplaceViews', () => {
 
 		renderComponent();
 
-		userEvent.click(screen.getByRole('button', {name: 'install'}));
-
-		expect(
-			await screen.findByText('manage-existing-items')
-		).toBeInTheDocument();
-		expect(
-			screen.getByRole('radio', {name: 'replace-existing-items'})
-		).toBeInTheDocument();
+		await userEvent.click(screen.getByRole('button', {name: 'install'}));
 
 		await waitFor(() => {
+			expect(openModalComponent).toHaveBeenLastCalledWith(
+				expect.objectContaining({
+					modalComponentProps: expect.objectContaining({
+						onImport: expect.any(Function),
+					}),
+				})
+			);
 			expect(
 				mockUseMarketplaceContext.modal.onOpenChange
 			).toHaveBeenCalledWith(false);
@@ -295,7 +315,7 @@ describe('MarketplaceViews', () => {
 
 		renderComponent();
 
-		userEvent.click(screen.getByRole('button', {name: 'install'}));
+		await userEvent.click(screen.getByRole('button', {name: 'install'}));
 
 		await waitFor(() => {
 			expect(
@@ -303,6 +323,56 @@ describe('MarketplaceViews', () => {
 			).toHaveBeenCalledWith(expect.objectContaining({type: 'danger'}));
 
 			expect(mockContext.modal.onOpenChange).toHaveBeenCalledWith(false);
+		});
+	});
+
+	it('opens fragment set modal before importing marketplace fragments', async () => {
+		importZipFile.mockImplementation(() => Promise.resolve());
+
+		renderComponent();
+
+		await userEvent.click(screen.getByRole('button', {name: 'install'}));
+
+		await waitFor(() => {
+			expect(importZipFile).toHaveBeenCalled();
+		});
+
+		const {handleResponse} = importZipFile.mock.calls[0][0];
+
+		handleResponse(
+			{
+				hasConflicts: false,
+				importResults: {},
+				needsFragmentCollection: true,
+			},
+			new File(['test'], 'test-product.zip', {
+				type: 'application/zip',
+			})
+		);
+
+		await waitFor(() => {
+			expect(openModalComponent).toHaveBeenCalledWith(
+				expect.objectContaining({
+					ModalComponent: FragmentSetModal,
+				})
+			);
+		});
+
+		const {
+			modalComponentProps: {onSubmitFragmentCollection},
+		} = openModalComponent.mock.calls[0][0];
+
+		importZipFile.mockImplementation(() => Promise.resolve());
+
+		await onSubmitFragmentCollection(1);
+
+		await waitFor(() => {
+			expect(importZipFile).toHaveBeenNthCalledWith(
+				2,
+				expect.objectContaining({
+					fragmentCollectionId: 1,
+				})
+			);
 		});
 	});
 

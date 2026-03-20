@@ -10,10 +10,18 @@ import React from 'react';
 
 import FragmentSetModal from '../../../src/main/resources/META-INF/resources/js/components/modals/FragmentSetModal';
 
-const renderComponent = ({fragmentCollections = []} = {}) => {
+const renderComponent = ({
+	fragmentCollections = [],
+	onSubmitFragmentCollection,
+} = {}) => {
 	const user = userEvent.setup({advanceTimers: jest.advanceTimersByTime});
 
-	render(<FragmentSetModal fragmentCollections={fragmentCollections} />);
+	render(
+		<FragmentSetModal
+			fragmentCollections={fragmentCollections}
+			onSubmitFragmentCollection={onSubmitFragmentCollection}
+		/>
+	);
 
 	return user;
 };
@@ -49,6 +57,14 @@ describe('FragmentSetModal', () => {
 		});
 
 		expect(screen.getByLabelText('fragment-sets')).toBeInTheDocument();
+		expect(
+			screen.getByDisplayValue('-- not-selected --')
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(
+				'one-or-more-items-you-are-trying-to-add-already-exist-in-your-fragment-sets.-what-action-do-you-want-to-take'
+			)
+		).toBeInTheDocument();
 	});
 
 	it('renders fragment collections from without message when clicking on the save in new set button', async () => {
@@ -67,6 +83,9 @@ describe('FragmentSetModal', () => {
 		await user.click(button);
 
 		expect(screen.getByLabelText('name')).toBeInTheDocument();
+		expect(
+			screen.getByText('add-a-fragment-set-to-save-your-fragment')
+		).toBeInTheDocument();
 
 		expect(
 			screen.queryByText(
@@ -92,18 +111,40 @@ describe('FragmentSetModal', () => {
 	});
 
 	it('show required validation when no fragment collection is introduced', async () => {
-		const user = renderComponent();
+		const user = renderComponent({
+			fragmentCollections: [
+				{fragmentCollectionId: 1, name: 'fragment-collection'},
+			],
+		});
 
 		act(() => {
 			jest.runAllTimers();
 		});
 
-		fireEvent.change(screen.getByLabelText('name'), {
-			target: {value: ''},
+		await user.click(screen.getByText('save'));
+
+		expect(screen.getByText('x-field-is-required')).toBeInTheDocument();
+	});
+
+	it('submits the selected fragment collection', async () => {
+		const onSubmitFragmentCollection = jest.fn();
+		const user = renderComponent({
+			fragmentCollections: [
+				{fragmentCollectionId: 1, name: 'fragment-collection'},
+			],
+			onSubmitFragmentCollection,
+		});
+
+		act(() => {
+			jest.runAllTimers();
+		});
+
+		fireEvent.change(screen.getByLabelText('fragment-sets'), {
+			target: {value: '1'},
 		});
 
 		await user.click(screen.getByText('save'));
 
-		expect(screen.getByText('x-field-is-required')).toBeInTheDocument();
+		expect(onSubmitFragmentCollection).toHaveBeenCalledWith(1);
 	});
 });
