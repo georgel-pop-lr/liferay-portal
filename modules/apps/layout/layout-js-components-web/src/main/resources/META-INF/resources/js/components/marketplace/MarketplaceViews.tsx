@@ -21,6 +21,7 @@ import ImportOptionsModal, {
 	OverwriteStrategy,
 } from '../import/ImportOptionsModal';
 import importZipFile from '../import/importZipFile';
+import FragmentSetModal from '../modals/FragmentSetModal';
 import openModalComponent from '../modals/openModalComponent';
 import {InstallFragmentModalBody} from './InstallFragmentModal';
 
@@ -66,12 +67,19 @@ async function getProductVirtualEntryBlob(
 }
 
 interface MarketplaceViewsProps {
+	addFragmentCollectionURL: string;
+	fragmentCollections: {
+		fragmentCollectionId: number;
+		name: string;
+	}[];
 	fragmentPortletNamespace: string;
 	fragmentsImportURL: string;
 	hideBackButton?: boolean;
 }
 
 export default function MarketplaceViews({
+	addFragmentCollectionURL,
+	fragmentCollections,
 	fragmentPortletNamespace,
 	fragmentsImportURL,
 	hideBackButton,
@@ -87,13 +95,51 @@ export default function MarketplaceViews({
 	} = useMarketplaceContext();
 
 	const handleImportFile = useCallback(
-		async (file: File, overwriteStrategy?: OverwriteStrategy) => {
+		async (
+			file: File,
+			fragmentCollectionId?: number,
+			overwriteStrategy?: OverwriteStrategy
+		) => {
 			let awaitingResolution = false;
 
 			try {
 				await importZipFile({
 					file,
-					handleResponse: ({hasConflicts, importResults}, file) => {
+					fragmentCollectionId,
+					handleResponse: (
+						{hasConflicts, importResults, needsFragmentCollection},
+						file
+					) => {
+						if (needsFragmentCollection) {
+							onOpenChange(false);
+
+							openModalComponent({
+								ModalComponent: FragmentSetModal,
+								modalComponentProps: {
+									addFragmentCollectionURL,
+									fragmentCollections,
+									onSubmitFragmentCollection: (
+										fragmentCollectionId: number
+									) => {
+										setView(MarketplaceView.PURCHASE);
+										onOpenChange(true);
+
+										handleImportFile(
+											file,
+											fragmentCollectionId
+										).then((awaitingResolution) => {
+											if (!awaitingResolution) {
+												onOpenChange(false);
+											}
+										});
+									},
+									portletNamespace: fragmentPortletNamespace,
+								},
+							});
+
+							return;
+						}
+
 						if (hasConflicts) {
 							awaitingResolution = true;
 							onOpenChange(false);
@@ -109,6 +155,7 @@ export default function MarketplaceViews({
 
 										handleImportFile(
 											file,
+											fragmentCollectionId,
 											overwriteStrategy
 										).then((awaitingResolution) => {
 											if (!awaitingResolution) {
@@ -159,7 +206,14 @@ export default function MarketplaceViews({
 
 			return awaitingResolution;
 		},
-		[fragmentsImportURL, fragmentPortletNamespace, onOpenChange, setView]
+		[
+			addFragmentCollectionURL,
+			fragmentCollections,
+			fragmentsImportURL,
+			fragmentPortletNamespace,
+			onOpenChange,
+			setView,
+		]
 	);
 
 	const handleInstallProduct = useCallback(
@@ -168,6 +222,7 @@ export default function MarketplaceViews({
 
 			setView(MarketplaceView.PURCHASE);
 			setProduct(product);
+			onOpenChange(true);
 
 			try {
 				const blob = await getProductVirtualEntryBlob(

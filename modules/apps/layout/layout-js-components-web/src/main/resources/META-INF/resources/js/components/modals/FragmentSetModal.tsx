@@ -23,17 +23,21 @@ type Errors = {
 
 export default function FragmentSetModal({
 	addFragmentCollectionURL,
-	contributedEntryKeys,
+	contributedEntryKeys = [],
 	copyFragmentEntriesURL,
 	fragmentCollections = [],
-	fragmentEntryIds,
+	fragmentEntryIds = [],
+	onSubmitFragmentCollection,
 	portletNamespace,
 }: {
-	addFragmentCollectionURL: string;
-	contributedEntryKeys: string[];
-	copyFragmentEntriesURL: string;
+	addFragmentCollectionURL?: string;
+	contributedEntryKeys?: string[];
+	copyFragmentEntriesURL?: string;
 	fragmentCollections: FragmentSet[];
-	fragmentEntryIds: string[];
+	fragmentEntryIds?: string[];
+	onSubmitFragmentCollection?: (
+		fragmentCollectionId: number
+	) => Promise<void> | void;
 	portletNamespace: string;
 }) {
 	const noFragmentCollections = !fragmentCollections.length;
@@ -51,7 +55,23 @@ export default function FragmentSetModal({
 
 	const formId = `${portletNamespace}form`;
 
-	const copyFragments = (fragmentCollectionId: number) => {
+	const submitFragmentCollection = (fragmentCollectionId: number) => {
+		if (onSubmitFragmentCollection) {
+			onSubmitFragmentCollection(fragmentCollectionId);
+			onClose();
+
+			return;
+		}
+
+		if (!copyFragmentEntriesURL) {
+			openToast({
+				message: Liferay.Language.get('an-unexpected-error-occurred'),
+				type: 'danger',
+			});
+
+			return;
+		}
+
 		const formData = new FormData();
 
 		if (fragmentEntryIds) {
@@ -125,7 +145,6 @@ export default function FragmentSetModal({
 					{showFragmentSetForm ? (
 						<FragmentSetForm
 							addFragmentCollectionURL={addFragmentCollectionURL}
-							copyFragments={copyFragments}
 							errors={errors}
 							formId={formId}
 							fragmentCollections={fragmentCollections}
@@ -134,15 +153,16 @@ export default function FragmentSetModal({
 							showNoFragmentCollectionMessage={
 								noFragmentCollections
 							}
+							submitFragmentCollection={submitFragmentCollection}
 						/>
 					) : (
 						<FragmentSetSelector
-							copyFragments={copyFragments}
 							errors={errors}
 							formId={formId}
 							fragmentCollections={fragmentCollections}
 							portletNamespace={portletNamespace}
 							setErrors={setErrors}
+							submitFragmentCollection={submitFragmentCollection}
 						/>
 					)}
 				</ClayModal.Body>
@@ -185,26 +205,29 @@ export default function FragmentSetModal({
 }
 
 function FragmentSetSelector({
-	copyFragments,
 	errors,
 	formId,
 	fragmentCollections,
 	portletNamespace,
 	setErrors,
+	submitFragmentCollection,
 }: {
-	copyFragments: (fragmentCollectionId: number) => void;
 	errors: Errors;
 	formId: string;
 	fragmentCollections: FragmentSet[];
 	portletNamespace: string;
 	setErrors: (errors: Errors) => void;
+	submitFragmentCollection: (fragmentCollectionId: number) => void;
 }) {
 	const [selectedFragmentCollection, setSelectedFragmentCollection] =
 		useState('');
 
 	const items = useMemo(
 		() => [
-			{label: `-- ${Liferay.Language.get('not-selected')} --`, value: ''},
+			{
+				label: `-- ${Liferay.Language.get('not-selected')} --`,
+				value: '',
+			},
 			...fragmentCollections.map((fragmentSet: FragmentSet) => ({
 				label: fragmentSet.name,
 				value: fragmentSet.fragmentCollectionId,
@@ -227,14 +250,14 @@ function FragmentSetSelector({
 			return;
 		}
 
-		copyFragments(Number(selectedFragmentCollection));
+		submitFragmentCollection(Number(selectedFragmentCollection));
 	};
 
 	return (
 		<ClayForm id={formId} onSubmit={handleSubmit}>
 			<p className="text-secondary">
 				{Liferay.Language.get(
-					'select-an-existing-set-or-create-a-new-one-to-save-your-fragment'
+					'one-or-more-items-you-are-trying-to-add-already-exist-in-your-fragment-sets.-what-action-do-you-want-to-take'
 				)}
 			</p>
 
@@ -260,22 +283,22 @@ function FragmentSetSelector({
 
 function FragmentSetForm({
 	addFragmentCollectionURL,
-	copyFragments,
 	errors,
 	formId,
 	fragmentCollections,
 	portletNamespace,
 	setErrors,
 	showNoFragmentCollectionMessage,
+	submitFragmentCollection,
 }: {
-	addFragmentCollectionURL: string;
-	copyFragments: (fragmentCollectionId: number) => void;
+	addFragmentCollectionURL?: string;
 	errors: Errors;
 	formId: string;
 	fragmentCollections: FragmentSet[];
 	portletNamespace: string;
 	setErrors: (errors: Errors) => void;
 	showNoFragmentCollectionMessage: boolean;
+	submitFragmentCollection: (fragmentCollectionId: number) => void;
 }) {
 	const [name, setName] = useState(() =>
 		getDefaultFragmentSetName(fragmentCollections)
@@ -298,6 +321,14 @@ function FragmentSetForm({
 
 		const formData = new FormData();
 
+		if (!addFragmentCollectionURL) {
+			setErrors({
+				error: Liferay.Language.get('an-unexpected-error-occurred'),
+			});
+
+			return;
+		}
+
 		formData.append(`${portletNamespace}name`, name);
 
 		formData.append(`${portletNamespace}description`, description);
@@ -309,7 +340,7 @@ function FragmentSetForm({
 					setErrors({error: response.error});
 				}
 				else if (response.fragmentCollectionId) {
-					copyFragments(response.fragmentCollectionId);
+					submitFragmentCollection(response.fragmentCollectionId);
 				}
 			});
 	};
@@ -329,7 +360,13 @@ function FragmentSetForm({
 						'a-fragment-set-must-first-be-created-before-you-can-copy-it'
 					)}
 				</p>
-			) : null}
+			) : (
+				<p className="text-secondary">
+					{Liferay.Language.get(
+						'add-a-fragment-set-to-save-your-fragment'
+					)}
+				</p>
+			)}
 
 			<FormField
 				error={errors.name}

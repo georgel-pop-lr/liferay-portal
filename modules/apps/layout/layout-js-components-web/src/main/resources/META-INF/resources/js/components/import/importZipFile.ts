@@ -12,10 +12,12 @@ import {Results} from './ImportResults';
 interface ResponseAPI {
 	hasConflicts: boolean;
 	importResults: Results;
+	needsFragmentCollection?: boolean;
 }
 
 interface ImportZipFileProps {
 	file: File | null;
+	fragmentCollectionId?: number;
 	handleResponse?: (response: ResponseAPI, file: File) => void;
 	importURL: string;
 	marketplace?: boolean;
@@ -25,6 +27,7 @@ interface ImportZipFileProps {
 
 export default async function importZipFile({
 	file,
+	fragmentCollectionId,
 	handleResponse,
 	importURL,
 	marketplace = false,
@@ -43,6 +46,13 @@ export default async function importZipFile({
 
 	formData.append(`${portletNamespace}file`, file);
 	formData.append(`${portletNamespace}marketplace`, String(marketplace));
+
+	if (fragmentCollectionId) {
+		formData.append(
+			`${portletNamespace}fragmentCollectionId`,
+			String(fragmentCollectionId)
+		);
+	}
 
 	if (overwriteStrategy) {
 		formData.append(`${portletNamespace}importType`, overwriteStrategy);
