@@ -11,12 +11,12 @@ export function toUnix(str: string) {
 	return new Date(str).getTime();
 }
 
-export function formatDate(date: Date, rangeSelector: RangeSelectors) {
+export function formatDate(date: Date, rangeSelector: RangeSelectors): string {
 	if (rangeSelector === RangeSelectors.Last24Hours) {
-		return dateUtils.format(date, 'MMM d, h a');
+		return String(dateUtils.format(date, 'MMM d, h a') ?? '');
 	}
 
-	return dateUtils.format(date, 'YYYY MMM D');
+	return String(dateUtils.format(date, 'yyyy MMM d') ?? '');
 }
 
 export function getDateRange(rangeSelector: RangeSelectors, date = new Date()) {

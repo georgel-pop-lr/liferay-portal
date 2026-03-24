@@ -46,9 +46,11 @@ const AssetVersionsListItem = ({
 						</List.ItemText>
 
 						<List.ItemText>
-							{dateUtils.format(
-								new Date(item.dateModified),
-								'P p'
+							{String(
+								dateUtils.format(
+									new Date(item.dateModified),
+									'P p'
+								) ?? ''
 							)}
 						</List.ItemText>
 

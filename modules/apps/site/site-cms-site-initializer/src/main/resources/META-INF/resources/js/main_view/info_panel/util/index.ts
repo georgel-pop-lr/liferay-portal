@@ -9,7 +9,7 @@ import {IAssetObjectEntry} from '../../../common/types/AssetType';
 import {ASSET_TYPE, L_CONTENTS, L_FILES} from './constants';
 
 export function formatDate(date: string): string {
-	return dateUtils.format(new Date(date), 'P p');
+	return String(dateUtils.format(new Date(date), 'P p') ?? '');
 }
 
 export function getAssetType(objectEntry: IAssetObjectEntry): string {

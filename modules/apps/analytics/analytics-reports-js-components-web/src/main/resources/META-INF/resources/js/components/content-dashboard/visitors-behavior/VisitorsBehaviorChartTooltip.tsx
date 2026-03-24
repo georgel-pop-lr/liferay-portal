@@ -70,8 +70,10 @@ const VisitorsBehaviorChartTooltip: React.FC<
 				},
 				{
 					align: Alignments.Right,
-					label: metricData.format?.(
-						payload[VisitorsBehaviorDataKey.Metric]
+					label: String(
+						metricData.format?.(
+							payload[VisitorsBehaviorDataKey.Metric]
+						) ?? ''
 					),
 				},
 			],
@@ -99,9 +101,11 @@ const VisitorsBehaviorChartTooltip: React.FC<
 				},
 				{
 					align: Alignments.Right,
-					label: payload[
-						VisitorsBehaviorDataKey.PublishedVersionValue
-					],
+					label: String(
+						payload[
+							VisitorsBehaviorDataKey.PublishedVersionValue
+						] ?? ''
+					),
 				},
 			],
 		});

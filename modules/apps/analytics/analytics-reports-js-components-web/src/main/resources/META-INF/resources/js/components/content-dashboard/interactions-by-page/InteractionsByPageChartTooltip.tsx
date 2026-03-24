@@ -90,7 +90,7 @@ const InteractionsByPageChartTooltip: React.FC<
 					},
 					{
 						align: Alignments.Right,
-						label: page.format?.(payload[dataKey]),
+						label: String(page.format?.(payload[dataKey]) ?? ''),
 					},
 				],
 			};

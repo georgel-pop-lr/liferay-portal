@@ -18,7 +18,7 @@ import {format} from './format';
 import {parse} from './parse';
 
 function getFirstDayOfWeek(
-	locale = Liferay.ThemeDisplay.getBCP47LanguageId() as keyof typeof FIRST_DAY_OF_WEEK_MAP
+	locale = Liferay.ThemeDisplay.getBCP47LanguageId()
 ): number {
 	if (!(locale in FIRST_DAY_OF_WEEK_MAP)) {
 		console.warn(`No locale for '${locale}' found. Defaulting to 'en-US'.`);
@@ -26,12 +26,18 @@ function getFirstDayOfWeek(
 		locale = 'en-US';
 	}
 
-	return FIRST_DAY_OF_WEEK_MAP[locale] ?? 0;
+	return (
+		FIRST_DAY_OF_WEEK_MAP[locale as keyof typeof FIRST_DAY_OF_WEEK_MAP] ?? 0
+	);
 }
 
-function getWeekdaysShort(locale = Liferay.ThemeDisplay.getBCP47LanguageId()) {
+function getWeekdaysShort(
+	locale = Liferay.ThemeDisplay.getBCP47LanguageId()
+): string[] {
 	if (locale in WEEKDAYS_SHORT_MAP) {
-		return WEEKDAYS_SHORT_MAP[locale as keyof typeof WEEKDAYS_SHORT_MAP];
+		return [
+			...WEEKDAYS_SHORT_MAP[locale as keyof typeof WEEKDAYS_SHORT_MAP],
+		];
 	}
 
 	const weekdaysShort = Array.from({length: 7}, (_, i) => {
@@ -43,9 +49,11 @@ function getWeekdaysShort(locale = Liferay.ThemeDisplay.getBCP47LanguageId()) {
 	return weekdaysShort;
 }
 
-function getMonthsLong(locale = Liferay.ThemeDisplay.getBCP47LanguageId()) {
+function getMonthsLong(
+	locale = Liferay.ThemeDisplay.getBCP47LanguageId()
+): string[] {
 	if (locale in MONTHS_LONG_MAP) {
-		return MONTHS_LONG_MAP[locale as keyof typeof MONTHS_LONG_MAP];
+		return [...MONTHS_LONG_MAP[locale as keyof typeof MONTHS_LONG_MAP]];
 	}
 
 	const weekdaysShort = Array.from({length: 12}, (_, i) => {
