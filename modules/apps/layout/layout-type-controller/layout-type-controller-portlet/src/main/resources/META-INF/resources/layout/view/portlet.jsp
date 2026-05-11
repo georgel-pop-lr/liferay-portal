@@ -50,3 +50,9 @@ String ppid = ParamUtil.getString(request, "p_p_id");
 <liferay-layout:layout-common
 	displaySessionMessages="<%= true %>"
 />
+
+<aui:script>
+	console.warn(
+		'This page is a deprecated widget page. Consider using a content page instead.'
+	);
+</aui:script>

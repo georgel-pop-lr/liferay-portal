@@ -73,3 +73,9 @@
 </c:choose>
 
 <liferay-layout:layout-common />
+
+<aui:script>
+	console.warn(
+		'This page is a deprecated panel page. Consider using a content page instead.'
+	);
+</aui:script>

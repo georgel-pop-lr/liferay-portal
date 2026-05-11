@@ -25,3 +25,9 @@ if (Validator.isNotNull(velocityTemplateContent)) {
 %>
 
 <liferay-layout:layout-common />
+
+<aui:script>
+	console.warn(
+		'This page is a deprecated full page application. Consider using a content page instead.'
+	);
+</aui:script>
