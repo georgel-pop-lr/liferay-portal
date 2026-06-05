@@ -79,5 +79,32 @@ describe('Analytics MiddleWare Integration', () => {
 				})
 			);
 		});
+
+		it('includes an empty page experience key when the meta tag is absent', () => {
+			const req = {context: {channelId: '', dataSourceId: ''}};
+
+			expect(meta(req).context).toEqual(
+				expect.objectContaining({pageExperienceKey: ''})
+			);
+		});
+
+		it('includes the page experience key when the meta tag is present', () => {
+			const metaElement = document.createElement('meta');
+
+			metaElement.setAttribute('content', 'TEST_EXPERIENCE_KEY');
+			metaElement.setAttribute('name', 'page-experience-key');
+
+			document.head.appendChild(metaElement);
+
+			const req = {context: {channelId: '', dataSourceId: ''}};
+
+			expect(meta(req).context).toEqual(
+				expect.objectContaining({
+					pageExperienceKey: 'TEST_EXPERIENCE_KEY',
+				})
+			);
+
+			document.head.removeChild(metaElement);
+		});
 	});
 });
