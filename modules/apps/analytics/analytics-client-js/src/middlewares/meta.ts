@@ -27,6 +27,10 @@ function meta(request: {context: Analytics.Context}) {
 		description: getAttribute('meta[name="description"]', 'content'),
 		keywords: getAttribute('meta[name="keywords"]', 'content'),
 		languageId: navigator.language,
+		pageExperienceKey: getAttribute(
+			'meta[name="page-experience-key"]',
+			'content'
+		),
 		referrer: document.referrer,
 		timezoneOffset: getTimezoneOffsetHour(),
 		title: getAttribute('title', 'textContent'),
