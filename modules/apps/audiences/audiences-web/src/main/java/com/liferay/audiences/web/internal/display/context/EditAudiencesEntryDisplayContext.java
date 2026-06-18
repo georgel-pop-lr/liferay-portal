@@ -10,9 +10,13 @@ import com.liferay.audiences.criteria.AudiencesCriteriaProvider;
 import com.liferay.audiences.model.AudiencesEntry;
 import com.liferay.audiences.service.AudiencesEntryServiceUtil;
 import com.liferay.petra.function.transform.TransformUtil;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -74,48 +78,86 @@ public class EditAudiencesEntryDisplayContext {
 	}
 
 	public Map<String, Object> getData() {
+		if (_data != null) {
+			return _data;
+		}
+
+		AudiencesEntry audiencesEntry = null;
+
+		try {
+			audiencesEntry = _getAudiencesEntry();
+		}
+		catch (PortalException portalException) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(portalException);
+			}
+		}
+
 		ThemeDisplay themeDisplay =
 			(ThemeDisplay)_httpServletRequest.getAttribute(
 				WebKeys.THEME_DISPLAY);
 
-		return HashMapBuilder.<String, Object>put(
-			"audiencesCriteriaTypes",
-			TransformUtil.transform(
-				_audiencesCriteriaProvider.getAudiencesCriteriaTypes(
-					themeDisplay.getCompanyId(), themeDisplay.getLocale()),
-				audiencesCriteriaType -> HashMapBuilder.<String, Object>put(
-					"audiencesCriterias",
-					TransformUtil.transform(
-						audiencesCriteriaType.getAudiencesCriterias(),
-						audiencesCriteria -> HashMapBuilder.<String, Object>put(
-							"icon", audiencesCriteria.getIcon()
-						).put(
-							"key", audiencesCriteria.getKey()
-						).put(
-							"label", audiencesCriteria.getLabel()
-						).put(
-							"operators",
-							TransformUtil.transform(
-								audiencesCriteria.getOperators(),
-								AudiencesCriteria.Operator::getValue)
-						).put(
-							"options",
-							TransformUtil.transform(
-								audiencesCriteria.getOptions(),
-								option -> HashMapBuilder.<String, Object>put(
-									"label", option.getLabel()
+		_data = HashMapBuilder.<String, Object>put(
+			"context",
+			HashMapBuilder.<String, Object>put(
+				"namespace", _renderResponse.getNamespace()
+			).build()
+		).put(
+			"props",
+			HashMapBuilder.<String, Object>put(
+				"audienceCriteriaTypes",
+				TransformUtil.transform(
+					_audiencesCriteriaProvider.getAudiencesCriteriaTypes(
+						themeDisplay.getCompanyId(), themeDisplay.getLocale()),
+					audiencesCriteriaType -> HashMapBuilder.<String, Object>put(
+						"audienceCriterias",
+						TransformUtil.transform(
+							audiencesCriteriaType.getAudiencesCriterias(),
+							audiencesCriteria ->
+								HashMapBuilder.<String, Object>put(
+									"icon", audiencesCriteria.getIcon()
 								).put(
-									"value", option.getValue()
+									"key", audiencesCriteria.getKey()
+								).put(
+									"label", audiencesCriteria.getLabel()
+								).put(
+									"operators",
+									TransformUtil.transform(
+										audiencesCriteria.getOperators(),
+										AudiencesCriteria.Operator::getValue)
+								).put(
+									"options",
+									TransformUtil.transform(
+										audiencesCriteria.getOptions(),
+										option ->
+											HashMapBuilder.<String, Object>put(
+												"label", option.getLabel()
+											).put(
+												"value", option.getValue()
+											).build())
+								).put(
+									"type",
+									StringUtil.toLowerCase(
+										GetterUtil.getString(
+											audiencesCriteria.getType()))
 								).build())
-						).put(
-							"type",
-							StringUtil.toLowerCase(
-								String.valueOf(audiencesCriteria.getType()))
-						).build())
-				).put(
-					"label", audiencesCriteriaType.getLabel()
-				).build())
+					).put(
+						"label", audiencesCriteriaType.getLabel()
+					).build())
+			).put(
+				"backURL", getBackURL()
+			).put(
+				"json",
+				(audiencesEntry == null) ? StringPool.BLANK :
+					audiencesEntry.getJSON()
+			).put(
+				"name",
+				(audiencesEntry == null) ? StringPool.BLANK :
+					audiencesEntry.getName()
+			).build()
 		).build();
+
+		return _data;
 	}
 
 	public String getRedirect() {
@@ -168,10 +210,14 @@ public class EditAudiencesEntryDisplayContext {
 		return null;
 	}
 
+	private static final Log _log = LogFactoryUtil.getLog(
+		EditAudiencesEntryDisplayContext.class);
+
 	private final AudiencesCriteriaProvider _audiencesCriteriaProvider;
 	private AudiencesEntry _audiencesEntry;
 	private Long _audiencesEntryId;
 	private String _backURL;
+	private Map<String, Object> _data;
 	private final HttpServletRequest _httpServletRequest;
 	private String _redirect;
 	private final RenderResponse _renderResponse;
