@@ -6,6 +6,9 @@ set -o pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
+_proxy_pid=
+_proxy_started=false
+
 function main {
 	if [[ $(uname --nodename) == sandbox ]]
 	then
@@ -47,6 +50,10 @@ function main {
 
 	if [[ ${command} == check ]]
 	then
+		trap _stop_proxy EXIT
+
+		_ensure_proxy
+
 		if [[ -z ${pr_number} ]]
 		then
 			clear
@@ -126,6 +133,10 @@ function main {
 		then
 			_print_help
 		fi
+
+		trap _stop_proxy EXIT
+
+		_ensure_proxy
 
 		_get_automatic_code_review_json
 	else
@@ -442,6 +453,35 @@ function _classify_failure {
 	fi
 }
 
+function _ensure_proxy {
+	if [[ ${_HTTPS_PROXY} != localhost:8118 ]] && [[ ${_HTTPS_PROXY} != 127.0.0.1:8118 ]]
+	then
+		return 0
+	fi
+
+	if ss --listening --numeric --tcp | grep --quiet "127.0.0.1:8118"
+	then
+		return 0
+	fi
+
+	python3 proxy.py > /tmp/pr-reviewer-proxy.log 2>&1 &
+
+	_proxy_pid=$!
+	_proxy_started=true
+
+	local attempt
+
+	for ((attempt = 0; attempt < 50; attempt++))
+	do
+		if ss --listening --numeric --tcp | grep --quiet "127.0.0.1:8118"
+		then
+			return 0
+		fi
+
+		sleep 0.1
+	done
+}
+
 function _extract_last_json_block {
 	local candidate result=""
 	local text=$(cat)
@@ -686,8 +726,8 @@ function _invoke_model {
 	then
 		_review_in_sandbox \
 			env \
-				HTTPS_PROXY=${_HTTPS_PROXY} \
-				HTTP_PROXY=${_HTTPS_PROXY} \
+				HTTPS_PROXY=http://${_HTTPS_PROXY} \
+				HTTP_PROXY=http://${_HTTPS_PROXY} \
 				\
 				claude \
 					--add-dir /review \
@@ -838,6 +878,15 @@ function _salvage_violations {
 	fi
 
 	printf "%s" "${text}" | sed --regexp-extended --quiet "/[*\"]*violations[*\"]*[[:space:]]*:/,\$p" | tail --lines=+2 | sed "/./,\$!d"
+}
+
+function _stop_proxy {
+	if ${_proxy_started}
+	then
+		kill ${_proxy_pid} 2> /dev/null || true
+
+		_proxy_started=false
+	fi
 }
 
 function _update_points {
