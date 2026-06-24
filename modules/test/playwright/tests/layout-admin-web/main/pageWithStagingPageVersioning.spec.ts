@@ -204,7 +204,9 @@ test(
 		await page.goto(`/web${site.friendlyUrlPath}${layout.friendlyUrlPath}`);
 
 		await expect(
-			page.getByText(`Page ${layoutTitle} was last published from`)
+			page.getByText(
+				`Page ${layoutTitle} was last published from ${sitePagesVariationName}`
+			)
 		).toBeVisible();
 
 		await expect(
