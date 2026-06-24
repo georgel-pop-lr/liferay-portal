@@ -2185,6 +2185,34 @@ components:
                 templateReference:
                     $ref: "#/components/schemas/TemplateReference"
             type: object
+        LastPublishInformation:
+            description:
+                The site pages variation and version a page was last published from. It is populated only while a page is being published through staging.
+            properties:
+                layoutBranchId:
+                    description:
+                        The identifier of the published page variation.
+                    format: int64
+                    type: integer
+                layoutBranchName:
+                    description:
+                        The name of the published page variation.
+                    type: string
+                layoutRevisionId:
+                    description:
+                        The identifier of the published page version.
+                    format: int64
+                    type: integer
+                layoutSetBranchId:
+                    description:
+                        The identifier of the published site pages variation.
+                    format: int64
+                    type: integer
+                layoutSetBranchName:
+                    description:
+                        The name of the published site pages variation.
+                    type: string
+            type: object
         Layout:
             allOf:
                 -   $ref: "#/components/schemas/BasicLayout"
@@ -3628,6 +3656,11 @@ components:
                     items:
                         type: string
                     type: array
+                lastPublishInformation:
+                    $ref: "#/components/schemas/LastPublishInformation"
+                    # @review
+                    description:
+                        The site pages variation and version this page was last published from. It is populated only while the page is being published through staging.
                 name_i18n:
                     additionalProperties:
                         type: string
