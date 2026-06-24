@@ -16,6 +16,7 @@ import com.liferay.headless.admin.site.dto.v1_0.ContentPageSpecification;
 import com.liferay.headless.admin.site.dto.v1_0.CustomMetaTag;
 import com.liferay.headless.admin.site.dto.v1_0.EmbeddedPageSettings;
 import com.liferay.headless.admin.site.dto.v1_0.ItemExternalReference;
+import com.liferay.headless.admin.site.dto.v1_0.LastPublishInformation;
 import com.liferay.headless.admin.site.dto.v1_0.LinkToPagePageSettings;
 import com.liferay.headless.admin.site.dto.v1_0.LinkToURLPageSettings;
 import com.liferay.headless.admin.site.dto.v1_0.OpenGraphSettings;
@@ -906,6 +907,75 @@ public class SitePageResourceImpl
 			unicodePropertiesWrapper.setProperty(
 				LayoutTypePortletConstants.DEFAULT_ASSET_PUBLISHER_PORTLET_ID,
 				defaultAssetPublisherPortletId);
+		}
+
+		if (ExportImportThreadLocal.isStagingInProcess()) {
+			unicodePropertiesWrapper.setProperty(
+				LayoutTypePortletConstants.LAST_IMPORT_DATE,
+				String.valueOf(System.currentTimeMillis()));
+
+			if (contextUser != null) {
+				unicodePropertiesWrapper.setProperty(
+					LayoutTypePortletConstants.LAST_IMPORT_USER_NAME,
+					contextUser.getFullName());
+				unicodePropertiesWrapper.setProperty(
+					LayoutTypePortletConstants.LAST_IMPORT_USER_UUID,
+					contextUser.getUserUuid());
+			}
+
+			LastPublishInformation lastPublishInformation =
+				sitePage.getLastPublishInformation();
+
+			if (lastPublishInformation != null) {
+				Long layoutBranchId =
+					lastPublishInformation.getLayoutBranchId();
+
+				if (layoutBranchId != null) {
+					unicodePropertiesWrapper.setProperty(
+						LayoutTypePortletConstants.LAST_IMPORT_LAYOUT_BRANCH_ID,
+						String.valueOf(layoutBranchId));
+				}
+
+				String layoutBranchName =
+					lastPublishInformation.getLayoutBranchName();
+
+				if (Validator.isNotNull(layoutBranchName)) {
+					unicodePropertiesWrapper.setProperty(
+						LayoutTypePortletConstants.
+							LAST_IMPORT_LAYOUT_BRANCH_NAME,
+						layoutBranchName);
+				}
+
+				Long layoutRevisionId =
+					lastPublishInformation.getLayoutRevisionId();
+
+				if (layoutRevisionId != null) {
+					unicodePropertiesWrapper.setProperty(
+						LayoutTypePortletConstants.
+							LAST_IMPORT_LAYOUT_REVISION_ID,
+						String.valueOf(layoutRevisionId));
+				}
+
+				Long layoutSetBranchId =
+					lastPublishInformation.getLayoutSetBranchId();
+
+				if (layoutSetBranchId != null) {
+					unicodePropertiesWrapper.setProperty(
+						LayoutTypePortletConstants.
+							LAST_IMPORT_LAYOUT_SET_BRANCH_ID,
+						String.valueOf(layoutSetBranchId));
+				}
+
+				String layoutSetBranchName =
+					lastPublishInformation.getLayoutSetBranchName();
+
+				if (Validator.isNotNull(layoutSetBranchName)) {
+					unicodePropertiesWrapper.setProperty(
+						LayoutTypePortletConstants.
+							LAST_IMPORT_LAYOUT_SET_BRANCH_NAME,
+						layoutSetBranchName);
+				}
+			}
 		}
 
 		if ((sitePage.getType() == SitePage.Type.CONTENT_PAGE) ||

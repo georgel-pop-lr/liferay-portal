@@ -6,10 +6,13 @@
 package com.liferay.headless.admin.site.internal.dto.v1_0.converter;
 
 import com.liferay.document.library.kernel.service.DLAppService;
+import com.liferay.exportimport.kernel.lar.ExportImportThreadLocal;
+import com.liferay.exportimport.kernel.staging.LayoutStagingUtil;
 import com.liferay.headless.admin.site.dto.v1_0.ContentPageSettings;
 import com.liferay.headless.admin.site.dto.v1_0.CustomMetaTag;
 import com.liferay.headless.admin.site.dto.v1_0.EmbeddedPageSettings;
 import com.liferay.headless.admin.site.dto.v1_0.ItemExternalReference;
+import com.liferay.headless.admin.site.dto.v1_0.LastPublishInformation;
 import com.liferay.headless.admin.site.dto.v1_0.LinkToPagePageSettings;
 import com.liferay.headless.admin.site.dto.v1_0.LinkToURLPageSettings;
 import com.liferay.headless.admin.site.dto.v1_0.PageSetPageSettings;
@@ -28,9 +31,14 @@ import com.liferay.layout.seo.model.LayoutSEOEntryCustomMetaTag;
 import com.liferay.layout.seo.service.LayoutSEOEntryLocalService;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.model.LayoutBranch;
+import com.liferay.portal.kernel.model.LayoutRevision;
+import com.liferay.portal.kernel.model.LayoutSetBranch;
 import com.liferay.portal.kernel.model.LayoutTypePortletConstants;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.service.LayoutBranchLocalService;
 import com.liferay.portal.kernel.service.LayoutLocalService;
+import com.liferay.portal.kernel.service.LayoutSetBranchLocalService;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ListUtil;
@@ -128,6 +136,8 @@ public class SitePageDTOConverter implements DTOConverter<Layout, SitePage> {
 				setKeywords(
 					() -> AssetUtil.getKeywords(
 						Layout.class.getName(), layout.getPlid()));
+				setLastPublishInformation(
+					() -> _toLastPublishInformation(layout));
 				setName_i18n(
 					() -> LocalizedMapUtil.getI18nMap(
 						true, layout.getNameMap()));
@@ -304,6 +314,47 @@ public class SitePageDTOConverter implements DTOConverter<Layout, SitePage> {
 		return contentPageSettings;
 	}
 
+	private LastPublishInformation _toLastPublishInformation(Layout layout) {
+		if (!ExportImportThreadLocal.isStagingInProcess()) {
+			return null;
+		}
+
+		LayoutRevision layoutRevision = LayoutStagingUtil.getLayoutRevision(
+			layout);
+
+		if (layoutRevision == null) {
+			return null;
+		}
+
+		LastPublishInformation lastPublishInformation =
+			new LastPublishInformation();
+
+		lastPublishInformation.setLayoutBranchId(
+			layoutRevision::getLayoutBranchId);
+		lastPublishInformation.setLayoutRevisionId(
+			layoutRevision::getLayoutRevisionId);
+		lastPublishInformation.setLayoutSetBranchId(
+			layoutRevision::getLayoutSetBranchId);
+
+		LayoutBranch layoutBranch = _layoutBranchLocalService.fetchLayoutBranch(
+			layoutRevision.getLayoutBranchId());
+
+		if (layoutBranch != null) {
+			lastPublishInformation.setLayoutBranchName(layoutBranch::getName);
+		}
+
+		LayoutSetBranch layoutSetBranch =
+			_layoutSetBranchLocalService.fetchLayoutSetBranch(
+				layoutRevision.getLayoutSetBranchId());
+
+		if (layoutSetBranch != null) {
+			lastPublishInformation.setLayoutSetBranchName(
+				layoutSetBranch::getName);
+		}
+
+		return lastPublishInformation;
+	}
+
 	private PageSettings _toPageSettings(Layout layout) {
 		PageSettings pageSettings = _getPageSettings(layout);
 
@@ -405,10 +456,16 @@ public class SitePageDTOConverter implements DTOConverter<Layout, SitePage> {
 	private DLAppService _dlAppService;
 
 	@Reference
+	private LayoutBranchLocalService _layoutBranchLocalService;
+
+	@Reference
 	private LayoutLocalService _layoutLocalService;
 
 	@Reference
 	private LayoutSEOEntryLocalService _layoutSEOEntryLocalService;
+
+	@Reference
+	private LayoutSetBranchLocalService _layoutSetBranchLocalService;
 
 	@Reference
 	private UserLocalService _userLocalService;
