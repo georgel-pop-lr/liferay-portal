@@ -182,6 +182,16 @@ public class SitePageSerDes {
 			sb.append("]");
 		}
 
+		if (sitePage.getLastPublishInformation() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"lastPublishInformation\": ");
+
+			sb.append(String.valueOf(sitePage.getLastPublishInformation()));
+		}
+
 		if (sitePage.getName_i18n() != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
@@ -439,6 +449,15 @@ public class SitePageSerDes {
 			map.put("keywords", String.valueOf(sitePage.getKeywords()));
 		}
 
+		if (sitePage.getLastPublishInformation() == null) {
+			map.put("lastPublishInformation", null);
+		}
+		else {
+			map.put(
+				"lastPublishInformation",
+				String.valueOf(sitePage.getLastPublishInformation()));
+		}
+
 		if (sitePage.getName_i18n() == null) {
 			map.put("name_i18n", null);
 		}
@@ -568,6 +587,11 @@ public class SitePageSerDes {
 			else if (Objects.equals(jsonParserFieldName, "keywords")) {
 				return false;
 			}
+			else if (Objects.equals(
+						jsonParserFieldName, "lastPublishInformation")) {
+
+				return false;
+			}
 			else if (Objects.equals(jsonParserFieldName, "name_i18n")) {
 				return true;
 			}
@@ -675,6 +699,15 @@ public class SitePageSerDes {
 				if (jsonParserFieldValue != null) {
 					sitePage.setKeywords(
 						toStrings((Object[])jsonParserFieldValue));
+				}
+			}
+			else if (Objects.equals(
+						jsonParserFieldName, "lastPublishInformation")) {
+
+				if (jsonParserFieldValue != null) {
+					sitePage.setLastPublishInformation(
+						LastPublishInformationSerDes.toDTO(
+							(String)jsonParserFieldValue));
 				}
 			}
 			else if (Objects.equals(jsonParserFieldName, "name_i18n")) {
@@ -881,4 +914,4 @@ public class SitePageSerDes {
 	}
 
 }
-// LIFERAY-REST-BUILDER-HASH:512544216
+// LIFERAY-REST-BUILDER-HASH:-866568954

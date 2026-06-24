@@ -46,6 +46,30 @@ public class LastPublishInformationSerDes {
 
 		sb.append("{");
 
+		if (lastPublishInformation.getLayoutBranchId() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"layoutBranchId\": ");
+
+			sb.append(lastPublishInformation.getLayoutBranchId());
+		}
+
+		if (lastPublishInformation.getLayoutBranchName() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"layoutBranchName\": ");
+
+			sb.append("\"");
+
+			sb.append(_escape(lastPublishInformation.getLayoutBranchName()));
+
+			sb.append("\"");
+		}
+
 		if (lastPublishInformation.getLayoutRevisionId() != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
@@ -54,6 +78,16 @@ public class LastPublishInformationSerDes {
 			sb.append("\"layoutRevisionId\": ");
 
 			sb.append(lastPublishInformation.getLayoutRevisionId());
+		}
+
+		if (lastPublishInformation.getLayoutSetBranchId() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"layoutSetBranchId\": ");
+
+			sb.append(lastPublishInformation.getLayoutSetBranchId());
 		}
 
 		if (lastPublishInformation.getLayoutSetBranchName() != null) {
@@ -91,6 +125,24 @@ public class LastPublishInformationSerDes {
 
 		Map<String, String> map = new TreeMap<>();
 
+		if (lastPublishInformation.getLayoutBranchId() == null) {
+			map.put("layoutBranchId", null);
+		}
+		else {
+			map.put(
+				"layoutBranchId",
+				String.valueOf(lastPublishInformation.getLayoutBranchId()));
+		}
+
+		if (lastPublishInformation.getLayoutBranchName() == null) {
+			map.put("layoutBranchName", null);
+		}
+		else {
+			map.put(
+				"layoutBranchName",
+				String.valueOf(lastPublishInformation.getLayoutBranchName()));
+		}
+
 		if (lastPublishInformation.getLayoutRevisionId() == null) {
 			map.put("layoutRevisionId", null);
 		}
@@ -98,6 +150,15 @@ public class LastPublishInformationSerDes {
 			map.put(
 				"layoutRevisionId",
 				String.valueOf(lastPublishInformation.getLayoutRevisionId()));
+		}
+
+		if (lastPublishInformation.getLayoutSetBranchId() == null) {
+			map.put("layoutSetBranchId", null);
+		}
+		else {
+			map.put(
+				"layoutSetBranchId",
+				String.valueOf(lastPublishInformation.getLayoutSetBranchId()));
 		}
 
 		if (lastPublishInformation.getLayoutSetBranchName() == null) {
@@ -128,7 +189,16 @@ public class LastPublishInformationSerDes {
 
 		@Override
 		protected boolean parseMaps(String jsonParserFieldName) {
-			if (Objects.equals(jsonParserFieldName, "layoutRevisionId")) {
+			if (Objects.equals(jsonParserFieldName, "layoutBranchId")) {
+				return false;
+			}
+			else if (Objects.equals(jsonParserFieldName, "layoutBranchName")) {
+				return false;
+			}
+			else if (Objects.equals(jsonParserFieldName, "layoutRevisionId")) {
+				return false;
+			}
+			else if (Objects.equals(jsonParserFieldName, "layoutSetBranchId")) {
 				return false;
 			}
 			else if (Objects.equals(
@@ -145,9 +215,27 @@ public class LastPublishInformationSerDes {
 			LastPublishInformation lastPublishInformation,
 			String jsonParserFieldName, Object jsonParserFieldValue) {
 
-			if (Objects.equals(jsonParserFieldName, "layoutRevisionId")) {
+			if (Objects.equals(jsonParserFieldName, "layoutBranchId")) {
+				if (jsonParserFieldValue != null) {
+					lastPublishInformation.setLayoutBranchId(
+						Long.valueOf((String)jsonParserFieldValue));
+				}
+			}
+			else if (Objects.equals(jsonParserFieldName, "layoutBranchName")) {
+				if (jsonParserFieldValue != null) {
+					lastPublishInformation.setLayoutBranchName(
+						(String)jsonParserFieldValue);
+				}
+			}
+			else if (Objects.equals(jsonParserFieldName, "layoutRevisionId")) {
 				if (jsonParserFieldValue != null) {
 					lastPublishInformation.setLayoutRevisionId(
+						Long.valueOf((String)jsonParserFieldValue));
+				}
+			}
+			else if (Objects.equals(jsonParserFieldName, "layoutSetBranchId")) {
+				if (jsonParserFieldValue != null) {
+					lastPublishInformation.setLayoutSetBranchId(
 						Long.valueOf((String)jsonParserFieldValue));
 				}
 			}
@@ -240,4 +328,4 @@ public class LastPublishInformationSerDes {
 	}
 
 }
-// LIFERAY-REST-BUILDER-HASH:1540979310
+// LIFERAY-REST-BUILDER-HASH:-468472473

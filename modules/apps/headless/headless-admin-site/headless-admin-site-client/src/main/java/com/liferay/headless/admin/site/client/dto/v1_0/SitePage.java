@@ -220,6 +220,30 @@ public class SitePage implements Cloneable, Serializable {
 
 	protected String[] keywords;
 
+	public LastPublishInformation getLastPublishInformation() {
+		return lastPublishInformation;
+	}
+
+	public void setLastPublishInformation(
+		LastPublishInformation lastPublishInformation) {
+
+		this.lastPublishInformation = lastPublishInformation;
+	}
+
+	public void setLastPublishInformation(
+		UnsafeSupplier<LastPublishInformation, Exception>
+			lastPublishInformationUnsafeSupplier) {
+
+		try {
+			lastPublishInformation = lastPublishInformationUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected LastPublishInformation lastPublishInformation;
+
 	public Map<String, String> getName_i18n() {
 		return name_i18n;
 	}
@@ -564,4 +588,4 @@ public class SitePage implements Cloneable, Serializable {
 	}
 
 }
-// LIFERAY-REST-BUILDER-HASH:1299706233
+// LIFERAY-REST-BUILDER-HASH:-1971183101

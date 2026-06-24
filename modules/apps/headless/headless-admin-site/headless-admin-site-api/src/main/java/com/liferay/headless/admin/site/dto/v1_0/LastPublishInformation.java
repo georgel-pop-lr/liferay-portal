@@ -54,6 +54,94 @@ public class LastPublishInformation implements Serializable {
 	}
 
 	@io.swagger.v3.oas.annotations.media.Schema(
+		description = "The identifier of the published page variation."
+	)
+	public Long getLayoutBranchId() {
+		if (_layoutBranchIdSupplier != null) {
+			layoutBranchId = _layoutBranchIdSupplier.get();
+
+			_layoutBranchIdSupplier = null;
+		}
+
+		return layoutBranchId;
+	}
+
+	public void setLayoutBranchId(Long layoutBranchId) {
+		this.layoutBranchId = layoutBranchId;
+
+		_layoutBranchIdSupplier = null;
+	}
+
+	@JsonIgnore
+	public void setLayoutBranchId(
+		UnsafeSupplier<Long, Exception> layoutBranchIdUnsafeSupplier) {
+
+		_layoutBranchIdSupplier = () -> {
+			try {
+				return layoutBranchIdUnsafeSupplier.get();
+			}
+			catch (RuntimeException runtimeException) {
+				throw runtimeException;
+			}
+			catch (Exception exception) {
+				throw new RuntimeException(exception);
+			}
+		};
+	}
+
+	@GraphQLField(
+		description = "The identifier of the published page variation."
+	)
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected Long layoutBranchId;
+
+	@JsonIgnore
+	private Supplier<Long> _layoutBranchIdSupplier;
+
+	@io.swagger.v3.oas.annotations.media.Schema(
+		description = "The name of the published page variation."
+	)
+	public String getLayoutBranchName() {
+		if (_layoutBranchNameSupplier != null) {
+			layoutBranchName = _layoutBranchNameSupplier.get();
+
+			_layoutBranchNameSupplier = null;
+		}
+
+		return layoutBranchName;
+	}
+
+	public void setLayoutBranchName(String layoutBranchName) {
+		this.layoutBranchName = layoutBranchName;
+
+		_layoutBranchNameSupplier = null;
+	}
+
+	@JsonIgnore
+	public void setLayoutBranchName(
+		UnsafeSupplier<String, Exception> layoutBranchNameUnsafeSupplier) {
+
+		_layoutBranchNameSupplier = () -> {
+			try {
+				return layoutBranchNameUnsafeSupplier.get();
+			}
+			catch (RuntimeException runtimeException) {
+				throw runtimeException;
+			}
+			catch (Exception exception) {
+				throw new RuntimeException(exception);
+			}
+		};
+	}
+
+	@GraphQLField(description = "The name of the published page variation.")
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected String layoutBranchName;
+
+	@JsonIgnore
+	private Supplier<String> _layoutBranchNameSupplier;
+
+	@io.swagger.v3.oas.annotations.media.Schema(
 		description = "The identifier of the published page version."
 	)
 	public Long getLayoutRevisionId() {
@@ -95,6 +183,51 @@ public class LastPublishInformation implements Serializable {
 
 	@JsonIgnore
 	private Supplier<Long> _layoutRevisionIdSupplier;
+
+	@io.swagger.v3.oas.annotations.media.Schema(
+		description = "The identifier of the published site pages variation."
+	)
+	public Long getLayoutSetBranchId() {
+		if (_layoutSetBranchIdSupplier != null) {
+			layoutSetBranchId = _layoutSetBranchIdSupplier.get();
+
+			_layoutSetBranchIdSupplier = null;
+		}
+
+		return layoutSetBranchId;
+	}
+
+	public void setLayoutSetBranchId(Long layoutSetBranchId) {
+		this.layoutSetBranchId = layoutSetBranchId;
+
+		_layoutSetBranchIdSupplier = null;
+	}
+
+	@JsonIgnore
+	public void setLayoutSetBranchId(
+		UnsafeSupplier<Long, Exception> layoutSetBranchIdUnsafeSupplier) {
+
+		_layoutSetBranchIdSupplier = () -> {
+			try {
+				return layoutSetBranchIdUnsafeSupplier.get();
+			}
+			catch (RuntimeException runtimeException) {
+				throw runtimeException;
+			}
+			catch (Exception exception) {
+				throw new RuntimeException(exception);
+			}
+		};
+	}
+
+	@GraphQLField(
+		description = "The identifier of the published site pages variation."
+	)
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected Long layoutSetBranchId;
+
+	@JsonIgnore
+	private Supplier<Long> _layoutSetBranchIdSupplier;
 
 	@io.swagger.v3.oas.annotations.media.Schema(
 		description = "The name of the published site pages variation."
@@ -169,6 +302,34 @@ public class LastPublishInformation implements Serializable {
 
 		sb.append("{");
 
+		Long layoutBranchId = getLayoutBranchId();
+
+		if (layoutBranchId != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"layoutBranchId\": ");
+
+			sb.append(layoutBranchId);
+		}
+
+		String layoutBranchName = getLayoutBranchName();
+
+		if (layoutBranchName != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"layoutBranchName\": ");
+
+			sb.append("\"");
+
+			sb.append(_escape(layoutBranchName));
+
+			sb.append("\"");
+		}
+
 		Long layoutRevisionId = getLayoutRevisionId();
 
 		if (layoutRevisionId != null) {
@@ -179,6 +340,18 @@ public class LastPublishInformation implements Serializable {
 			sb.append("\"layoutRevisionId\": ");
 
 			sb.append(layoutRevisionId);
+		}
+
+		Long layoutSetBranchId = getLayoutSetBranchId();
+
+		if (layoutSetBranchId != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"layoutSetBranchId\": ");
+
+			sb.append(layoutSetBranchId);
 		}
 
 		String layoutSetBranchName = getLayoutSetBranchName();
@@ -298,4 +471,4 @@ public class LastPublishInformation implements Serializable {
 	private Map<String, Serializable> _extendedProperties;
 
 }
-// LIFERAY-REST-BUILDER-HASH:1622666992
+// LIFERAY-REST-BUILDER-HASH:681696354

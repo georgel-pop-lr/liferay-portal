@@ -467,6 +467,55 @@ public class SitePage implements Serializable {
 	private Supplier<String[]> _keywordsSupplier;
 
 	@io.swagger.v3.oas.annotations.media.Schema(
+		description = "The site pages variation and version this page was last published from. It is populated only while the page is being published through staging."
+	)
+	@Valid
+	public LastPublishInformation getLastPublishInformation() {
+		if (_lastPublishInformationSupplier != null) {
+			lastPublishInformation = _lastPublishInformationSupplier.get();
+
+			_lastPublishInformationSupplier = null;
+		}
+
+		return lastPublishInformation;
+	}
+
+	public void setLastPublishInformation(
+		LastPublishInformation lastPublishInformation) {
+
+		this.lastPublishInformation = lastPublishInformation;
+
+		_lastPublishInformationSupplier = null;
+	}
+
+	@JsonIgnore
+	public void setLastPublishInformation(
+		UnsafeSupplier<LastPublishInformation, Exception>
+			lastPublishInformationUnsafeSupplier) {
+
+		_lastPublishInformationSupplier = () -> {
+			try {
+				return lastPublishInformationUnsafeSupplier.get();
+			}
+			catch (RuntimeException runtimeException) {
+				throw runtimeException;
+			}
+			catch (Exception exception) {
+				throw new RuntimeException(exception);
+			}
+		};
+	}
+
+	@GraphQLField(
+		description = "The site pages variation and version this page was last published from. It is populated only while the page is being published through staging."
+	)
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected LastPublishInformation lastPublishInformation;
+
+	@JsonIgnore
+	private Supplier<LastPublishInformation> _lastPublishInformationSupplier;
+
+	@io.swagger.v3.oas.annotations.media.Schema(
 		description = "The localized page's names."
 	)
 	@Valid
@@ -1140,6 +1189,19 @@ public class SitePage implements Serializable {
 			sb.append("]");
 		}
 
+		LastPublishInformation lastPublishInformation =
+			getLastPublishInformation();
+
+		if (lastPublishInformation != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"lastPublishInformation\": ");
+
+			sb.append(String.valueOf(lastPublishInformation));
+		}
+
 		Map<String, String> name_i18n = getName_i18n();
 
 		if (name_i18n != null) {
@@ -1495,4 +1557,4 @@ public class SitePage implements Serializable {
 	private Map<String, Serializable> _extendedProperties;
 
 }
-// LIFERAY-REST-BUILDER-HASH:-1642070978
+// LIFERAY-REST-BUILDER-HASH:-1944532281

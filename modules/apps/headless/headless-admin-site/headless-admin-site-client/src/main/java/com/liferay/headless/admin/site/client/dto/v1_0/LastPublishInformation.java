@@ -25,6 +25,48 @@ public class LastPublishInformation implements Cloneable, Serializable {
 		return LastPublishInformationSerDes.toDTO(json);
 	}
 
+	public Long getLayoutBranchId() {
+		return layoutBranchId;
+	}
+
+	public void setLayoutBranchId(Long layoutBranchId) {
+		this.layoutBranchId = layoutBranchId;
+	}
+
+	public void setLayoutBranchId(
+		UnsafeSupplier<Long, Exception> layoutBranchIdUnsafeSupplier) {
+
+		try {
+			layoutBranchId = layoutBranchIdUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected Long layoutBranchId;
+
+	public String getLayoutBranchName() {
+		return layoutBranchName;
+	}
+
+	public void setLayoutBranchName(String layoutBranchName) {
+		this.layoutBranchName = layoutBranchName;
+	}
+
+	public void setLayoutBranchName(
+		UnsafeSupplier<String, Exception> layoutBranchNameUnsafeSupplier) {
+
+		try {
+			layoutBranchName = layoutBranchNameUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected String layoutBranchName;
+
 	public Long getLayoutRevisionId() {
 		return layoutRevisionId;
 	}
@@ -45,6 +87,27 @@ public class LastPublishInformation implements Cloneable, Serializable {
 	}
 
 	protected Long layoutRevisionId;
+
+	public Long getLayoutSetBranchId() {
+		return layoutSetBranchId;
+	}
+
+	public void setLayoutSetBranchId(Long layoutSetBranchId) {
+		this.layoutSetBranchId = layoutSetBranchId;
+	}
+
+	public void setLayoutSetBranchId(
+		UnsafeSupplier<Long, Exception> layoutSetBranchIdUnsafeSupplier) {
+
+		try {
+			layoutSetBranchId = layoutSetBranchIdUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected Long layoutSetBranchId;
 
 	public String getLayoutSetBranchName() {
 		return layoutSetBranchName;
@@ -100,4 +163,4 @@ public class LastPublishInformation implements Cloneable, Serializable {
 	}
 
 }
-// LIFERAY-REST-BUILDER-HASH:-701190408
+// LIFERAY-REST-BUILDER-HASH:850513638
