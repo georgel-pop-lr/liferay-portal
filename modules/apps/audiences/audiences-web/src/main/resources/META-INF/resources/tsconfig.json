@@ -1,5 +1,5 @@
 {
-	"@generated": "f6b6644abbbf1b37b57fbf465c4d6c319cb5d535",
+	"@generated": "c243cbb320ef87bde7837fdb9425adb7d184f2d1",
 	"@readonly": "** AUTO-GENERATED: DO NOT EDIT **",
 	"compilerOptions": {
 		"allowSyntheticDefaultImports": true,
@@ -11,6 +11,15 @@
 		"module": "es2022",
 		"moduleResolution": "node",
 		"paths": {
+			"@liferay/layout-js-components-web": [
+				"../../../../../../../layout/layout-js-components-web/src/main/resources/META-INF/resources/js/index.ts"
+			],
+			"frontend-js-web": [
+				"../../../../../../../frontend-js/frontend-js-web/src/main/resources/META-INF/resources/main/index.d.ts"
+			],
+			"frontend-js-web/legacy": [
+				"../../../../../../../frontend-js/frontend-js-web/src/main/resources/META-INF/resources/legacy/index.ts"
+			]
 		},
 		"rootDir": "../../../../../../../..",
 		"skipLibCheck": true,
@@ -28,5 +37,11 @@
 		"../../../../../../../../global.d.ts"
 	],
 	"references": [
+		{
+			"path": "../../../../../../../layout/layout-js-components-web/src/main/resources/META-INF/resources/tsconfig.json"
+		},
+		{
+			"path": "../../../../../../../frontend-js/frontend-js-web/src/main/resources/META-INF/resources/tsconfig.json"
+		}
 	]
 }
