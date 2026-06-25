@@ -1,0 +1,5 @@
+$toolbar-height: 55px;
+
+.audience-builder-content {
+	height: calc(100vh - #{$toolbar-height});
+}

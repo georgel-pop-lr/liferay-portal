@@ -9,7 +9,6 @@
 		"@clayui/list": "^3.165.0",
 		"@clayui/toolbar": "^3.165.0",
 		"@liferay/layout-js-components-web": "*",
-		"frontend-js-web": "*",
 		"react": "18.2.0"
 	},
 	"description": "",
