@@ -7,6 +7,7 @@ package com.liferay.batch.engine.internal.reader;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -16,6 +17,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import com.liferay.batch.engine.BatchEngineTaskContentType;
+import com.liferay.batch.engine.BatchEngineTaskOperation;
 import com.liferay.batch.engine.action.ItemReaderPostAction;
 import com.liferay.batch.engine.exception.BatchEngineImportTaskExecutorException;
 import com.liferay.batch.engine.model.BatchEngineImportTask;
@@ -62,7 +64,7 @@ public class BatchEngineImportTaskItemReaderUtil {
 
 		try {
 			Class<? extends T> resolvedClass = _resolveClass(
-				fieldNameValueMap, itemClass);
+				batchEngineImportTask, fieldNameValueMap, itemClass);
 
 			Constructor<? extends T> constructor =
 				resolvedClass.getDeclaredConstructor();
@@ -347,6 +349,7 @@ public class BatchEngineImportTaskItemReaderUtil {
 	}
 
 	private static <T> Class<? extends T> _resolveClass(
+		BatchEngineImportTask batchEngineImportTask,
 		Map<String, Object> fieldNameValueMap, Class<T> itemClass) {
 
 		JsonTypeInfo jsonTypeInfo = itemClass.getAnnotation(JsonTypeInfo.class);
@@ -357,16 +360,40 @@ public class BatchEngineImportTaskItemReaderUtil {
 
 		String property = jsonTypeInfo.property();
 
+		Object typeValue = fieldNameValueMap.get(property);
+
+		if ((typeValue == null) &&
+			StringUtil.equals(
+				batchEngineImportTask.getOperation(),
+				BatchEngineTaskOperation.DELETE.name())) {
+
+			return _resolveSubtypeClass(itemClass);
+		}
+
 		ObjectMapper objectMapper =
 			ObjectMapperProviderUtil.getBatchEngineObjectMapper();
 
 		T value = objectMapper.convertValue(
 			HashMapBuilder.put(
-				property, fieldNameValueMap.get(property)
+				property, typeValue
 			).build(),
 			itemClass);
 
 		return (Class<? extends T>)value.getClass();
+	}
+
+	private static <T> Class<? extends T> _resolveSubtypeClass(
+		Class<T> itemClass) {
+
+		JsonSubTypes jsonSubTypes = itemClass.getAnnotation(JsonSubTypes.class);
+
+		if (jsonSubTypes != null) {
+			for (JsonSubTypes.Type type : jsonSubTypes.value()) {
+				return (Class<? extends T>)type.value();
+			}
+		}
+
+		return itemClass;
 	}
 
 	private static void _setField(
