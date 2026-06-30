@@ -44,6 +44,8 @@ public interface Constants {
 
 	public static final String COPY = "copy";
 
+	public static final String COPY_FROM_LIVE = "copy_from_live";
+
 	public static final String DEACTIVATE = "deactivate";
 
 	public static final String DELETE = "delete";
@@ -118,6 +120,15 @@ public interface Constants {
 
 	public static final String SAVE = "save";
 
+	public static final String SCHEDULE_COPY_FROM_LIVE =
+		"schedule_copy_from_live";
+
+	public static final String SCHEDULE_PUBLISH_TO_LIVE =
+		"schedule_publish_to_live";
+
+	public static final String SCHEDULE_PUBLISH_TO_REMOTE =
+		"schedule_publish_to_remote";
+
 	public static final String SEARCH = "search";
 
 	public static final String SEND = "send";
@@ -137,6 +148,15 @@ public interface Constants {
 	public static final String UNDO = "undo";
 
 	public static final String UNLOCK = "unlock";
+
+	public static final String UNSCHEDULE_COPY_FROM_LIVE =
+		"unschedule_copy_from_live";
+
+	public static final String UNSCHEDULE_PUBLISH_TO_LIVE =
+		"unschedule_publish_to_live";
+
+	public static final String UNSCHEDULE_PUBLISH_TO_REMOTE =
+		"unschedule_publish_to_remote";
 
 	public static final String UNSUBSCRIBE = "unsubscribe";
 

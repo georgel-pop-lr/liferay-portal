@@ -67,7 +67,7 @@ public class PublishLayoutsMVCActionCommand extends BaseMVCActionCommand {
 		}
 
 		try {
-			if (cmd.equals("copy_from_live")) {
+			if (cmd.equals(Constants.COPY_FROM_LIVE)) {
 				setLayoutIdMap(actionRequest);
 
 				_staging.copyFromLive(actionRequest);
@@ -90,28 +90,28 @@ public class PublishLayoutsMVCActionCommand extends BaseMVCActionCommand {
 					actionRequest, actionResponse,
 					_staging.publishToRemote(actionRequest));
 			}
-			else if (cmd.equals("schedule_copy_from_live")) {
+			else if (cmd.equals(Constants.SCHEDULE_COPY_FROM_LIVE)) {
 				setLayoutIdMap(actionRequest);
 
 				_staging.scheduleCopyFromLive(actionRequest);
 			}
-			else if (cmd.equals("schedule_publish_to_live")) {
+			else if (cmd.equals(Constants.SCHEDULE_PUBLISH_TO_LIVE)) {
 				setLayoutIdMap(actionRequest);
 
 				_staging.schedulePublishToLive(actionRequest);
 			}
-			else if (cmd.equals("schedule_publish_to_remote")) {
+			else if (cmd.equals(Constants.SCHEDULE_PUBLISH_TO_REMOTE)) {
 				setLayoutIdMap(actionRequest);
 
 				_staging.schedulePublishToRemote(actionRequest);
 			}
-			else if (cmd.equals("unschedule_copy_from_live")) {
+			else if (cmd.equals(Constants.UNSCHEDULE_COPY_FROM_LIVE)) {
 				_staging.unscheduleCopyFromLive(actionRequest);
 			}
-			else if (cmd.equals("unschedule_publish_to_live")) {
+			else if (cmd.equals(Constants.UNSCHEDULE_PUBLISH_TO_LIVE)) {
 				_staging.unschedulePublishToLive(actionRequest);
 			}
-			else if (cmd.equals("unschedule_publish_to_remote")) {
+			else if (cmd.equals(Constants.UNSCHEDULE_PUBLISH_TO_REMOTE)) {
 				_staging.unschedulePublishToRemote(actionRequest);
 			}
 

@@ -14,6 +14,7 @@ import com.liferay.portal.kernel.portlet.SearchOrderByUtil;
 import com.liferay.portal.kernel.scheduler.SchedulerEngineHelperUtil;
 import com.liferay.portal.kernel.scheduler.StorageType;
 import com.liferay.portal.kernel.scheduler.messaging.SchedulerResponse;
+import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.JavaConstants;
 import com.liferay.portal.kernel.util.PortletKeys;
 import com.liferay.portal.kernel.util.Validator;
@@ -42,10 +43,10 @@ public class ScheduledPublishProcessesDisplayContext {
 			return _cmd;
 		}
 
-		_cmd = "unschedule_publish_to_live";
+		_cmd = Constants.UNSCHEDULE_PUBLISH_TO_LIVE;
 
 		if (_group.isStaged() && _group.isStagedRemotely()) {
-			_cmd = "unschedule_publish_to_remote";
+			_cmd = Constants.UNSCHEDULE_PUBLISH_TO_REMOTE;
 		}
 
 		return _cmd;

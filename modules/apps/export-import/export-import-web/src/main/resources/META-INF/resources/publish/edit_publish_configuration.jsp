@@ -214,16 +214,16 @@ response.setHeader("Ajax-ID", request.getHeader("Ajax-ID"));
 					String unscheduleCMD = StringPool.BLANK;
 
 					if (cmd.equals(Constants.PUBLISH_TO_LIVE)) {
-						scheduleCMD = "schedule_publish_to_live";
-						unscheduleCMD = "unschedule_publish_to_live";
+						scheduleCMD = Constants.SCHEDULE_PUBLISH_TO_LIVE;
+						unscheduleCMD = Constants.UNSCHEDULE_PUBLISH_TO_LIVE;
 					}
 					else if (cmd.equals(Constants.PUBLISH_TO_REMOTE)) {
-						scheduleCMD = "schedule_publish_to_remote";
-						unscheduleCMD = "unschedule_publish_to_remote";
+						scheduleCMD = Constants.SCHEDULE_PUBLISH_TO_REMOTE;
+						unscheduleCMD = Constants.UNSCHEDULE_PUBLISH_TO_REMOTE;
 					}
-					else if (cmd.equals("copy_from_live")) {
-						scheduleCMD = "schedule_copy_from_live";
-						unscheduleCMD = "unschedule_copy_from_live";
+					else if (cmd.equals(Constants.COPY_FROM_LIVE)) {
+						scheduleCMD = Constants.SCHEDULE_COPY_FROM_LIVE;
+						unscheduleCMD = Constants.UNSCHEDULE_COPY_FROM_LIVE;
 					}
 					%>
 

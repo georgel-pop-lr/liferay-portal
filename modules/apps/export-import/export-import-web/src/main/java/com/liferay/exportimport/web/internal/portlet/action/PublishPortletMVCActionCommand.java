@@ -80,7 +80,7 @@ public class PublishPortletMVCActionCommand extends BaseMVCActionCommand {
 		}
 
 		try {
-			if (cmd.equals("copy_from_live")) {
+			if (cmd.equals(Constants.COPY_FROM_LIVE)) {
 				_staging.copyFromLive(actionRequest, portlet);
 			}
 			else if (cmd.equals(Constants.PUBLISH_TO_LIVE)) {
