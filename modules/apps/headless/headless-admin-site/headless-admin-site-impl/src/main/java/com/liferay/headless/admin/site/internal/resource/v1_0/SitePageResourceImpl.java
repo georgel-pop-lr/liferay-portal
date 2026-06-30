@@ -66,6 +66,7 @@ import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.service.LayoutService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.ArrayUtil;
+import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.MapUtil;
@@ -92,6 +93,7 @@ import jakarta.ws.rs.core.MultivaluedMap;
 
 import java.io.Serializable;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -116,6 +118,17 @@ import org.osgi.service.component.annotations.ServiceScope;
 public class SitePageResourceImpl
 	extends BaseSitePageResourceImpl
 	implements ExportImportVulcanBatchEngineTaskItemDelegate<SitePage> {
+
+	@Override
+	public void create(
+			Collection<SitePage> sitePages,
+			Map<String, Serializable> parameters)
+		throws Exception {
+
+		_command = GetterUtil.getString(parameters.get(Constants.CMD));
+
+		super.create(sitePages, parameters);
+	}
 
 	@Override
 	@Tags({@Tag(description = "[BETA]", name = "SitePage")})
@@ -171,6 +184,10 @@ public class SitePageResourceImpl
 				PortletDataContext portletDataContext) {
 
 				return HashMapBuilder.<String, Serializable>put(
+					Constants.CMD,
+					MapUtil.getString(
+						portletDataContext.getParameterMap(), Constants.CMD)
+				).put(
 					"filter",
 					() -> {
 						if (ExportImportThreadLocal.
@@ -293,6 +310,17 @@ public class SitePageResourceImpl
 		EnabledUtil.checkEnabled(contextCompany);
 
 		return super.read(filter, pagination, sorts, parameters, search);
+	}
+
+	@Override
+	public void update(
+			Collection<SitePage> sitePages,
+			Map<String, Serializable> parameters)
+		throws Exception {
+
+		_command = GetterUtil.getString(parameters.get(Constants.CMD));
+
+		super.update(sitePages, parameters);
 	}
 
 	@Override
@@ -909,7 +937,9 @@ public class SitePageResourceImpl
 				defaultAssetPublisherPortletId);
 		}
 
-		if (ExportImportThreadLocal.isStagingInProcess()) {
+		if (ExportImportThreadLocal.isStagingInProcess() &&
+			_isPublishCommand()) {
+
 			unicodePropertiesWrapper.setProperty(
 				LayoutTypePortletConstants.LAST_IMPORT_DATE,
 				String.valueOf(System.currentTimeMillis()));
@@ -1076,6 +1106,18 @@ public class SitePageResourceImpl
 
 		return GetterUtil.getBoolean(
 			pageSettings.getHiddenFromNavigation(), defaultValue);
+	}
+
+	private boolean _isPublishCommand() {
+		if (_command.equals(Constants.PUBLISH_TO_LIVE) ||
+			_command.equals(Constants.PUBLISH_TO_REMOTE) ||
+			_command.equals(Constants.SCHEDULE_PUBLISH_TO_LIVE) ||
+			_command.equals(Constants.SCHEDULE_PUBLISH_TO_REMOTE)) {
+
+			return true;
+		}
+
+		return false;
 	}
 
 	private SitePage _toSitePage(Layout layout) throws Exception {
@@ -1356,6 +1398,8 @@ public class SitePageResourceImpl
 
 	@Reference
 	private CETManager _cetManager;
+
+	private String _command = StringPool.BLANK;
 
 	@Reference
 	private DTOConverterRegistry _dtoConverterRegistry;
