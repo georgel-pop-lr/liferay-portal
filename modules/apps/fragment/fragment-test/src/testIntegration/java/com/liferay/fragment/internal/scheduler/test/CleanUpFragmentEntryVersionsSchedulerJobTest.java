@@ -37,7 +37,7 @@ import org.junit.runner.RunWith;
  * @author Georgel Pop
  */
 @RunWith(Arquillian.class)
-public class CleanUpFragmentEntryVersionsSchedulerJobConfigurationTest {
+public class CleanUpFragmentEntryVersionsSchedulerJobTest {
 
 	@ClassRule
 	@Rule
@@ -58,9 +58,8 @@ public class CleanUpFragmentEntryVersionsSchedulerJobConfigurationTest {
 						TestPropsValues.getCompanyId(),
 						FragmentEntryVersionConfiguration.class.getName(),
 						HashMapDictionaryBuilder.<String, Object>put(
-							"maximumVersionsPerFragmentEntry",
-							FragmentEntryVersionTestUtil.
-								MAX_VERSIONS_PER_FRAGMENT_ENTRY
+							"maximumVersionsPerEntry",
+							FragmentEntryVersionTestUtil.MAX_VERSIONS_PER_ENTRY
 						).build())) {
 
 			FragmentEntry fragmentEntry1 =
@@ -68,15 +67,13 @@ public class CleanUpFragmentEntryVersionsSchedulerJobConfigurationTest {
 					_group.getGroupId());
 
 			FragmentEntryVersionTestUtil.insertFragmentEntryVersions(
-				FragmentEntryVersionTestUtil.MAX_VERSIONS_PER_FRAGMENT_ENTRY +
-					1,
+				FragmentEntryVersionTestUtil.MAX_VERSIONS_PER_ENTRY + 1,
 				CTConstants.CT_COLLECTION_ID_PRODUCTION, fragmentEntry1);
 
 			long ctCollectionId = RandomTestUtil.randomLong();
 
 			FragmentEntryVersionTestUtil.insertFragmentEntryVersions(
-				FragmentEntryVersionTestUtil.MAX_VERSIONS_PER_FRAGMENT_ENTRY +
-					1,
+				FragmentEntryVersionTestUtil.MAX_VERSIONS_PER_ENTRY + 1,
 				ctCollectionId, fragmentEntry1);
 
 			FragmentEntry fragmentEntry2 =
@@ -84,8 +81,7 @@ public class CleanUpFragmentEntryVersionsSchedulerJobConfigurationTest {
 					_group.getGroupId());
 
 			FragmentEntryVersionTestUtil.insertFragmentEntryVersions(
-				FragmentEntryVersionTestUtil.MAX_VERSIONS_PER_FRAGMENT_ENTRY -
-					1,
+				FragmentEntryVersionTestUtil.MAX_VERSIONS_PER_ENTRY - 1,
 				CTConstants.CT_COLLECTION_ID_PRODUCTION, fragmentEntry2);
 
 			List<Integer> ctCollectionVersions =
@@ -102,20 +98,18 @@ public class CleanUpFragmentEntryVersionsSchedulerJobConfigurationTest {
 			Assert.assertEquals(
 				ctCollectionVersions.subList(
 					ctCollectionVersions.size() -
-						FragmentEntryVersionTestUtil.
-							MAX_VERSIONS_PER_FRAGMENT_ENTRY,
+						FragmentEntryVersionTestUtil.MAX_VERSIONS_PER_ENTRY,
 					ctCollectionVersions.size()),
 				FragmentEntryVersionTestUtil.getVersions(
 					ctCollectionId, fragmentEntry1));
 			Assert.assertEquals(
 				versions.subList(
 					versions.size() -
-						FragmentEntryVersionTestUtil.
-							MAX_VERSIONS_PER_FRAGMENT_ENTRY,
+						FragmentEntryVersionTestUtil.MAX_VERSIONS_PER_ENTRY,
 					versions.size()),
 				FragmentEntryVersionTestUtil.getVersions(fragmentEntry1));
 			Assert.assertEquals(
-				FragmentEntryVersionTestUtil.MAX_VERSIONS_PER_FRAGMENT_ENTRY,
+				FragmentEntryVersionTestUtil.MAX_VERSIONS_PER_ENTRY,
 				FragmentEntryVersionTestUtil.getFragmentEntryVersionsCount(
 					CTConstants.CT_COLLECTION_ID_PRODUCTION, fragmentEntry2));
 		}

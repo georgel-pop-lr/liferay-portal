@@ -80,9 +80,8 @@ public class FragmentEntryVersionCleanUpCTCollectionTest {
 						TestPropsValues.getCompanyId(),
 						FragmentEntryVersionConfiguration.class.getName(),
 						HashMapDictionaryBuilder.<String, Object>put(
-							"maximumVersionsPerFragmentEntry",
-							FragmentEntryVersionTestUtil.
-								MAX_VERSIONS_PER_FRAGMENT_ENTRY
+							"maximumVersionsPerEntry",
+							FragmentEntryVersionTestUtil.MAX_VERSIONS_PER_ENTRY
 						).build())) {
 
 			CTCollection ctCollection =
@@ -102,8 +101,7 @@ public class FragmentEntryVersionCleanUpCTCollectionTest {
 					_group.getGroupId());
 
 				int count =
-					FragmentEntryVersionTestUtil.
-						MAX_VERSIONS_PER_FRAGMENT_ENTRY + 1;
+					FragmentEntryVersionTestUtil.MAX_VERSIONS_PER_ENTRY + 1;
 
 				for (int i = 0; i < count; i++) {
 					_fragmentEntryLocalService.updateFragmentEntry(
@@ -117,25 +115,20 @@ public class FragmentEntryVersionCleanUpCTCollectionTest {
 				}
 			}
 
-			int versionsInCTCollectionBeforeCleanUp =
+			int count =
 				FragmentEntryVersionTestUtil.getFragmentEntryVersionsCount(
 					ctCollection.getCtCollectionId(), fragmentEntry);
 
 			_fragmentEntryLocalService.cleanUpFragmentEntryVersions(
 				TestPropsValues.getCompanyId());
 
-			int versionsInCTCollectionAfterCleanUp =
-				FragmentEntryVersionTestUtil.getFragmentEntryVersionsCount(
-					ctCollection.getCtCollectionId(), fragmentEntry);
-
 			Assert.assertTrue(
-				versionsInCTCollectionBeforeCleanUp >
-					FragmentEntryVersionTestUtil.
-						MAX_VERSIONS_PER_FRAGMENT_ENTRY);
+				count > FragmentEntryVersionTestUtil.MAX_VERSIONS_PER_ENTRY);
 
 			Assert.assertEquals(
-				FragmentEntryVersionTestUtil.MAX_VERSIONS_PER_FRAGMENT_ENTRY,
-				versionsInCTCollectionAfterCleanUp);
+				FragmentEntryVersionTestUtil.MAX_VERSIONS_PER_ENTRY,
+				FragmentEntryVersionTestUtil.getFragmentEntryVersionsCount(
+					ctCollection.getCtCollectionId(), fragmentEntry));
 
 			try (LogCapture logCapture = LoggerTestUtil.configureLog4JLogger(
 					"com.liferay.portal.background.task.internal.messaging." +

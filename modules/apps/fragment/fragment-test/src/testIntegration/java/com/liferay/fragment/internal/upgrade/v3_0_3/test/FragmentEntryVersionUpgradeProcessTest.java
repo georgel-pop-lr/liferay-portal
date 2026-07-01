@@ -109,8 +109,7 @@ public class FragmentEntryVersionUpgradeProcessTest {
 				Math.max(
 					0,
 					productionVersions.size() -
-						FragmentEntryVersionTestUtil.
-							MAX_VERSIONS_PER_FRAGMENT_ENTRY),
+						FragmentEntryVersionTestUtil.MAX_VERSIONS_PER_ENTRY),
 				productionVersions.size()),
 			FragmentEntryVersionTestUtil.getVersions(
 				CTConstants.CT_COLLECTION_ID_PRODUCTION, fragmentEntry));
@@ -122,7 +121,7 @@ public class FragmentEntryVersionUpgradeProcessTest {
 						0,
 						ctCollectionVersions.size() -
 							FragmentEntryVersionTestUtil.
-								MAX_VERSIONS_PER_FRAGMENT_ENTRY),
+								MAX_VERSIONS_PER_ENTRY),
 					ctCollectionVersions.size()),
 				FragmentEntryVersionTestUtil.getVersions(
 					ctCollectionId, fragmentEntry));

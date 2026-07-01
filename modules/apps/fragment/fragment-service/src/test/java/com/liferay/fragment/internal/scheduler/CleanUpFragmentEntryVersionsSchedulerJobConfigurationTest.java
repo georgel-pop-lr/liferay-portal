@@ -53,7 +53,7 @@ public class CleanUpFragmentEntryVersionsSchedulerJobConfigurationTest {
 
 	@Test
 	@TestInfo("LPD-75909")
-	public void testGetTriggerConfigurationEmptyCronExpression() {
+	public void testGetTriggerEmptyCronExpression() {
 		Mockito.when(
 			_fragmentEntryVersionConfiguration.cleanUpCronExpression()
 		).thenReturn(
@@ -72,7 +72,7 @@ public class CleanUpFragmentEntryVersionsSchedulerJobConfigurationTest {
 
 	@Test
 	@TestInfo("LPD-75909")
-	public void testGetTriggerConfigurationInvalidCronExpression() {
+	public void testGetTriggerInvalidCronExpression() {
 		Mockito.when(
 			_fragmentEntryVersionConfiguration.cleanUpCronExpression()
 		).thenReturn(
@@ -99,7 +99,7 @@ public class CleanUpFragmentEntryVersionsSchedulerJobConfigurationTest {
 
 	@Test
 	@TestInfo("LPD-75909")
-	public void testGetTriggerConfigurationValidCronExpression() {
+	public void testGetTriggerValidCronExpression() {
 		String cleanUpCronExpression = RandomTestUtil.randomString();
 
 		Mockito.when(
