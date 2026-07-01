@@ -68,7 +68,7 @@ export default function AttributeListItem({
 				audiencesCriteria.label
 			)}
 			className={classNames(
-				'align-items-center audience-builder-attribute d-flex p-2',
+				'align-items-center audience-builder-attribute c-gap-3 d-flex px-2 rounded',
 				{
 					'audience-builder-attribute--dragging':
 						isDragging || isPlacing,
@@ -87,11 +87,11 @@ export default function AttributeListItem({
 			tabIndex={rovingProps.tabIndex}
 		>
 			<ClayIcon
-				className="audience-builder-attribute__grip mr-2 text-secondary"
+				className="audience-builder-attribute__grip text-secondary"
 				symbol="drag"
 			/>
 
-			<ClayIcon className="mr-2" symbol={audiencesCriteria.icon} />
+			<ClayIcon symbol={audiencesCriteria.icon} />
 
 			<span className="text-3 text-truncate">
 				{audiencesCriteria.label}
