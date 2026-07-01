@@ -34,6 +34,6 @@ public interface FragmentEntryVersionConfiguration {
 		description = "maximum-versions-per-fragment-entry-description",
 		name = "maximum-versions-per-fragment-entry", required = false
 	)
-	public int maximumVersionsPerFragmentEntry();
+	public int maximumVersionsPerEntry();
 
 }

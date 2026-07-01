@@ -186,10 +186,10 @@ public class FragmentEntryLocalServiceImpl
 			_configurationProvider.getCompanyConfiguration(
 				FragmentEntryVersionConfiguration.class, companyId);
 
-		int maximumVersionsPerFragmentEntry =
-			fragmentEntryVersionConfiguration.maximumVersionsPerFragmentEntry();
+		int maximumVersionsPerEntry =
+			fragmentEntryVersionConfiguration.maximumVersionsPerEntry();
 
-		if (maximumVersionsPerFragmentEntry <= 0) {
+		if (maximumVersionsPerEntry <= 0) {
 			return;
 		}
 
@@ -207,8 +207,7 @@ public class FragmentEntryLocalServiceImpl
 				"FragmentEntryVersion2.fragmentEntryId = ",
 				"FragmentEntryVersion1.fragmentEntryId and ",
 				"FragmentEntryVersion2.version >= ",
-				"FragmentEntryVersion1.version) > ",
-				maximumVersionsPerFragmentEntry,
+				"FragmentEntryVersion1.version) > ", maximumVersionsPerEntry,
 				") tempFragmentEntryVersion)"));
 
 		fragmentEntryVersionPersistence.clearCache();
