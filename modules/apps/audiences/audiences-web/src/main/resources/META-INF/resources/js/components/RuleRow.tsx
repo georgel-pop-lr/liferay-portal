@@ -6,7 +6,6 @@
 import {ClayButtonWithIcon} from '@clayui/button';
 import {Option, Picker} from '@clayui/core';
 import {ClayInput} from '@clayui/form';
-import ClayIcon from '@clayui/icon';
 import {useDragAndDrop} from '@liferay/layout-js-components-web';
 import classNames from 'classnames';
 import {sub} from 'frontend-js-web';
@@ -71,20 +70,24 @@ export default function RuleRow({
 	onReorder,
 	rule,
 }: IProps) {
-	const dragHandlerRef = useRef<HTMLSpanElement>(null);
+	const dragHandlerRef = useRef<HTMLButtonElement>(null);
 	const dropItemRef = useRef<HTMLDivElement | null>(null);
 
 	const [dropPosition, setDropPosition] = useState<DropPosition>(null);
 
-	const {isDragging, isDropBottomPosition, isDropTopPosition} =
-		useDragAndDrop<DragItem>({
-			dragHandlerRef,
-			dropItemRef,
-			item: items[index],
-			itemIndex: index,
-			items,
-			onDrop: onReorder,
-		});
+	const {
+		handleKeyboardDragAndDrop,
+		isDragging,
+		isDropBottomPosition,
+		isDropTopPosition,
+	} = useDragAndDrop<DragItem>({
+		dragHandlerRef,
+		dropItemRef,
+		item: items[index],
+		itemIndex: index,
+		items,
+		onDrop: onReorder,
+	});
 
 	const [{isOver}, attributeDrop] = useDrop<
 		AttributeDragItem,
@@ -170,20 +173,17 @@ export default function RuleRow({
 				ref={dropItemRef}
 			>
 				<div className="align-items-center c-gap-3 d-flex">
-					<span
-						aria-label={sub(
-							Liferay.Language.get('drag-x'),
-							Liferay.Language.get('condition')
-						)}
+					<ClayButtonWithIcon
+						aria-label={sub(Liferay.Language.get('move-x'), label)}
+						borderless
 						className="audience-builder-grip text-secondary"
+						displayType="secondary"
+						onKeyDown={handleKeyboardDragAndDrop}
 						ref={dragHandlerRef}
-						title={sub(
-							Liferay.Language.get('drag-x'),
-							Liferay.Language.get('condition')
-						)}
-					>
-						<ClayIcon symbol="drag" />
-					</span>
+						size="sm"
+						symbol="drag"
+						title={sub(Liferay.Language.get('move-x'), label)}
+					/>
 
 					<span className="font-weight-semi-bold text-4 text-nowrap">
 						{label}

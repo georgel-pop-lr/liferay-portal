@@ -10,8 +10,8 @@ import ClayLayout from '@clayui/layout';
 import ClayLink from '@clayui/link';
 import ClayToolbar from '@clayui/toolbar';
 import {
+	DragAndDropContextProvider,
 	DragPreview,
-	ScreenReaderAnnouncerContextProvider,
 } from '@liferay/layout-js-components-web';
 import React, {useReducer} from 'react';
 import {DndProvider} from 'react-dnd';
@@ -54,7 +54,7 @@ export default function AudienceBuilder({
 	);
 
 	return (
-		<ScreenReaderAnnouncerContextProvider>
+		<DragAndDropContextProvider>
 			<DragAndDropProvider backend={HTML5Backend}>
 				<DragPreview />
 
@@ -168,6 +168,6 @@ export default function AudienceBuilder({
 					</div>
 				</div>
 			</DragAndDropProvider>
-		</ScreenReaderAnnouncerContextProvider>
+		</DragAndDropContextProvider>
 	);
 }
