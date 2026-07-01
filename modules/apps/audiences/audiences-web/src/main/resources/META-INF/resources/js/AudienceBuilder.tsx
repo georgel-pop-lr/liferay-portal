@@ -116,6 +116,8 @@ export default function AudienceBuilder({
 						<div className="audience-builder-sidebar border-right d-flex flex-column flex-shrink-0 px-4">
 							<AttributesSidebar
 								audiencesCriteriaTypes={audiencesCriteriaTypes}
+								dispatch={dispatch}
+								rules={state.rules}
 							/>
 						</div>
 
