@@ -24,7 +24,6 @@ import com.liferay.portal.kernel.upgrade.BaseSQLServerDatetimeUpgradeProcess;
 import com.liferay.portal.kernel.upgrade.CTModelUpgradeProcess;
 import com.liferay.portal.kernel.upgrade.DummyUpgradeStep;
 import com.liferay.portal.kernel.upgrade.MVCCVersionUpgradeProcess;
-import com.liferay.portal.kernel.upgrade.UpgradeProcess;
 import com.liferay.portal.kernel.upgrade.UpgradeProcessFactory;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.view.count.ViewCountManager;
@@ -281,14 +280,8 @@ public class FragmentServiceUpgradeStepRegistrator
 
 		registry.register(
 			"3.0.2", "3.0.3",
-			new UpgradeProcess() {
-
-				@Override
-				protected void doUpgrade() throws Exception {
-					_fragmentEntryLocalService.cleanUpFragmentEntryVersions();
-				}
-
-			});
+			new com.liferay.fragment.internal.upgrade.v3_0_3.
+				FragmentEntryVersionUpgradeProcess(_fragmentEntryLocalService));
 	}
 
 	@Reference
