@@ -5,7 +5,10 @@
 
 import {Option, Picker} from '@clayui/core';
 import ClayEmptyState from '@clayui/empty-state';
-import {useScreenReaderAnnounce} from '@liferay/layout-js-components-web';
+import {
+	useRovingFocus,
+	useScreenReaderAnnounce,
+} from '@liferay/layout-js-components-web';
 import classNames from 'classnames';
 import React, {Dispatch, Fragment} from 'react';
 import {useDrop} from 'react-dnd';
@@ -62,6 +65,11 @@ export default function ConditionsPanel({
 	);
 
 	const announce = useScreenReaderAnnounce();
+
+	const {focusItem, getItemProps} = useRovingFocus({
+		itemCount: rules.length,
+		loop: true,
+	});
 
 	const dndItems = rules.map((rule) => {
 		const audiencesCriteria = audiencesCriteriasByKey[rule.attribute];
@@ -167,7 +175,12 @@ export default function ConditionsPanel({
 						</span>
 					</div>
 
-					<div className="px-3 py-2">
+					<div
+						aria-label={Liferay.Language.get('conditions')}
+						aria-orientation="vertical"
+						className="px-3 py-2"
+						role="menu"
+					>
 						{rules.map((rule, index) => (
 							<Fragment key={rule.id}>
 								{index > 0 ? (
@@ -217,7 +230,14 @@ export default function ConditionsPanel({
 											)
 										);
 									}}
+									onNavigate={(delta) =>
+										focusItem(
+											(index + delta + rules.length) %
+												rules.length
+										)
+									}
 									onReorder={handleReorder}
+									rovingProps={getItemProps(index)}
 									rule={rule}
 								/>
 							</Fragment>
