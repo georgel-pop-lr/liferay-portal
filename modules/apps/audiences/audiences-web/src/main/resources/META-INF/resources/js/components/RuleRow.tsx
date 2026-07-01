@@ -6,10 +6,13 @@
 import {ClayButtonWithIcon} from '@clayui/button';
 import {Option, Picker} from '@clayui/core';
 import {ClayInput} from '@clayui/form';
-import {useDragAndDrop} from '@liferay/layout-js-components-web';
+import {
+	RovingItemProps,
+	useDragAndDrop,
+} from '@liferay/layout-js-components-web';
 import classNames from 'classnames';
 import {sub} from 'frontend-js-web';
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {DropTargetMonitor, useDrop} from 'react-dnd';
 
 import {DRAG_TYPES} from '../constants/dragTypes';
@@ -37,7 +40,9 @@ interface IProps {
 	onChange: (rule: Rule) => void;
 	onDelete: () => void;
 	onDuplicate: () => void;
+	onNavigate: (delta: number) => void;
 	onReorder: (items: DragItem[]) => void;
+	rovingProps: RovingItemProps;
 	rule: Rule;
 }
 
@@ -65,11 +70,19 @@ export default function RuleRow({
 	onChange,
 	onDelete,
 	onDuplicate,
+	onNavigate,
 	onReorder,
+	rovingProps,
 	rule,
 }: IProps) {
 	const dragHandlerRef = useRef<HTMLButtonElement>(null);
 	const dropItemRef = useRef<HTMLDivElement | null>(null);
+
+	const setRowRef = (node: HTMLDivElement | null) => {
+		dropItemRef.current = node;
+
+		rovingProps.ref(node);
+	};
 
 	const [dropPosition, setDropPosition] = useState<DropPosition>(null);
 
@@ -78,6 +91,7 @@ export default function RuleRow({
 		isDragging,
 		isDropBottomPosition,
 		isDropTopPosition,
+		isKeyboardDragging,
 	} = useDragAndDrop<DragItem>({
 		dragHandlerRef,
 		dropItemRef,
@@ -113,6 +127,43 @@ export default function RuleRow({
 		},
 	});
 
+	const isNavigationTarget = rovingProps.tabIndex === 0;
+
+	useEffect(() => {
+		dropItemRef.current
+			?.querySelectorAll<HTMLElement>(
+				'a, button, input, select, textarea, [role="combobox"]'
+			)
+			.forEach((element) => {
+				element.tabIndex = isNavigationTarget ? 0 : -1;
+			});
+	}, [isNavigationTarget]);
+
+	const handleArrowNavigation = (
+		event: React.KeyboardEvent<HTMLDivElement>
+	) => {
+		if (
+			isKeyboardDragging ||
+			(event.key !== 'ArrowDown' && event.key !== 'ArrowUp')
+		) {
+			return;
+		}
+
+		const target = event.target as HTMLElement;
+
+		if (
+			target.getAttribute('role') === 'combobox' ||
+			target.tagName === 'INPUT'
+		) {
+			return;
+		}
+
+		event.preventDefault();
+		event.stopPropagation();
+
+		onNavigate(event.key === 'ArrowDown' ? 1 : -1);
+	};
+
 	if (!audiencesCriteria) {
 		return null;
 	}
@@ -124,6 +175,7 @@ export default function RuleRow({
 	return (
 		<div className="mb-3" ref={attributeDrop}>
 			<div
+				aria-label={label}
 				className={classNames(
 					'align-items-center audience-builder-rule d-flex justify-content-between p-3',
 					{
@@ -136,7 +188,11 @@ export default function RuleRow({
 							(isOver && dropPosition === 'top'),
 					}
 				)}
-				ref={dropItemRef}
+				onFocus={rovingProps.onFocus}
+				onKeyDownCapture={handleArrowNavigation}
+				ref={setRowRef}
+				role="menuitem"
+				tabIndex={rovingProps.tabIndex}
 			>
 				<div className="align-items-center c-gap-3 d-flex">
 					<ClayButtonWithIcon
