@@ -33,6 +33,8 @@ export {default as SearchResultsMessage} from './components/search_results_messa
 export {
 	DragAndDropContextProvider,
 	useKeyboardDragPreviewProps,
+	useKeyboardItem,
+	useUpdateKeyboardItem,
 } from './contexts/DragAndDropContext';
 export {
 	ScreenReaderAnnouncerContext,
@@ -47,6 +49,10 @@ export {
 export {default as useDragAndDrop} from './hooks/drag_and_drop/useDragAndDrop';
 export {default as useControlledState} from './hooks/useControlledState';
 export {default as useMediaQuery} from './hooks/useMediaQuery';
+export {
+	default as useRovingFocus,
+	RovingItemProps,
+} from './hooks/useRovingFocus';
 export type {default as ConfigurationCustomComponentProps} from './types/ConfigurationCustomComponentProps';
 export {default as SegmentExperience} from './types/SegmentExperience';
 export {default as convertRGBtoHex} from './utils/convertRGBtoHex';
