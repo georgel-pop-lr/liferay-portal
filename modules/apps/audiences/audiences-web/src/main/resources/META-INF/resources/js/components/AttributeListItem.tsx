@@ -4,19 +4,35 @@
  */
 
 import ClayIcon from '@clayui/icon';
+import {RovingItemProps} from '@liferay/layout-js-components-web';
 import classNames from 'classnames';
+import {sub} from 'frontend-js-web';
 import React, {useEffect} from 'react';
 import {useDrag} from 'react-dnd';
 import {getEmptyImage} from 'react-dnd-html5-backend';
 
 import {DRAG_TYPES} from '../constants/dragTypes';
+import useKeyboardInsert from '../hooks/useKeyboardInsert';
 import {AudiencesCriteria} from '../types';
+
+interface DragItem {
+	id: string;
+	name: string;
+}
 
 interface IProps {
 	audiencesCriteria: AudiencesCriteria;
+	items: DragItem[];
+	onInsert: (audiencesCriteria: AudiencesCriteria, index: number) => void;
+	rovingProps: RovingItemProps;
 }
 
-export default function AttributeListItem({audiencesCriteria}: IProps) {
+export default function AttributeListItem({
+	audiencesCriteria,
+	items,
+	onInsert,
+	rovingProps,
+}: IProps) {
 	const [{isDragging}, handlerRef, previewRef] = useDrag({
 		collect: (monitor) => ({
 			isDragging: monitor.isDragging(),
@@ -29,19 +45,46 @@ export default function AttributeListItem({audiencesCriteria}: IProps) {
 		},
 	});
 
+	const {handleKeyboardInsert, isPlacing} = useKeyboardInsert({
+		item: {id: audiencesCriteria.key, name: audiencesCriteria.label},
+		items,
+		onInsert: (index) => onInsert(audiencesCriteria, index),
+	});
+
 	useEffect(() => {
 		previewRef(getEmptyImage(), {captureDraggingState: true});
 	}, [previewRef]);
 
+	const setRefs = (node: HTMLDivElement | null) => {
+		handlerRef(node);
+
+		rovingProps.ref(node);
+	};
+
 	return (
 		<div
+			aria-label={sub(
+				Liferay.Language.get('add-x'),
+				audiencesCriteria.label
+			)}
 			className={classNames(
 				'align-items-center audience-builder-attribute d-flex p-2',
 				{
-					'audience-builder-attribute--dragging': isDragging,
+					'audience-builder-attribute--dragging':
+						isDragging || isPlacing,
 				}
 			)}
-			ref={handlerRef}
+			onFocus={rovingProps.onFocus}
+			onKeyDown={(event) => {
+				handleKeyboardInsert(event);
+
+				if (!event.defaultPrevented) {
+					rovingProps.onKeyDown(event);
+				}
+			}}
+			ref={setRefs}
+			role="button"
+			tabIndex={rovingProps.tabIndex}
 		>
 			<ClayIcon
 				className="audience-builder-attribute__grip mr-2 text-secondary"

@@ -5,17 +5,24 @@
 
 import ClayEmptyState from '@clayui/empty-state';
 import ClayForm, {ClaySelectWithOption} from '@clayui/form';
-import {SearchForm} from '@liferay/layout-js-components-web';
-import React, {useState} from 'react';
+import {SearchForm, useRovingFocus} from '@liferay/layout-js-components-web';
+import React, {Dispatch, useState} from 'react';
 
-import {AudiencesCriteriaType} from '../types';
+import {Action} from '../reducer';
+import {AudiencesCriteria, AudiencesCriteriaType, Rule} from '../types';
 import AttributeListItem from './AttributeListItem';
 
 interface IProps {
 	audiencesCriteriaTypes: AudiencesCriteriaType[];
+	dispatch: Dispatch<Action>;
+	rules: Rule[];
 }
 
-export default function AttributesSidebar({audiencesCriteriaTypes}: IProps) {
+export default function AttributesSidebar({
+	audiencesCriteriaTypes,
+	dispatch,
+	rules,
+}: IProps) {
 	const [selectedIndex, setSelectedIndex] = useState(0);
 	const [query, setQuery] = useState('');
 
@@ -26,6 +33,34 @@ export default function AttributesSidebar({audiencesCriteriaTypes}: IProps) {
 			(audiencesCriteria) =>
 				audiencesCriteria.label.toLowerCase().includes(normalizedQuery)
 		) ?? [];
+
+	const {getItemProps} = useRovingFocus({
+		itemCount: audiencesCriterias.length,
+		loop: true,
+	});
+
+	const audiencesCriteriasByKey: Record<string, AudiencesCriteria> =
+		Object.fromEntries(
+			audiencesCriteriaTypes
+				.flatMap(
+					(audiencesCriteriaType) =>
+						audiencesCriteriaType.audiencesCriterias
+				)
+				.map((audiencesCriteria) => [
+					audiencesCriteria.key,
+					audiencesCriteria,
+				])
+		);
+
+	const dndItems = rules.map((rule) => ({
+		id: rule.id,
+		name: audiencesCriteriasByKey[rule.attribute]?.label ?? rule.attribute,
+	}));
+
+	const handleInsert = (
+		audiencesCriteria: AudiencesCriteria,
+		index: number
+	) => dispatch({audiencesCriteria, index, type: 'ADD_RULE'});
 
 	return (
 		<div className="d-flex flex-column flex-grow-0 h-100">
@@ -58,11 +93,19 @@ export default function AttributesSidebar({audiencesCriteriaTypes}: IProps) {
 			/>
 
 			{audiencesCriterias.length ? (
-				<div className="overflow-auto">
-					{audiencesCriterias.map((audiencesCriteria) => (
+				<div
+					aria-label={Liferay.Language.get('attributes')}
+					aria-orientation="vertical"
+					className="overflow-auto"
+					role="toolbar"
+				>
+					{audiencesCriterias.map((audiencesCriteria, index) => (
 						<AttributeListItem
 							audiencesCriteria={audiencesCriteria}
+							items={dndItems}
 							key={audiencesCriteria.key}
+							onInsert={handleInsert}
+							rovingProps={getItemProps(index)}
 						/>
 					))}
 				</div>
