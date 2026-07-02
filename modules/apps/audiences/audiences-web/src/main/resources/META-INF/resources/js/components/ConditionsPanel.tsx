@@ -13,6 +13,7 @@ import classNames from 'classnames';
 import React, {Dispatch, Fragment} from 'react';
 import {useDrop} from 'react-dnd';
 
+import {CATEGORY_ICON_COLORS} from '../constants/categoryIconColors';
 import {DRAG_TYPES} from '../constants/dragTypes';
 import {Action} from '../reducer';
 import {AudiencesCriteria, AudiencesCriteriaType, Rule} from '../types';
@@ -47,6 +48,17 @@ export default function ConditionsPanel({
 				audiencesCriteria,
 			])
 		);
+
+	const iconColorsByKey: Record<string, string> = Object.fromEntries(
+		audiencesCriteriaTypes.flatMap((audiencesCriteriaType, index) =>
+			audiencesCriteriaType.audiencesCriterias.map(
+				(audiencesCriteria) => [
+					audiencesCriteria.key,
+					CATEGORY_ICON_COLORS[index] ?? CATEGORY_ICON_COLORS[0],
+				]
+			)
+		)
+	);
 
 	const announce = useScreenReaderAnnounce();
 
@@ -184,6 +196,7 @@ export default function ConditionsPanel({
 									audiencesCriteria={
 										audiencesCriteriasByKey[rule.attribute]
 									}
+									iconColor={iconColorsByKey[rule.attribute]}
 									index={index}
 									items={dndItems}
 									onAddRule={handleAddRule}

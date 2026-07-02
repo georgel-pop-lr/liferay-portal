@@ -34,6 +34,7 @@ interface AttributeDragItem {
 
 interface IProps {
 	audiencesCriteria?: AudiencesCriteria;
+	iconColor: string;
 	index: number;
 	items: DragItem[];
 	onAddRule: (audiencesCriteria: AudiencesCriteria, index?: number) => void;
@@ -64,6 +65,7 @@ const getDropPosition = (
 
 export default function RuleRow({
 	audiencesCriteria,
+	iconColor,
 	index,
 	items,
 	onAddRule,
@@ -178,6 +180,7 @@ export default function RuleRow({
 				aria-label={label}
 				className={classNames(
 					'align-items-center audience-builder-rule d-flex justify-content-between p-3',
+					`audience-builder-rule--${iconColor}`,
 					{
 						'audience-builder-rule--dragging': isDragging,
 						'audience-builder-rule--drop-bottom':

@@ -22,6 +22,7 @@ interface DragItem {
 
 interface IProps {
 	audiencesCriteria: AudiencesCriteria;
+	iconColor: string;
 	items: DragItem[];
 	onInsert: (audiencesCriteria: AudiencesCriteria, index: number) => void;
 	rovingProps: RovingItemProps;
@@ -29,6 +30,7 @@ interface IProps {
 
 export default function AttributeListItem({
 	audiencesCriteria,
+	iconColor,
 	items,
 	onInsert,
 	rovingProps,
@@ -91,7 +93,14 @@ export default function AttributeListItem({
 				symbol="drag"
 			/>
 
-			<ClayIcon symbol={audiencesCriteria.icon} />
+			<span
+				className={classNames(
+					'align-items-center audience-builder-attribute__icon d-inline-flex justify-content-center rounded',
+					`audience-builder-attribute__icon--${iconColor}`
+				)}
+			>
+				<ClayIcon symbol={audiencesCriteria.icon} />
+			</span>
 
 			<span className="text-3 text-truncate">
 				{audiencesCriteria.label}
