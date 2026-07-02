@@ -124,11 +124,15 @@ export default function ConditionsPanel({
 								className="form-control-sm w-auto"
 								items={[
 									{
-										label: Liferay.Language.get('and'),
+										label: Liferay.Language.get(
+											'and'
+										).toUpperCase(),
 										value: 'AND',
 									},
 									{
-										label: Liferay.Language.get('or'),
+										label: Liferay.Language.get(
+											'or'
+										).toUpperCase(),
 										value: 'OR',
 									},
 								]}
