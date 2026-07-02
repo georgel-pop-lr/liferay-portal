@@ -33,9 +33,9 @@ const AUDIENCES_CRITERIA_TYPES: AudiencesCriteriaType[] = [
 			},
 			{
 				icon: 'globe',
+				inputType: 'text',
 				key: 'country',
 				label: 'Country',
-				operators: ['eq'],
 				options: [],
 				type: 'string',
 			},
