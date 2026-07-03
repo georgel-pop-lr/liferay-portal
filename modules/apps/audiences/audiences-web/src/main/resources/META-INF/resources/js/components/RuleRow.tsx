@@ -213,7 +213,7 @@ export default function RuleRow({
 	const operators = getOperators(inputType, type);
 
 	return (
-		<div className="mb-3" ref={attributeDrop}>
+		<div ref={attributeDrop}>
 			<div
 				aria-label={label}
 				className={classNames(
