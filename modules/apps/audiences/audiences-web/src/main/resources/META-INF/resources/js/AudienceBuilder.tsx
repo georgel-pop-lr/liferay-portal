@@ -19,6 +19,7 @@ import {HTML5Backend} from 'react-dnd-html5-backend';
 
 import AttributesSidebar from './components/AttributesSidebar';
 import ConditionsPanel from './components/ConditionsPanel';
+import GeneralSettings from './components/GeneralSettings';
 import {initState, reducer, serializeCriteria} from './reducer';
 import {AudiencesCriteriaRulesGroup, AudiencesCriteriaType} from './types';
 
@@ -34,6 +35,7 @@ interface IProps {
 	audiencesCriteriaTypes?: AudiencesCriteriaType[];
 	backURL?: string;
 	backURLTitle?: string;
+	externalReferenceCode?: string;
 	name?: string;
 	namespace?: string;
 	rulesGroup?: AudiencesCriteriaRulesGroup;
@@ -43,13 +45,14 @@ export default function AudienceBuilder({
 	audiencesCriteriaTypes = [],
 	backURL,
 	backURLTitle,
+	externalReferenceCode,
 	name,
 	namespace = '',
 	rulesGroup,
 }: IProps) {
 	const [state, dispatch] = useReducer(
 		reducer,
-		{name, rulesGroup},
+		{externalReferenceCode, name, rulesGroup},
 		initState
 	);
 
@@ -153,6 +156,22 @@ export default function AudienceBuilder({
 									value={state.name}
 								/>
 							</ClayForm.Group>
+
+							<GeneralSettings
+								externalReferenceCode={
+									state.externalReferenceCode
+								}
+								namespace={namespace}
+								onExternalReferenceCodeChange={(
+									newExternalReferenceCode
+								) =>
+									dispatch({
+										externalReferenceCode:
+											newExternalReferenceCode,
+										type: 'SET_EXTERNAL_REFERENCE_CODE',
+									})
+								}
+							/>
 
 							<input
 								name={`${namespace}json`}
