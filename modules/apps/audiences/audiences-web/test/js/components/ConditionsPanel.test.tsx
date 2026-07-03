@@ -53,6 +53,11 @@ const TWO_RULES: Rule[] = [
 	{attribute: 'country', id: 'rule-country', operator: 'eq', value: 'us'},
 ];
 
+const RULES_WITH_REMOVED: Rule[] = [
+	{attribute: 'removed', id: 'rule-removed', operator: 'eq', value: ''},
+	{attribute: 'age', id: 'rule-age', operator: 'gt', value: '18'},
+];
+
 function renderConditionsPanel({
 	dispatch = jest.fn(),
 	rules = [] as Rule[],
@@ -96,6 +101,26 @@ describe('ConditionsPanel', () => {
 			index: 0,
 			type: 'DUPLICATE_RULE',
 		});
+	});
+
+	it('shows an error state for a removed criteria and deletes it', async () => {
+		const {dispatch} = renderConditionsPanel({rules: RULES_WITH_REMOVED});
+
+		expect(
+			screen.getByText('the-criteria-is-no-longer-available')
+		).toBeTruthy();
+
+		const rows = screen.getAllByRole('menuitem');
+
+		rows[0].focus();
+
+		await userEvent.keyboard('{ArrowDown}');
+
+		expect(document.activeElement).toBe(rows[1]);
+
+		await userEvent.click(screen.getAllByLabelText('delete')[0]);
+
+		expect(dispatch).toHaveBeenCalledWith({index: 0, type: 'DELETE_RULE'});
 	});
 
 	it('navigates and reorders the rows with the keyboard', async () => {
