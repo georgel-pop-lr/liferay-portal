@@ -61,6 +61,7 @@ function renderSidebar() {
 	function Sidebar() {
 		const [state, reducerDispatch] = useReducer(reducer, {
 			conjunction: 'AND',
+			externalReferenceCode: '',
 			name: '',
 			rules: [],
 		});
