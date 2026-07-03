@@ -6,6 +6,7 @@
 import {ClayButtonWithIcon} from '@clayui/button';
 import {Option, Picker} from '@clayui/core';
 import {ClayInput} from '@clayui/form';
+import ClayIcon from '@clayui/icon';
 import {
 	RovingItemProps,
 	useDragAndDrop,
@@ -167,7 +168,44 @@ export default function RuleRow({
 	};
 
 	if (!audiencesCriteria) {
-		return null;
+		return (
+			<div ref={attributeDrop}>
+				<div
+					aria-label={Liferay.Language.get(
+						'the-criteria-is-no-longer-available'
+					)}
+					className="align-items-center audience-builder-rule audience-builder-rule--error d-flex justify-content-between p-3"
+					onFocus={rovingProps.onFocus}
+					onKeyDownCapture={handleArrowNavigation}
+					ref={setRowRef}
+					role="menuitem"
+					tabIndex={rovingProps.tabIndex}
+				>
+					<div className="align-items-center c-gap-3 d-flex">
+						<ClayIcon
+							className="text-danger"
+							symbol="exclamation-full"
+						/>
+
+						<span className="text-3">
+							{Liferay.Language.get(
+								'the-criteria-is-no-longer-available'
+							)}
+						</span>
+					</div>
+
+					<ClayButtonWithIcon
+						aria-label={Liferay.Language.get('delete')}
+						borderless
+						displayType="secondary"
+						onClick={onDelete}
+						size="sm"
+						symbol="times-circle"
+						title={Liferay.Language.get('delete')}
+					/>
+				</div>
+			</div>
+		);
 	}
 
 	const {inputType, label, options, type} = audiencesCriteria;
