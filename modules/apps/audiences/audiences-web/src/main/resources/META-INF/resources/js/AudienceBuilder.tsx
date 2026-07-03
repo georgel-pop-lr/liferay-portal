@@ -41,6 +41,62 @@ interface IProps {
 	rulesGroup?: AudiencesCriteriaRulesGroup;
 }
 
+interface AudienceBuilderToolbarProps {
+	backURL?: string;
+	backURLTitle?: string;
+	name: string;
+}
+
+const AudienceBuilderToolbar = ({
+	backURL,
+	backURLTitle,
+	name,
+}: AudienceBuilderToolbarProps) => (
+	<ClayToolbar>
+		<ClayLayout.ContainerFluid size={false}>
+			<ClayToolbar.Nav>
+				<ClayToolbar.Item>
+					<ClayLink
+						aria-label={Liferay.Language.get('back')}
+						button
+						displayType="unstyled"
+						href={backURL}
+						monospaced
+						title={backURLTitle}
+					>
+						<ClayIcon symbol="angle-left" />
+					</ClayLink>
+				</ClayToolbar.Item>
+
+				<ClayToolbar.Item expand>
+					<ClayToolbar.Section className="text-left">
+						<span className="font-weight-bold text-dark text-truncate">
+							{name || Liferay.Language.get('new-audience')}
+						</span>
+					</ClayToolbar.Section>
+				</ClayToolbar.Item>
+
+				<ClayToolbar.Item>
+					<ClayLink
+						button
+						displayType="secondary"
+						href={backURL}
+						small
+					>
+						{Liferay.Language.get('cancel')}
+					</ClayLink>
+				</ClayToolbar.Item>
+
+				<ClayToolbar.Item>
+					<ClayButton displayType="primary" size="sm" type="submit">
+						{Liferay.Language.get('save')}
+					</ClayButton>
+				</ClayToolbar.Item>
+			</ClayToolbar.Nav>
+		</ClayLayout.ContainerFluid>
+	</ClayToolbar>
+);
+
 export default function AudienceBuilder({
 	audiencesCriteriaTypes = [],
 	backURL,
@@ -62,58 +118,11 @@ export default function AudienceBuilder({
 				<DragPreview />
 
 				<div className="d-flex flex-column overflow-hidden">
-					<ClayToolbar>
-						<ClayLayout.ContainerFluid size={false}>
-							<ClayToolbar.Nav>
-								<ClayToolbar.Item>
-									<ClayLink
-										aria-label={Liferay.Language.get(
-											'back'
-										)}
-										button
-										displayType="unstyled"
-										href={backURL}
-										monospaced
-										title={backURLTitle}
-									>
-										<ClayIcon symbol="angle-left" />
-									</ClayLink>
-								</ClayToolbar.Item>
-
-								<ClayToolbar.Item expand>
-									<ClayToolbar.Section className="text-left">
-										<span className="font-weight-bold text-dark text-truncate">
-											{state.name ||
-												Liferay.Language.get(
-													'new-audience'
-												)}
-										</span>
-									</ClayToolbar.Section>
-								</ClayToolbar.Item>
-
-								<ClayToolbar.Item>
-									<ClayLink
-										button
-										displayType="secondary"
-										href={backURL}
-										small
-									>
-										{Liferay.Language.get('cancel')}
-									</ClayLink>
-								</ClayToolbar.Item>
-
-								<ClayToolbar.Item>
-									<ClayButton
-										displayType="primary"
-										size="sm"
-										type="submit"
-									>
-										{Liferay.Language.get('save')}
-									</ClayButton>
-								</ClayToolbar.Item>
-							</ClayToolbar.Nav>
-						</ClayLayout.ContainerFluid>
-					</ClayToolbar>
+					<AudienceBuilderToolbar
+						backURL={backURL}
+						backURLTitle={backURLTitle}
+						name={state.name}
+					/>
 
 					<div className="audience-builder-content d-flex">
 						<div className="audience-builder-sidebar border-right d-flex flex-column flex-shrink-0 px-4">

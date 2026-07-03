@@ -14,7 +14,7 @@ import {
 import classNames from 'classnames';
 import {sub} from 'frontend-js-web';
 import React, {useEffect, useRef, useState} from 'react';
-import {DropTargetMonitor, useDrop} from 'react-dnd';
+import {ConnectDropTarget, DropTargetMonitor, useDrop} from 'react-dnd';
 
 import {DRAG_TYPES} from '../constants/dragTypes';
 import {getOperatorLabel, getOperators} from '../constants/operators';
@@ -63,6 +63,99 @@ const getDropPosition = (
 
 	return hoverClientY < dropItemBoundingRect.height / 2 ? 'top' : 'bottom';
 };
+
+interface RuleValueFieldProps {
+	inputType: AudiencesCriteria['inputType'];
+	onChange: (value: string) => void;
+	options: AudiencesCriteria['options'];
+	type: AudiencesCriteria['type'];
+	value: string;
+}
+
+const RuleValueField = ({
+	inputType,
+	onChange,
+	options,
+	type,
+	value,
+}: RuleValueFieldProps) => {
+	if (options.length) {
+		return (
+			<Picker
+				aria-label={Liferay.Language.get('value')}
+				className="flex-shrink-0 form-control-sm w-auto"
+				items={options}
+				onSelectionChange={(key) => onChange(key as string)}
+				selectedKey={value}
+			>
+				{(item) => <Option key={item.value}>{item.label}</Option>}
+			</Picker>
+		);
+	}
+
+	return (
+		<ClayInput
+			aria-label={Liferay.Language.get('value')}
+			className="form-control-sm text-3"
+			onChange={(event) => onChange(event.target.value)}
+			placeholder={inputType === 'date' ? 'YYYY-MM-DD' : undefined}
+			type={type === 'number' ? 'number' : 'text'}
+			value={value}
+		/>
+	);
+};
+
+interface RemovedRuleRowProps {
+	attributeDropRef: ConnectDropTarget;
+	onDelete: () => void;
+	onFocus: (event: React.FocusEvent<HTMLDivElement>) => void;
+	onKeyDownCapture: (event: React.KeyboardEvent<HTMLDivElement>) => void;
+	rowRef: (node: HTMLDivElement | null) => void;
+	tabIndex: number;
+}
+
+const RemovedRuleRow = ({
+	attributeDropRef,
+	onDelete,
+	onFocus,
+	onKeyDownCapture,
+	rowRef,
+	tabIndex,
+}: RemovedRuleRowProps) => (
+	<div ref={attributeDropRef}>
+		<div
+			aria-label={Liferay.Language.get(
+				'the-criteria-is-no-longer-available'
+			)}
+			className="align-items-center audience-builder-rule audience-builder-rule--error d-flex justify-content-between p-3"
+			onFocus={onFocus}
+			onKeyDownCapture={onKeyDownCapture}
+			ref={rowRef}
+			role="menuitem"
+			tabIndex={tabIndex}
+		>
+			<div className="align-items-center c-gap-3 d-flex">
+				<ClayIcon className="text-danger" symbol="exclamation-full" />
+
+				<span className="text-3">
+					{Liferay.Language.get(
+						'the-criteria-is-no-longer-available'
+					)}
+				</span>
+			</div>
+
+			<ClayButtonWithIcon
+				aria-label={Liferay.Language.get('delete')}
+				borderless
+				displayType="secondary"
+				onClick={onDelete}
+				size="sm"
+				symbol="times-circle"
+				title={Liferay.Language.get('delete')}
+			/>
+		</div>
+	</div>
+);
 
 export default function RuleRow({
 	audiencesCriteria,
@@ -169,42 +262,14 @@ export default function RuleRow({
 
 	if (!audiencesCriteria) {
 		return (
-			<div ref={attributeDrop}>
-				<div
-					aria-label={Liferay.Language.get(
-						'the-criteria-is-no-longer-available'
-					)}
-					className="align-items-center audience-builder-rule audience-builder-rule--error d-flex justify-content-between p-3"
-					onFocus={rovingProps.onFocus}
-					onKeyDownCapture={handleArrowNavigation}
-					ref={setRowRef}
-					role="menuitem"
-					tabIndex={rovingProps.tabIndex}
-				>
-					<div className="align-items-center c-gap-3 d-flex">
-						<ClayIcon
-							className="text-danger"
-							symbol="exclamation-full"
-						/>
-
-						<span className="text-3">
-							{Liferay.Language.get(
-								'the-criteria-is-no-longer-available'
-							)}
-						</span>
-					</div>
-
-					<ClayButtonWithIcon
-						aria-label={Liferay.Language.get('delete')}
-						borderless
-						displayType="secondary"
-						onClick={onDelete}
-						size="sm"
-						symbol="times-circle"
-						title={Liferay.Language.get('delete')}
-					/>
-				</div>
-			</div>
+			<RemovedRuleRow
+				attributeDropRef={attributeDrop}
+				onDelete={onDelete}
+				onFocus={rovingProps.onFocus}
+				onKeyDownCapture={handleArrowNavigation}
+				rowRef={setRowRef}
+				tabIndex={rovingProps.tabIndex}
+			/>
 		);
 	}
 
@@ -269,34 +334,13 @@ export default function RuleRow({
 						)}
 					</Picker>
 
-					{options.length ? (
-						<Picker
-							aria-label={Liferay.Language.get('value')}
-							className="flex-shrink-0 form-control-sm w-auto"
-							items={options}
-							onSelectionChange={(key) =>
-								onChange({...rule, value: key as string})
-							}
-							selectedKey={rule.value}
-						>
-							{(item) => (
-								<Option key={item.value}>{item.label}</Option>
-							)}
-						</Picker>
-					) : (
-						<ClayInput
-							aria-label={Liferay.Language.get('value')}
-							className="form-control-sm text-3"
-							onChange={(event) =>
-								onChange({...rule, value: event.target.value})
-							}
-							placeholder={
-								inputType === 'date' ? 'YYYY-MM-DD' : undefined
-							}
-							type={type === 'number' ? 'number' : 'text'}
-							value={rule.value}
-						/>
-					)}
+					<RuleValueField
+						inputType={inputType}
+						onChange={(value) => onChange({...rule, value})}
+						options={options}
+						type={type}
+						value={rule.value}
+					/>
 				</div>
 
 				<div className="align-items-baseline d-flex">

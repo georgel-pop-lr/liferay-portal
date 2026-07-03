@@ -11,7 +11,7 @@ import {
 } from '@liferay/layout-js-components-web';
 import classNames from 'classnames';
 import React, {Dispatch, Fragment} from 'react';
-import {useDrop} from 'react-dnd';
+import {ConnectDropTarget, useDrop} from 'react-dnd';
 
 import {CATEGORY_ICON_COLORS} from '../constants/categoryIconColors';
 import {DRAG_TYPES} from '../constants/dragTypes';
@@ -30,6 +30,89 @@ interface AttributeDragItem {
 	audiencesCriteria: AudiencesCriteria;
 	type: string;
 }
+
+interface ConjunctionBarProps {
+	conjunction: string;
+	onConjunctionChange: (conjunction: string) => void;
+	rulesCount: number;
+}
+
+const ConjunctionBar = ({
+	conjunction,
+	onConjunctionChange,
+	rulesCount,
+}: ConjunctionBarProps) => (
+	<div className="align-items-center bg-lighter border-top d-flex p-3">
+		<div className="mr-3">
+			<Picker
+				aria-label={Liferay.Language.get('conjunction')}
+				className="form-control-sm w-auto"
+				items={[
+					{
+						label: Liferay.Language.get('and').toUpperCase(),
+						value: 'AND',
+					},
+					{
+						label: Liferay.Language.get('or').toUpperCase(),
+						value: 'OR',
+					},
+				]}
+				onSelectionChange={(key) => onConjunctionChange(key as string)}
+				selectedKey={conjunction}
+			>
+				{(item) => <Option key={item.value}>{item.label}</Option>}
+			</Picker>
+		</div>
+
+		<span className="text-2 text-secondary">
+			{conjunction === 'OR'
+				? Liferay.Language.get('any-rule-must-match')
+				: Liferay.Language.get('all-rules-must-match')}
+
+			{' · '}
+
+			{rulesCount === 1
+				? Liferay.Util.sub(
+						Liferay.Language.get('x-criterion'),
+						rulesCount
+					)
+				: Liferay.Util.sub(
+						Liferay.Language.get('x-criteria'),
+						rulesCount
+					)}
+		</span>
+	</div>
+);
+
+interface ConditionsEmptyStateProps {
+	canDrop: boolean;
+	dropRef: ConnectDropTarget;
+	isOver: boolean;
+}
+
+const ConditionsEmptyState = ({
+	canDrop,
+	dropRef,
+	isOver,
+}: ConditionsEmptyStateProps) => (
+	<div
+		className={classNames('audience-builder-drop-zone m-4 p-4', {
+			'audience-builder-drop-zone--active': canDrop,
+			'audience-builder-drop-zone--over': isOver,
+		})}
+		ref={dropRef}
+	>
+		{!canDrop && (
+			<ClayEmptyState
+				description={Liferay.Language.get(
+					'to-create-a-new-audience-drag-items-from-the-sidebar-and-drop-them-here'
+				)}
+				imgSrc={`${Liferay.ThemeDisplay.getPathThemeImages()}/states/search_state.svg`}
+				title={Liferay.Language.get('no-criteria-yet')}
+			/>
+		)}
+	</div>
+);
 
 export default function ConditionsPanel({
 	audiencesCriteriaTypes,
@@ -120,59 +203,16 @@ export default function ConditionsPanel({
 
 			{rules.length ? (
 				<>
-					<div className="align-items-center bg-lighter border-top d-flex p-3">
-						<div className="mr-3">
-							<Picker
-								aria-label={Liferay.Language.get('conjunction')}
-								className="form-control-sm w-auto"
-								items={[
-									{
-										label: Liferay.Language.get(
-											'and'
-										).toUpperCase(),
-										value: 'AND',
-									},
-									{
-										label: Liferay.Language.get(
-											'or'
-										).toUpperCase(),
-										value: 'OR',
-									},
-								]}
-								onSelectionChange={(key) =>
-									dispatch({
-										conjunction: key as string,
-										type: 'SET_CONJUNCTION',
-									})
-								}
-								selectedKey={conjunction}
-							>
-								{(item) => (
-									<Option key={item.value}>
-										{item.label}
-									</Option>
-								)}
-							</Picker>
-						</div>
-
-						<span className="text-2 text-secondary">
-							{conjunction === 'OR'
-								? Liferay.Language.get('any-rule-must-match')
-								: Liferay.Language.get('all-rules-must-match')}
-
-							{' · '}
-
-							{rules.length === 1
-								? Liferay.Util.sub(
-										Liferay.Language.get('x-criterion'),
-										rules.length
-									)
-								: Liferay.Util.sub(
-										Liferay.Language.get('x-criteria'),
-										rules.length
-									)}
-						</span>
-					</div>
+					<ConjunctionBar
+						conjunction={conjunction}
+						onConjunctionChange={(value) =>
+							dispatch({
+								conjunction: value,
+								type: 'SET_CONJUNCTION',
+							})
+						}
+						rulesCount={rules.length}
+					/>
 
 					<div
 						aria-label={Liferay.Language.get('conditions')}
@@ -244,26 +284,11 @@ export default function ConditionsPanel({
 					</div>
 				</>
 			) : (
-				<div
-					className={classNames(
-						'audience-builder-drop-zone m-4 p-4',
-						{
-							'audience-builder-drop-zone--active': canDrop,
-							'audience-builder-drop-zone--over': isOver,
-						}
-					)}
-					ref={drop}
-				>
-					{!canDrop && (
-						<ClayEmptyState
-							description={Liferay.Language.get(
-								'to-create-a-new-audience-drag-items-from-the-sidebar-and-drop-them-here'
-							)}
-							imgSrc={`${Liferay.ThemeDisplay.getPathThemeImages()}/states/search_state.svg`}
-							title={Liferay.Language.get('no-criteria-yet')}
-						/>
-					)}
-				</div>
+				<ConditionsEmptyState
+					canDrop={canDrop}
+					dropRef={drop}
+					isOver={isOver}
+				/>
 			)}
 		</div>
 	);
