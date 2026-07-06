@@ -6,6 +6,7 @@
 import {ClayButtonWithIcon} from '@clayui/button';
 import {Option, Picker} from '@clayui/core';
 import {ClayInput} from '@clayui/form';
+import ClayIcon from '@clayui/icon';
 import {
 	RovingItemProps,
 	useDragAndDrop,
@@ -173,7 +174,11 @@ export default function RuleRow({
 					'the-criteria-is-no-longer-available'
 				)}
 				className="align-items-center audience-builder-rule audience-builder-rule--error d-flex justify-content-between p-3"
-				ref={dropItemRef}
+				onFocus={rovingProps.onFocus}
+				onKeyDownCapture={handleArrowNavigation}
+				ref={setRowRef}
+				role="menuitem"
+				tabIndex={rovingProps.tabIndex}
 			>
 				<div className="align-items-center c-gap-3 d-flex">
 					<ClayIcon
