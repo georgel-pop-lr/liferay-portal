@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-import {ScreenReaderAnnouncerContextProvider} from '@liferay/layout-js-components-web';
+import {DragAndDropContextProvider} from '@liferay/layout-js-components-web';
 
 import '@testing-library/jest-dom';
 import {render, screen} from '@testing-library/react';
@@ -33,6 +33,14 @@ const AUDIENCES_CRITERIA_TYPES: AudiencesCriteriaType[] = [
 				options: [],
 				type: 'number',
 			},
+			{
+				icon: 'globe',
+				inputType: 'text',
+				key: 'country',
+				label: 'Country',
+				options: [],
+				type: 'string',
+			},
 		],
 		key: 'user',
 		label: 'User',
@@ -43,8 +51,14 @@ const RULES: Rule[] = [
 	{attribute: 'age', id: 'rule-age', operator: 'gt', value: '18'},
 ];
 
+const TWO_RULES: Rule[] = [
+	{attribute: 'age', id: 'rule-age', operator: 'gt', value: '18'},
+	{attribute: 'country', id: 'rule-country', operator: 'eq', value: 'us'},
+];
+
 const RULES_WITH_REMOVED: Rule[] = [
 	{attribute: 'removed', id: 'rule-removed', operator: 'eq', value: ''},
+	{attribute: 'age', id: 'rule-age', operator: 'gt', value: '18'},
 ];
 
 function renderConditionsPanel({
@@ -53,14 +67,14 @@ function renderConditionsPanel({
 } = {}) {
 	render(
 		<DragAndDropProvider backend={HTML5Backend}>
-			<ScreenReaderAnnouncerContextProvider>
+			<DragAndDropContextProvider>
 				<ConditionsPanel
 					audiencesCriteriaTypes={AUDIENCES_CRITERIA_TYPES}
 					conjunction="AND"
 					dispatch={dispatch}
 					rules={rules}
 				/>
-			</ScreenReaderAnnouncerContextProvider>
+			</DragAndDropContextProvider>
 		</DragAndDropProvider>
 	);
 
@@ -108,11 +122,72 @@ describe('ConditionsPanel', () => {
 		});
 	});
 
-	it('shows an error state for a removed criteria', () => {
-		renderConditionsPanel({rules: RULES_WITH_REMOVED});
+	it('shows an error state for a removed criteria and deletes it', async () => {
+		const {dispatch} = renderConditionsPanel({rules: RULES_WITH_REMOVED});
 
 		expect(
 			screen.getByText('the-criteria-is-no-longer-available')
 		).toBeTruthy();
+
+		const rows = screen.getAllByRole('menuitem');
+
+		rows[0].focus();
+
+		await userEvent.keyboard('{ArrowDown}');
+
+		expect(document.activeElement).toBe(rows[1]);
+
+		screen.getByLabelText('move-x').focus();
+
+		await userEvent.keyboard('{Enter}{ArrowUp}');
+
+		expect(rows[0]).toHaveClass('audience-builder-rule--drop-top');
+
+		await userEvent.keyboard('{Escape}');
+
+		await userEvent.click(screen.getAllByLabelText('delete')[0]);
+
+		expect(dispatch).toHaveBeenCalledWith({index: 0, type: 'DELETE_RULE'});
+	});
+
+	it('navigates and reorders the rows with the keyboard', async () => {
+		const {dispatch} = renderConditionsPanel({rules: TWO_RULES});
+
+		const rows = screen.getAllByRole('menuitem');
+
+		expect(rows[0].tabIndex).toBe(0);
+		expect(rows[1].tabIndex).toBe(-1);
+		expect(screen.getAllByLabelText('move-x')[0].tabIndex).toBe(0);
+
+		rows[0].focus();
+
+		await userEvent.keyboard('{ArrowDown}');
+
+		expect(document.activeElement).toBe(rows[1]);
+		expect(rows[0].tabIndex).toBe(-1);
+		expect(rows[1].tabIndex).toBe(0);
+
+		await userEvent.keyboard('{ArrowUp}');
+
+		expect(document.activeElement).toBe(rows[0]);
+
+		screen.getAllByLabelText('move-x')[0].focus();
+
+		await userEvent.keyboard('{ArrowDown}');
+
+		expect(document.activeElement).toBe(rows[1]);
+
+		await userEvent.keyboard('{ArrowUp}');
+
+		expect(document.activeElement).toBe(rows[0]);
+
+		screen.getAllByLabelText('move-x')[0].focus();
+
+		await userEvent.keyboard('{Enter}{ArrowDown}{Enter}');
+
+		expect(dispatch).toHaveBeenCalledWith({
+			rules: [TWO_RULES[1], TWO_RULES[0]],
+			type: 'REORDER_RULES',
+		});
 	});
 });

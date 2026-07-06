@@ -3,13 +3,15 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-import {render, screen, waitFor} from '@testing-library/react';
+import {DragAndDropContextProvider} from '@liferay/layout-js-components-web';
+import {render, screen, waitFor, within} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
+import React, {useReducer} from 'react';
 import {DndProvider} from 'react-dnd';
 import {HTML5Backend} from 'react-dnd-html5-backend';
 
 import AttributesSidebar from '../../../src/main/resources/META-INF/resources/js/components/AttributesSidebar';
+import {reducer} from '../../../src/main/resources/META-INF/resources/js/reducer';
 import {AudiencesCriteriaType} from '../../../src/main/resources/META-INF/resources/js/types';
 
 const DragAndDropProvider = DndProvider as unknown as React.FC<
@@ -55,15 +57,46 @@ const AUDIENCES_CRITERIA_TYPES: AudiencesCriteriaType[] = [
 	},
 ];
 
+function renderSidebar() {
+	const dispatch = jest.fn();
+
+	function Sidebar() {
+		const [state, reducerDispatch] = useReducer(reducer, {
+			conjunction: 'AND',
+			name: '',
+			rules: [],
+		});
+
+		return (
+			<AttributesSidebar
+				audiencesCriteriaTypes={AUDIENCES_CRITERIA_TYPES}
+				dispatch={(action) => {
+					dispatch(action);
+					reducerDispatch(action);
+				}}
+				rules={state.rules}
+			/>
+		);
+	}
+
+	render(
+		<DragAndDropProvider backend={HTML5Backend}>
+			<DragAndDropContextProvider>
+				<Sidebar />
+			</DragAndDropContextProvider>
+		</DragAndDropProvider>
+	);
+
+	return {dispatch};
+}
+
+function getAttributeItems() {
+	return within(screen.getByRole('toolbar')).getAllByRole('button');
+}
+
 describe('AttributesSidebar', () => {
 	it('lists and filters the attributes', async () => {
-		render(
-			<DragAndDropProvider backend={HTML5Backend}>
-				<AttributesSidebar
-					audiencesCriteriaTypes={AUDIENCES_CRITERIA_TYPES}
-				/>
-			</DragAndDropProvider>
-		);
+		renderSidebar();
 
 		expect(screen.getByText('Age')).toBeTruthy();
 		expect(screen.getByText('City')).toBeTruthy();
@@ -94,5 +127,39 @@ describe('AttributesSidebar', () => {
 		await waitFor(() =>
 			expect(screen.getByText('no-attributes-were-found')).toBeTruthy()
 		);
+	});
+
+	it('navigates, adds, and inserts conditions with the keyboard', async () => {
+		const {dispatch} = renderSidebar();
+
+		const items = getAttributeItems();
+
+		items[0].focus();
+
+		await userEvent.keyboard('{ArrowDown}');
+
+		expect(document.activeElement).toBe(items[1]);
+
+		await userEvent.keyboard('{ArrowUp}');
+
+		expect(document.activeElement).toBe(items[0]);
+
+		await userEvent.keyboard('{Enter}');
+
+		expect(dispatch).toHaveBeenCalledWith({
+			audiencesCriteria: expect.objectContaining({key: 'age'}),
+			index: 0,
+			type: 'ADD_RULE',
+		});
+
+		getAttributeItems()[1].focus();
+
+		await userEvent.keyboard('{Enter}{ArrowUp}{Enter}');
+
+		expect(dispatch).toHaveBeenCalledWith({
+			audiencesCriteria: expect.objectContaining({key: 'city'}),
+			index: 0,
+			type: 'ADD_RULE',
+		});
 	});
 });
