@@ -4,6 +4,7 @@
  */
 
 import {
+	getNextKeyboardPosition,
 	useKeyboardItem,
 	useScreenReaderAnnounce,
 	useUpdateKeyboardItem,
@@ -43,23 +44,15 @@ export default function useKeyboardInsert({item, items, onInsert}: Props) {
 				event.preventDefault();
 				event.stopPropagation();
 
-				let nextIndex = keyboardItem.index ?? 0;
-				let nextPosition = keyboardItem.position;
-
-				if (key === 'ArrowDown') {
-					if (nextPosition === 'top') {
-						nextPosition = 'bottom';
-					}
-					else if (nextIndex < items.length - 1) {
-						nextIndex = nextIndex + 1;
-					}
-				}
-				else if (nextPosition === 'bottom') {
-					nextPosition = 'top';
-				}
-				else if (nextIndex > 0) {
-					nextIndex = nextIndex - 1;
-				}
+				const {index: nextIndex, position: nextPosition} =
+					getNextKeyboardPosition(
+						{
+							index: keyboardItem.index ?? 0,
+							position: keyboardItem.position,
+						},
+						key,
+						items.length
+					);
 
 				announce(
 					sub(Liferay.Language.get('move-x-at-the-x-of-x'), [

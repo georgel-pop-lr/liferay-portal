@@ -11,6 +11,7 @@ import {
 	useUpdateKeyboardItem,
 } from '../../contexts/DragAndDropContext';
 import {useScreenReaderAnnounce} from '../../contexts/ScreenReaderContext';
+import getNextKeyboardPosition from './getNextKeyboardPosition';
 
 interface Props<T extends {id: string}> {
 	draggedItem: T;
@@ -102,25 +103,15 @@ export default function useKeyboardDragAndDrop<
 				return;
 			}
 
-			let nextIndex = keyboardItem.index!;
-			let nextPosition = keyboardItem.position;
-
-			if (key === 'ArrowDown' && nextIndex <= items.length - 1) {
-				if (nextPosition === 'top') {
-					nextPosition = 'bottom';
-				}
-				else if (nextIndex < items.length - 1) {
-					nextIndex = nextIndex + 1;
-				}
-			}
-			else if (key === 'ArrowUp' && nextIndex >= 0) {
-				if (nextPosition === 'bottom') {
-					nextPosition = 'top';
-				}
-				else if (nextIndex > 0) {
-					nextIndex = nextIndex - 1;
-				}
-			}
+			const {index: nextIndex, position: nextPosition} =
+				getNextKeyboardPosition(
+					{
+						index: keyboardItem.index!,
+						position: keyboardItem.position,
+					},
+					key,
+					items.length
+				);
 
 			announce(
 				sub(Liferay.Language.get('move-x-at-the-x-of-x'), [
