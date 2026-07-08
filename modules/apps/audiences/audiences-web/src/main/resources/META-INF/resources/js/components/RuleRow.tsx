@@ -173,7 +173,14 @@ export default function RuleRow({
 				aria-label={Liferay.Language.get(
 					'the-criteria-is-no-longer-available'
 				)}
-				className="align-items-center audience-builder-rule audience-builder-rule--error d-flex justify-content-between p-3"
+				className={classNames(
+					'align-items-center audience-builder-rule audience-builder-rule--error d-flex justify-content-between p-3',
+					{
+						'audience-builder-rule--drop-bottom':
+							isDropBottomPosition,
+						'audience-builder-rule--drop-top': isDropTopPosition,
+					}
+				)}
 				onFocus={rovingProps.onFocus}
 				onKeyDownCapture={handleArrowNavigation}
 				ref={setRowRef}
