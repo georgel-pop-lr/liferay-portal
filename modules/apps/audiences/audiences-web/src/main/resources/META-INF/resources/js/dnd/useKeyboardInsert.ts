@@ -12,10 +12,7 @@ import {
 import {sub} from 'frontend-js-web';
 import React, {useCallback, useState} from 'react';
 
-interface DragItem {
-	id: string;
-	name: string;
-}
+import {DragItem} from './types';
 
 interface Props {
 	item: DragItem;

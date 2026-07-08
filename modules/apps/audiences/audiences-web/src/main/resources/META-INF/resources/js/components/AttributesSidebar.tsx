@@ -12,6 +12,7 @@ import {
 	CATEGORY_ICON_COLORS,
 	DEFAULT_ICON_COLOR,
 } from '../constants/categoryIconColors';
+import buildDndItems from '../dnd/buildDndItems';
 import {Action} from '../reducer';
 import {AudiencesCriteria, AudiencesCriteriaType, Rule} from '../types';
 import AttributeListItem from './AttributeListItem';
@@ -58,10 +59,7 @@ export default function AttributesSidebar({
 				])
 		);
 
-	const dndItems = rules.map((rule) => ({
-		id: rule.id,
-		name: audiencesCriteriasByKey[rule.attribute]?.label ?? rule.attribute,
-	}));
+	const dndItems = buildDndItems(rules, audiencesCriteriasByKey);
 
 	const handleInsert = (
 		audiencesCriteria: AudiencesCriteria,

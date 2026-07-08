@@ -13,25 +13,12 @@ import {
 } from '@liferay/layout-js-components-web';
 import classNames from 'classnames';
 import {sub} from 'frontend-js-web';
-import React, {useEffect, useRef, useState} from 'react';
-import {DropTargetMonitor, useDrop} from 'react-dnd';
+import React, {useEffect, useRef} from 'react';
 
-import {DRAG_TYPES} from '../constants/dragTypes';
 import {getOperatorLabel, getOperators} from '../constants/operators';
+import {DragItem} from '../dnd/types';
+import useAttributeDrop from '../dnd/useAttributeDrop';
 import {AudiencesCriteria, Rule} from '../types';
-
-type DropPosition = 'bottom' | 'top' | null;
-
-interface DragItem {
-	icon: string;
-	id: string;
-	name: string;
-}
-
-interface AttributeDragItem {
-	audiencesCriteria: AudiencesCriteria;
-	type: string;
-}
 
 interface IProps {
 	audiencesCriteria?: AudiencesCriteria;
@@ -47,22 +34,6 @@ interface IProps {
 	rovingProps: RovingItemProps;
 	rule: Rule;
 }
-
-const getDropPosition = (
-	ref: React.RefObject<HTMLElement>,
-	monitor: DropTargetMonitor
-): DropPosition => {
-	const clientOffset = monitor.getClientOffset();
-
-	if (!ref.current || !clientOffset) {
-		return null;
-	}
-
-	const dropItemBoundingRect = ref.current.getBoundingClientRect();
-	const hoverClientY = clientOffset.y - dropItemBoundingRect.top;
-
-	return hoverClientY < dropItemBoundingRect.height / 2 ? 'top' : 'bottom';
-};
 
 export default function RuleRow({
 	audiencesCriteria,
@@ -87,8 +58,6 @@ export default function RuleRow({
 		rovingProps.ref(node);
 	};
 
-	const [dropPosition, setDropPosition] = useState<DropPosition>(null);
-
 	const {
 		handleKeyboardDragAndDrop,
 		isDragging,
@@ -104,30 +73,10 @@ export default function RuleRow({
 		onDrop: onReorder,
 	});
 
-	const [{isOver}, attributeDrop] = useDrop<
-		AttributeDragItem,
-		void,
-		{isOver: boolean}
-	>({
-		accept: DRAG_TYPES.ATTRIBUTE,
-		collect: (monitor) => ({isOver: !!monitor.isOver()}),
-		drop: (item, monitor) => {
-			const dropPosition = getDropPosition(dropItemRef, monitor);
-
-			onAddRule(
-				item.audiencesCriteria,
-				dropPosition === 'bottom' ? index + 1 : index
-			);
-		},
-		hover: (item, monitor) => {
-			let dropPosition: DropPosition = null;
-
-			if (isOver) {
-				dropPosition = getDropPosition(dropItemRef, monitor);
-			}
-
-			setDropPosition(dropPosition);
-		},
+	const {dropPosition, dropRef, isOver} = useAttributeDrop({
+		dropItemRef,
+		index,
+		onAddRule,
 	});
 
 	const isNavigationTarget = rovingProps.tabIndex === 0;
@@ -218,7 +167,7 @@ export default function RuleRow({
 	const operators = getOperators(inputType, type);
 
 	return (
-		<div ref={attributeDrop}>
+		<div ref={dropRef}>
 			<div
 				aria-label={label}
 				className={classNames(

@@ -11,13 +11,13 @@ import {
 } from '@liferay/layout-js-components-web';
 import classNames from 'classnames';
 import React, {Dispatch, Fragment} from 'react';
-import {useDrop} from 'react-dnd';
 
 import {
 	CATEGORY_ICON_COLORS,
 	DEFAULT_ICON_COLOR,
 } from '../constants/categoryIconColors';
-import {DRAG_TYPES} from '../constants/dragTypes';
+import buildDndItems from '../dnd/buildDndItems';
+import useAttributeDrop from '../dnd/useAttributeDrop';
 import {Action} from '../reducer';
 import {AudiencesCriteria, AudiencesCriteriaType, Rule} from '../types';
 import RuleRow from './RuleRow';
@@ -27,11 +27,6 @@ interface IProps {
 	conjunction: string;
 	dispatch: Dispatch<Action>;
 	rules: Rule[];
-}
-
-interface AttributeDragItem {
-	audiencesCriteria: AudiencesCriteria;
-	type: string;
 }
 
 export default function ConditionsPanel({
@@ -71,27 +66,10 @@ export default function ConditionsPanel({
 		loop: true,
 	});
 
-	const dndItems = rules.map((rule) => {
-		const audiencesCriteria = audiencesCriteriasByKey[rule.attribute];
+	const dndItems = buildDndItems(rules, audiencesCriteriasByKey);
 
-		return {
-			icon: audiencesCriteria?.icon ?? '',
-			id: rule.id,
-			name: audiencesCriteria?.label ?? rule.attribute,
-		};
-	});
-
-	const [{canDrop, isOver}, drop] = useDrop<
-		AttributeDragItem,
-		void,
-		{canDrop: boolean; isOver: boolean}
-	>({
-		accept: DRAG_TYPES.ATTRIBUTE,
-		collect: (monitor) => ({
-			canDrop: monitor.canDrop(),
-			isOver: monitor.isOver(),
-		}),
-		drop: (item) => handleAddRule(item.audiencesCriteria),
+	const {canDrop, dropRef, isOver} = useAttributeDrop({
+		onAddRule: handleAddRule,
 	});
 
 	function handleAddRule(
@@ -253,7 +231,7 @@ export default function ConditionsPanel({
 							'audience-builder-drop-zone--over': isOver,
 						}
 					)}
-					ref={drop}
+					ref={dropRef}
 				>
 					{!canDrop && (
 						<ClayEmptyState

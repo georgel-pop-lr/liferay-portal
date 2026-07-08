@@ -7,18 +7,12 @@ import ClayIcon from '@clayui/icon';
 import {RovingItemProps} from '@liferay/layout-js-components-web';
 import classNames from 'classnames';
 import {sub} from 'frontend-js-web';
-import React, {useEffect} from 'react';
-import {useDrag} from 'react-dnd';
-import {getEmptyImage} from 'react-dnd-html5-backend';
+import React from 'react';
 
-import {DRAG_TYPES} from '../constants/dragTypes';
-import useKeyboardInsert from '../hooks/useKeyboardInsert';
+import {DragItem} from '../dnd/types';
+import useAttributeDrag from '../dnd/useAttributeDrag';
+import useKeyboardInsert from '../dnd/useKeyboardInsert';
 import {AudiencesCriteria} from '../types';
-
-interface DragItem {
-	id: string;
-	name: string;
-}
 
 interface IProps {
 	audiencesCriteria: AudiencesCriteria;
@@ -35,27 +29,13 @@ export default function AttributeListItem({
 	onInsert,
 	rovingProps,
 }: IProps) {
-	const [{isDragging}, handlerRef, previewRef] = useDrag({
-		collect: (monitor) => ({
-			isDragging: monitor.isDragging(),
-		}),
-		item: {
-			audiencesCriteria,
-			icon: audiencesCriteria.icon,
-			name: audiencesCriteria.label,
-			type: DRAG_TYPES.ATTRIBUTE,
-		},
-	});
+	const {handlerRef, isDragging} = useAttributeDrag(audiencesCriteria);
 
 	const {handleKeyboardInsert, isPlacing} = useKeyboardInsert({
 		item: {id: audiencesCriteria.key, name: audiencesCriteria.label},
 		items,
 		onInsert: (index) => onInsert(audiencesCriteria, index),
 	});
-
-	useEffect(() => {
-		previewRef(getEmptyImage(), {captureDraggingState: true});
-	}, [previewRef]);
 
 	const setRefs = (node: HTMLDivElement | null) => {
 		handlerRef(node);
