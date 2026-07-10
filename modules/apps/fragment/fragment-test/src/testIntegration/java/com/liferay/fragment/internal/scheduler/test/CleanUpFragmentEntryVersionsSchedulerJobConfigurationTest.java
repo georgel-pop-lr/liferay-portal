@@ -203,7 +203,8 @@ public class CleanUpFragmentEntryVersionsSchedulerJobConfigurationTest {
 
 			jobExecutorUnsafeRunnable.run();
 
-			int expectedFragmentEntryVersionsCount = 0;
+			int expectedFragmentEntryVersionsCount =
+				fragmentEntryVersions.size();
 
 			if (maximumVersionsPerEntry > 0) {
 				expectedFragmentEntryVersionsCount = Math.min(
