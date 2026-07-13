@@ -6,9 +6,14 @@
 package com.liferay.fragment.service.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
+import com.liferay.change.tracking.configuration.CTSettingsConfiguration;
+import com.liferay.change.tracking.model.CTCollection;
+import com.liferay.change.tracking.service.CTCollectionLocalService;
+import com.liferay.change.tracking.service.CTCollectionServiceUtil;
 import com.liferay.depot.constants.DepotConstants;
 import com.liferay.depot.model.DepotEntry;
 import com.liferay.depot.service.DepotEntryLocalService;
+import com.liferay.fragment.configuration.FragmentEntryVersionConfiguration;
 import com.liferay.fragment.configuration.FragmentServiceConfiguration;
 import com.liferay.fragment.constants.FragmentConstants;
 import com.liferay.fragment.exception.DuplicateFragmentEntryExternalReferenceCodeException;
@@ -16,6 +21,7 @@ import com.liferay.fragment.exception.NoSuchEntryException;
 import com.liferay.fragment.model.FragmentCollection;
 import com.liferay.fragment.model.FragmentEntry;
 import com.liferay.fragment.model.FragmentEntryLink;
+import com.liferay.fragment.model.FragmentEntryVersion;
 import com.liferay.fragment.service.FragmentEntryLinkLocalService;
 import com.liferay.fragment.service.FragmentEntryLocalService;
 import com.liferay.fragment.test.util.FragmentEntryTestUtil;
@@ -24,9 +30,12 @@ import com.liferay.fragment.util.comparator.FragmentEntryCreateDateComparator;
 import com.liferay.fragment.util.comparator.FragmentEntryNameComparator;
 import com.liferay.layout.test.util.ContentLayoutTestUtil;
 import com.liferay.layout.test.util.LayoutTestUtil;
+import com.liferay.petra.function.transform.TransformUtil;
+import com.liferay.petra.lang.SafeCloseable;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.configuration.test.util.CompanyConfigurationTemporarySwapper;
+import com.liferay.portal.kernel.change.tracking.CTCollectionThreadLocal;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.language.Language;
@@ -49,6 +58,9 @@ import com.liferay.portal.kernel.util.ScopeUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
+import com.liferay.portal.test.log.LogCapture;
+import com.liferay.portal.test.log.LogEntry;
+import com.liferay.portal.test.log.LoggerTestUtil;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
@@ -59,6 +71,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -229,13 +242,14 @@ public class FragmentEntryLocalServiceTest {
 	}
 
 	@Test
-	@TestInfo("LPD-98538")
+	@TestInfo({"LPD-75909", "LPD-98538"})
 	public void testUpdateFragmentEntry() throws Exception {
 		_testUpdateFragmentEntryFragmentCollectionId();
 		_testUpdateFragmentEntryName();
 		_testUpdateFragmentEntryNameCssHtmlJsConfigurationAndStatus();
 		_testUpdateFragmentEntryNameCssHtmlJsConfigurationPreviewFileEntryIdAndStatus();
 		_testUpdateFragmentEntryPreviewFileEntryId();
+		_testUpdateFragmentEntryVersions();
 		_testUpdateFragmentEntryWithCacheable();
 		_testUpdateFragmentEntryWithHtmlWithAmpersand();
 		_testUpdateFragmentEntryWithPreviewFileEntryId();
@@ -296,6 +310,60 @@ public class FragmentEntryLocalServiceTest {
 				fragmentEntryLinkId);
 
 		Assert.assertEquals(html, fragmentEntryLink.getHtml());
+	}
+
+	private List<Integer> _createFragmentEntryVersions(
+			List<Integer> allFragmentEntryVersions, int count,
+			FragmentEntry fragmentEntry, int maximumVersionsPerEntry)
+		throws Exception {
+
+		for (int i = 0; i < count; i++) {
+			_fragmentEntryLocalService.updateFragmentEntry(
+				TestPropsValues.getUserId(), fragmentEntry.getFragmentEntryId(),
+				fragmentEntry.getFragmentCollectionId(),
+				fragmentEntry.getName(), StringPool.BLANK,
+				RandomTestUtil.randomString(), StringPool.BLANK, false,
+				StringPool.BLANK, StringPool.BLANK, 0, false, StringPool.BLANK,
+				WorkflowConstants.STATUS_APPROVED);
+
+			List<Integer> fragmentEntryVersions = _getFragmentEntryVersions(
+				fragmentEntry);
+
+			allFragmentEntryVersions.add(fragmentEntryVersions.get(0));
+
+			Assert.assertEquals(
+				_getExpectedFragmentEntryVersions(
+					allFragmentEntryVersions, maximumVersionsPerEntry),
+				fragmentEntryVersions);
+		}
+
+		return _getFragmentEntryVersions(fragmentEntry);
+	}
+
+	private List<Integer> _getExpectedFragmentEntryVersions(
+		List<Integer> fragmentEntryVersions, int maximumVersionsPerEntry) {
+
+		List<Integer> reversedFragmentEntryVersions = new ArrayList<>(
+			fragmentEntryVersions);
+
+		Collections.reverse(reversedFragmentEntryVersions);
+
+		if (maximumVersionsPerEntry <= 0) {
+			return reversedFragmentEntryVersions;
+		}
+
+		return reversedFragmentEntryVersions.subList(
+			0,
+			Math.min(
+				maximumVersionsPerEntry, reversedFragmentEntryVersions.size()));
+	}
+
+	private List<Integer> _getFragmentEntryVersions(
+		FragmentEntry fragmentEntry) {
+
+		return TransformUtil.transform(
+			_fragmentEntryLocalService.getVersions(fragmentEntry),
+			FragmentEntryVersion::getVersion);
 	}
 
 	private String _read(String fileName) throws Exception {
@@ -1220,6 +1288,81 @@ public class FragmentEntryLocalServiceTest {
 			previewFileEntryId + 1, fragmentEntry.getPreviewFileEntryId());
 	}
 
+	private void _testUpdateFragmentEntryVersions() throws Exception {
+		_testUpdateFragmentEntryVersions(2);
+		_testUpdateFragmentEntryVersions(0);
+	}
+
+	private void _testUpdateFragmentEntryVersions(int maximumVersionsPerEntry)
+		throws Exception {
+
+		int count = Math.max(maximumVersionsPerEntry + 1, 3);
+
+		try (CompanyConfigurationTemporarySwapper
+				ctSettingsConfigurationTemporarySwapper =
+					new CompanyConfigurationTemporarySwapper(
+						TestPropsValues.getCompanyId(),
+						CTSettingsConfiguration.class.getName(),
+						HashMapDictionaryBuilder.<String, Object>put(
+							"enabled", true
+						).build());
+			CompanyConfigurationTemporarySwapper
+				companyConfigurationTemporarySwapper =
+					new CompanyConfigurationTemporarySwapper(
+						TestPropsValues.getCompanyId(),
+						FragmentEntryVersionConfiguration.class.getName(),
+						HashMapDictionaryBuilder.<String, Object>put(
+							"maximumVersionsPerEntry", maximumVersionsPerEntry
+						).build())) {
+
+			FragmentEntry fragmentEntry =
+				FragmentEntryTestUtil.addFragmentEntry(
+					_fragmentCollection.getFragmentCollectionId());
+
+			List<Integer> allFragmentEntryVersions = new ArrayList<>(
+				_getFragmentEntryVersions(fragmentEntry));
+
+			List<Integer> fragmentEntryVersions = _createFragmentEntryVersions(
+				allFragmentEntryVersions, count, fragmentEntry,
+				maximumVersionsPerEntry);
+
+			CTCollection ctCollection =
+				_ctCollectionLocalService.addCTCollection(
+					null, TestPropsValues.getCompanyId(),
+					TestPropsValues.getUserId(), 0,
+					RandomTestUtil.randomString(),
+					RandomTestUtil.randomString());
+
+			try (SafeCloseable safeCloseable =
+					CTCollectionThreadLocal.setCTCollectionIdWithSafeCloseable(
+						ctCollection.getCtCollectionId())) {
+
+				fragmentEntryVersions = _createFragmentEntryVersions(
+					allFragmentEntryVersions, count, fragmentEntry,
+					maximumVersionsPerEntry);
+			}
+
+			try (LogCapture logCapture = LoggerTestUtil.configureLog4JLogger(
+					"com.liferay.portal.background.task.internal.messaging." +
+						"BackgroundTaskMessageListener",
+					LoggerTestUtil.ERROR)) {
+
+				CTCollectionServiceUtil.publishCTCollection(
+					TestPropsValues.getUserId(),
+					ctCollection.getCtCollectionId());
+
+				List<LogEntry> logEntries = logCapture.getLogEntries();
+
+				Assert.assertEquals(
+					logEntries.toString(), 0, logEntries.size());
+			}
+
+			Assert.assertEquals(
+				fragmentEntryVersions,
+				_getFragmentEntryVersions(fragmentEntry));
+		}
+	}
+
 	private void _testUpdateFragmentEntryWithCacheable() throws Exception {
 		FragmentEntry fragmentEntry = FragmentEntryTestUtil.addFragmentEntry(
 			_fragmentCollection.getFragmentCollectionId());
@@ -1362,6 +1505,9 @@ public class FragmentEntryLocalServiceTest {
 			}
 		}
 	}
+
+	@Inject
+	private CTCollectionLocalService _ctCollectionLocalService;
 
 	@Inject
 	private DepotEntryLocalService _depotEntryLocalService;
