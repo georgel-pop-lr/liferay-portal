@@ -73,12 +73,12 @@ public class FragmentEntryVersionUpgradeProcessTest {
 			fragmentEntryVersionConfiguration.maximumVersionsPerEntry();
 
 		_testUpgrade(
-			0, maximumVersionsPerEntry + 1, maximumVersionsPerEntry + 1);
-		_testUpgrade(
-			maximumVersionsPerEntry, maximumVersionsPerEntry,
-			maximumVersionsPerEntry + 1);
+			maximumVersionsPerEntry + 1, maximumVersionsPerEntry + 1, 0);
 		_testUpgrade(
 			maximumVersionsPerEntry, maximumVersionsPerEntry + 1,
+			maximumVersionsPerEntry);
+		_testUpgrade(
+			maximumVersionsPerEntry + 1, maximumVersionsPerEntry,
 			maximumVersionsPerEntry);
 	}
 
@@ -103,9 +103,8 @@ public class FragmentEntryVersionUpgradeProcessTest {
 	}
 
 	private void _testUpgrade(
-			int maximumVersionsPerEntry,
 			int ctCollectionFragmentEntryVersionsCount,
-			int fragmentEntryVersionsCount)
+			int fragmentEntryVersionsCount, int maximumVersionsPerEntry)
 		throws Exception {
 
 		try (CompanyConfigurationTemporarySwapper

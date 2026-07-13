@@ -83,11 +83,11 @@ public class CleanUpFragmentEntryVersionsSchedulerJobConfigurationTest {
 	@Test
 	@TestInfo("LPD-75909")
 	public void testCleanUpFragmentEntryVersions() throws Exception {
-		_testCleanUpFragmentEntryVersions(0, _maximumVersionsPerEntry + 1);
+		_testCleanUpFragmentEntryVersions(_maximumVersionsPerEntry + 1, 0);
 		_testCleanUpFragmentEntryVersions(
 			_maximumVersionsPerEntry, _maximumVersionsPerEntry);
 		_testCleanUpFragmentEntryVersions(
-			_maximumVersionsPerEntry, _maximumVersionsPerEntry + 1);
+			_maximumVersionsPerEntry + 1, _maximumVersionsPerEntry);
 	}
 
 	@Test
@@ -175,7 +175,7 @@ public class CleanUpFragmentEntryVersionsSchedulerJobConfigurationTest {
 	}
 
 	private void _testCleanUpFragmentEntryVersions(
-			int maximumVersionsPerEntry, int fragmentEntryVersionsCount)
+			int fragmentEntryVersionsCount, int maximumVersionsPerEntry)
 		throws Exception {
 
 		try (CompanyConfigurationTemporarySwapper
