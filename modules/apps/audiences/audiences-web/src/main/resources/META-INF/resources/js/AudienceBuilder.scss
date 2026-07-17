@@ -77,6 +77,29 @@ $toolbar-height: 55px;
 	cursor: grab;
 }
 
+.audience-builder-name {
+	position: relative;
+
+	&::before {
+		background-color: var(--secondary-l0);
+		border-radius: 2px;
+		bottom: 0;
+		content: '';
+		left: 0;
+		position: absolute;
+		top: 0;
+		width: 2px;
+	}
+
+	&:focus-within::before {
+		background-color: transparent;
+	}
+
+	.form-control:not(:focus) {
+		border-color: transparent;
+	}
+}
+
 .audience-builder-rule {
 	border: 2px solid var(--secondary-l3);
 	border-left: 4px solid $indigo;

@@ -137,24 +137,26 @@ export default function AudienceBuilder({
 										</span>
 									</label>
 
-									<ClayInput
-										className="bg-white border-0 font-weight-semi-bold h-auto mb-0 p-0 text-8"
-										id={`${namespace}name`}
-										maxLength={NAME_MAX_LENGTH}
-										name={`${namespace}name`}
-										onChange={(event) =>
-											dispatch({
-												name: event.target.value,
-												type: 'SET_NAME',
-											})
-										}
-										placeholder={Liferay.Language.get(
-											'new-audience'
-										)}
-										required
-										type="text"
-										value={state.name}
-									/>
+									<div className="audience-builder-name">
+										<ClayInput
+											className="bg-white font-weight-semi-bold h-auto mb-0 text-8"
+											id={`${namespace}name`}
+											maxLength={NAME_MAX_LENGTH}
+											name={`${namespace}name`}
+											onChange={(event) =>
+												dispatch({
+													name: event.target.value,
+													type: 'SET_NAME',
+												})
+											}
+											placeholder={Liferay.Language.get(
+												'new-audience'
+											)}
+											required
+											type="text"
+											value={state.name}
+										/>
+									</div>
 								</ClayForm.Group>
 
 								<GeneralSettings
