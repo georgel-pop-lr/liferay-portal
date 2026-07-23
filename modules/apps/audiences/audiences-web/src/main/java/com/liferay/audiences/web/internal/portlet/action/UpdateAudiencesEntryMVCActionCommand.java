@@ -107,6 +107,8 @@ public class UpdateAudiencesEntryMVCActionCommand extends BaseMVCActionCommand {
 				SessionErrors.add(
 					actionRequest, exception.getClass(), exception);
 
+				hideDefaultErrorMessage(actionRequest);
+
 				actionResponse.setRenderParameter(
 					"audiencesEntryId", String.valueOf(audiencesEntryId));
 				actionResponse.setRenderParameter(
