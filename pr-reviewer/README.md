@@ -72,6 +72,10 @@ For interactive use there is a Claude Code skill, `brian-review`, that wraps the
 
 The skill takes the organization from the URL and works against any `liferay-portal` repository, not only the stability team, by overriding `_REPO` and `_GIT_REMOTE` for that run. Before reviewing it confirms the reviewer and the setup are in place, and when either is missing it asks whether to fetch the `pr-review` branch or run `setup.sh` for you rather than only printing instructions. When the pull request was already reviewed it reviews again only when there are new commits since the last comment, and otherwise asks first. Like the `review` command it reviews and comments only, and never closes a pull request.
 
+## The pr-check Review validation
+
+`pr-check` has a `Review` validation that runs `run_local.sh` against your branch as its last step, so the reviewer's verdict shows up alongside the format and build checks before you open the pull request. It reports PASS when the reviewer would most likely merge, and FAIL with the violations otherwise, which you then fix or override as false positives. The validation is read only and never commits.
+
 ## How it works
 
 The reviewer builds a filtered diff that excludes generated and binary files, then launches Claude inside a bubblewrap sandbox. For a pull request it first fetches the branch from the `stability` remote; `run_local.sh` skips the fetch and diffs your local branch instead. Both paths share the same `_build_review_diff` and `_run_review` functions, so they filter, sandbox, and score identically. The sandbox exposes only this directory, a read only copy of the repository for `git grep`, the diff, and your Claude install and credentials. All of the sandbox network traffic leaves through the proxy on port 8118. Claude returns a JSON object with a rejection chance and a list of violations, which the reviewer formats into the comment above.

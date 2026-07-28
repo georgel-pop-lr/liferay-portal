@@ -92,6 +92,8 @@ The procedure runs in two passes over the validations, in the order below. The o
 
 1. [Helm Unit Test Order](validations/helm-unit-test-order.md)
 
+1. [Review](validations/review.md)
+
 Process each validation in a subagent.
 
 ### Pass 1: Estimate
