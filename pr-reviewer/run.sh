@@ -160,6 +160,79 @@ function _acquire_pr_lock {
 	pr_locked=true
 }
 
+function _build_review_diff {
+	local diff_range=${1}
+	local generated_ref=${2}
+
+	local diff_file
+	local generated_files=""
+
+	for diff_file in $(git diff --name-only ${diff_range} || true)
+	do
+		if git grep --ignore-case --quiet "@generated" ${generated_ref} -- ":(top)${diff_file}" 2> /dev/null
+		then
+			generated_files+="|${diff_file}"
+		fi
+	done
+
+	git diff --unified=1 ${diff_range} | awk \
+		-v generated_files="${generated_files}|" \
+		-v ignored_filenames="${_IGNORED_FILENAMES}" \
+		-v ignored_patterns="${_IGNORED_PATTERNS}" \
+		-v ignored_suffixes="${_IGNORED_SUFFIXES}" \
+		-v name_only_suffixes="${_NAME_ONLY_SUFFIXES}" '
+		BEGIN {
+			split(ignored_filenames, filenames, " ")
+			split(ignored_patterns, patterns, " ")
+			split(ignored_suffixes, suffixes, " ")
+			split(name_only_suffixes, name_only_list, " ")
+		}
+		/^diff --git / {
+
+			#
+			# Match the b/ destination, not the a/ source, since a rename makes the two
+			# differ and generated_files holds the destination reported by --name-only
+			#
+
+			file = substr($4, 3)
+
+			skip = index(generated_files, "|" file "|") > 0
+			name_only = 0
+
+			for (i in filenames) {
+				if (file ~ ("(^|/)" filenames[i] "$")) {
+					skip = 1
+				}
+			}
+
+			for (i in patterns) {
+				if (file ~ patterns[i]) {
+					skip = 1
+				}
+			}
+
+			for (i in suffixes) {
+				if (file ~ ("[.]" suffixes[i] "$")) {
+					skip = 1
+				}
+			}
+
+			for (i in name_only_list) {
+				if (file ~ ("[.]" name_only_list[i] "$")) {
+					name_only = 1
+				}
+			}
+
+			if (! skip) {
+				print
+			}
+
+			next
+		}
+		! skip && ! name_only
+	'
+}
+
 function _check_pr {
 	pr_closed=false
 
@@ -589,8 +662,6 @@ function _get_automatic_code_review_json {
 		return 1
 	fi
 
-	local diff_file
-
 	local diff_range=refs/pr-reviewer/${pr_number}..refs/pr-reviewer/${pr_number}
 
 	local from_commit=$(git merge-base ${_GIT_REMOTE}/${_BASE_BRANCH} refs/pr-reviewer/${pr_number} 2> /dev/null)
@@ -600,111 +671,9 @@ function _get_automatic_code_review_json {
 		diff_range="${from_commit}..refs/pr-reviewer/${pr_number}"
 	fi
 
-	local generated_files=""
-
-	for diff_file in $(git diff --name-only ${diff_range} || true)
-	do
-		if git grep --ignore-case --quiet "@generated" refs/pr-reviewer/${pr_number} -- ":(top)${diff_file}" 2> /dev/null
-		then
-			generated_files+="|${diff_file}"
-		fi
-	done
-
 	rm --force ${pr_dir}/*
 
-	git diff --unified=1 ${diff_range} | awk \
-		-v generated_files="${generated_files}|" \
-		-v ignored_filenames="${_IGNORED_FILENAMES}" \
-		-v ignored_patterns="${_IGNORED_PATTERNS}" \
-		-v ignored_suffixes="${_IGNORED_SUFFIXES}" \
-		-v name_only_suffixes="${_NAME_ONLY_SUFFIXES}" '
-		BEGIN {
-			split(ignored_filenames, filenames, " ")
-			split(ignored_patterns, patterns, " ")
-			split(ignored_suffixes, suffixes, " ")
-			split(name_only_suffixes, name_only_list, " ")
-		}
-		/^diff --git / {
-
-			#
-			# Match the b/ destination, not the a/ source, since a rename makes the two
-			# differ and generated_files holds the destination reported by --name-only
-			#
-
-			file = substr($4, 3)
-
-			skip = index(generated_files, "|" file "|") > 0
-			name_only = 0
-
-			for (i in filenames) {
-				if (file ~ ("(^|/)" filenames[i] "$")) {
-					skip = 1
-				}
-			}
-
-			for (i in patterns) {
-				if (file ~ patterns[i]) {
-					skip = 1
-				}
-			}
-
-			for (i in suffixes) {
-				if (file ~ ("[.]" suffixes[i] "$")) {
-					skip = 1
-				}
-			}
-
-			for (i in name_only_list) {
-				if (file ~ ("[.]" name_only_list[i] "$")) {
-					name_only = 1
-				}
-			}
-
-			if (! skip) {
-				print
-			}
-
-			next
-		}
-		! skip && ! name_only
-	' > ${pr_dir}/pr.diff
-
-	if [ ! -s ${pr_dir}/pr.diff ]
-	then
-		echo "[]"
-
-		return 0
-	fi
-
-	local pids=()
-
-	for model in "${_MODELS[@]}"
-	do
-		_write_model_json_file ${model} &
-
-		pids+=($!)
-	done
-
-	for pid in "${pids[@]}"
-	do
-		wait "${pid}" || true
-	done
-
-	local automatic_code_review_json="[]"
-
-	for model in "${_MODELS[@]}"
-	do
-		local model_json=$(cat ${pr_dir}/${model}.json 2> /dev/null) || model_json=""
-
-		if [[ -z ${model_json} ]] || ! echo "${model_json}" | jq . > /dev/null 2>&1
-		then
-			model_json="{\"chance\": 0, \"seconds\": 0, \"violations\": []}"
-		fi
-
-		automatic_code_review_json=$(echo "${automatic_code_review_json}" | jq --arg model "${model}" --argjson model_json "${model_json}" ". + [\$model_json + {model: \$model}]")
-	done
-
-	echo "${automatic_code_review_json}"
+	_run_review "${diff_range}" "refs/pr-reviewer/${pr_number}"
 }
 
 function _get_indefinite_article_for_number {
@@ -840,6 +809,50 @@ function _review_in_sandbox {
 			--unshare-pid \
 			--unshare-uts \
 			"$@"
+}
+
+function _run_review {
+	local diff_range=${1}
+	local generated_ref=${2}
+
+	_build_review_diff "${diff_range}" "${generated_ref}" > ${pr_dir}/pr.diff
+
+	if [ ! -s ${pr_dir}/pr.diff ]
+	then
+		echo "[]"
+
+		return 0
+	fi
+
+	local pids=()
+
+	for model in "${_MODELS[@]}"
+	do
+		_write_model_json_file ${model} &
+
+		pids+=($!)
+	done
+
+	for pid in "${pids[@]}"
+	do
+		wait "${pid}" || true
+	done
+
+	local automatic_code_review_json="[]"
+
+	for model in "${_MODELS[@]}"
+	do
+		local model_json=$(cat ${pr_dir}/${model}.json 2> /dev/null) || model_json=""
+
+		if [[ -z ${model_json} ]] || ! echo "${model_json}" | jq . > /dev/null 2>&1
+		then
+			model_json="{\"chance\": 0, \"seconds\": 0, \"violations\": []}"
+		fi
+
+		automatic_code_review_json=$(echo "${automatic_code_review_json}" | jq --arg model "${model}" --argjson model_json "${model_json}" ". + [\$model_json + {model: \$model}]")
+	done
+
+	echo "${automatic_code_review_json}"
 }
 
 function _salvage_chance {

@@ -51,6 +51,17 @@ Run everything from this directory.
 
 Start with `review` or `--dry-run check` on a single pull request to see the output before you let it comment. A full review takes a few minutes and uses your Claude usage.
 
+## Reviewing a local branch
+
+`run_local.sh` runs the same review pipeline against the branch you have checked out, before any pull request exists, so you can see what the reviewer would flag before you push.
+
+```
+./run_local.sh          Review the current branch (its diff against master).
+./run_local.sh <ref>    Review <ref> instead of the current branch.
+```
+
+It reviews the diff from the merge base with `_BASE_BRANCH` to the given ref, using the same filtered diff, sandbox, and proxy as `review`, and prints the same JSON. It does not fetch, comment, or touch any remote. Overriding the configuration variables works the same way, for example `_MODELS='(sonnet-4.6)' ./run_local.sh`.
+
 ## The brian-review skill
 
 For interactive use there is a Claude Code skill, `brian-review`, that wraps the reviewer. From a Claude Code session in a `liferay-portal` checkout, run it with a pull request URL.
@@ -63,7 +74,7 @@ The skill takes the organization from the URL and works against any `liferay-por
 
 ## How it works
 
-The reviewer fetches the pull request branch from the `stability` remote, builds a filtered diff that excludes generated and binary files, and then launches Claude inside a bubblewrap sandbox. The sandbox exposes only this directory, a read only copy of the repository for `git grep`, the diff, and your Claude install and credentials. All of the sandbox network traffic leaves through the proxy on port 8118. Claude returns a JSON object with a rejection chance and a list of violations, which the reviewer formats into the comment above.
+The reviewer builds a filtered diff that excludes generated and binary files, then launches Claude inside a bubblewrap sandbox. For a pull request it first fetches the branch from the `stability` remote; `run_local.sh` skips the fetch and diffs your local branch instead. Both paths share the same `_build_review_diff` and `_run_review` functions, so they filter, sandbox, and score identically. The sandbox exposes only this directory, a read only copy of the repository for `git grep`, the diff, and your Claude install and credentials. All of the sandbox network traffic leaves through the proxy on port 8118. Claude returns a JSON object with a rejection chance and a list of violations, which the reviewer formats into the comment above.
 
 When you run the looping `check` command, the reviewer also closes any open pull request that has rebase conflicts, asking the author to resend it. It does not close pull requests for style violations.
 
@@ -101,3 +112,5 @@ The bundled `proxy.py` is a plain tunnel. It funnels the sandbox traffic through
 ## Troubleshooting
 
 If a review fails, the raw model output is saved at `/tmp/pr-reviewer/<pr>/sonnet-4.6.raw` and the parsed result at `/tmp/pr-reviewer/<pr>/sonnet-4.6.json`. The proxy log is at `/tmp/pr-reviewer-proxy.log`. If the reviewer reports that it cannot authenticate, run `claude` once outside the sandbox to refresh your login and rerun `./setup.sh` to recopy the credentials.
+
+If every model fails after 0 seconds with `bwrap: setting up uid map: Permission denied`, the host is blocking unprivileged user namespaces, which the sandbox needs. On recent Ubuntu this is the AppArmor restriction `kernel.apparmor_restrict_unprivileged_userns`. Confirm with `cat /proc/sys/kernel/apparmor_restrict_unprivileged_userns` (a `1` means it is on) and lift it with `sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0`, or install an AppArmor profile for `bwrap`. This affects `review` and `run_local.sh` the same way, since both use the same sandbox.
