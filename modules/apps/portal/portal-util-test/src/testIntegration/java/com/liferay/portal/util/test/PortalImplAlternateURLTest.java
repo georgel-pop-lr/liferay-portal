@@ -58,6 +58,7 @@ import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
+import com.liferay.portal.util.test.rule.CompanyVirtualHostTestRule;
 
 import jakarta.portlet.PortletPreferences;
 
@@ -87,7 +88,9 @@ public class PortalImplAlternateURLTest {
 	@ClassRule
 	@Rule
 	public static final AggregateTestRule aggregateTestRule =
-		new LiferayIntegrationTestRule();
+		new AggregateTestRule(
+			false, CompanyVirtualHostTestRule.INSTANCE,
+			new LiferayIntegrationTestRule());
 
 	@BeforeClass
 	public static void setUpClass() throws PortalException {

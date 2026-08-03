@@ -47,6 +47,7 @@ import com.liferay.portal.kernel.util.TreeMapBuilder;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
+import com.liferay.portal.util.test.rule.CompanyVirtualHostTestRule;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -70,7 +71,9 @@ public class PortalImplCanonicalURLTest {
 	@ClassRule
 	@Rule
 	public static final AggregateTestRule aggregateTestRule =
-		new LiferayIntegrationTestRule();
+		new AggregateTestRule(
+			false, CompanyVirtualHostTestRule.INSTANCE,
+			new LiferayIntegrationTestRule());
 
 	@BeforeClass
 	public static void setUpClass() throws Exception {
