@@ -290,7 +290,7 @@ public class PortalImplCanonicalURLTest {
 		throws Exception {
 
 		ThemeDisplay themeDisplay = _createThemeDisplay(
-			"localhost", _group, 8080, false);
+			"localhost", _group, PortalUtil.getPortalServerPort(false), false);
 
 		LayoutSet layoutSet = _layout4.getLayoutSet();
 
