@@ -21,10 +21,10 @@ Run every step from the repository root, `repo_root=$(git rev-parse --show-tople
 
 ### 1. Ensure the reviewer is present
 
-The reviewer lives on the `pr-review` branch of the stability team repository, `https://github.com/liferay-stability-team/liferay-portal/tree/pr-review`. When `${repo_root}/pr-reviewer/run.sh` is missing, do not just report it. Ask the user **"The pr-reviewer harness is not in this checkout. Should I fetch it from the pr-review branch? (yes/no)"**. On yes, run the commands below and continue. On no, stop.
+The reviewer lives on the `brian-review` branch, `https://github.com/georgel-pop-lr/liferay-portal/tree/brian-review`, which carries the latest fixes: `run_local.sh`, a per-run output directory, and the proxy client refcount. It started as the stability team's `pr-review` branch (`https://github.com/liferay-stability-team/liferay-portal/tree/pr-review`), so fetch that one only to pick up their changes, never to bootstrap a checkout, since it predates those fixes. When `${repo_root}/pr-reviewer/run.sh` is missing, do not just report it. Ask the user **"The pr-reviewer harness is not in this checkout. Should I fetch it from the brian-review branch? (yes/no)"**. On yes, run the commands below and continue. On no, stop.
 
 ```bash
-git fetch git@github.com:liferay-stability-team/liferay-portal.git pr-review
+git fetch git@github.com:georgel-pop-lr/liferay-portal.git brian-review
 git checkout FETCH_HEAD -- pr-reviewer .claude/skills/brian-review
 ```
 

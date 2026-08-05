@@ -70,7 +70,7 @@ For interactive use there is a Claude Code skill, `brian-review`, that wraps the
 /brian-review https://github.com/<org>/liferay-portal/pull/<number>
 ```
 
-The skill takes the organization from the URL and works against any `liferay-portal` repository, not only the stability team, by overriding `_REPO` and `_GIT_REMOTE` for that run. Before reviewing it confirms the reviewer and the setup are in place, and when either is missing it asks whether to fetch the `pr-review` branch or run `setup.sh` for you rather than only printing instructions. When the pull request was already reviewed it reviews again only when there are new commits since the last comment, and otherwise asks first. Like the `review` command it reviews and comments only, and never closes a pull request.
+The skill takes the organization from the URL and works against any `liferay-portal` repository, not only the stability team, by overriding `_REPO` and `_GIT_REMOTE` for that run. Before reviewing it confirms the reviewer and the setup are in place, and when either is missing it asks whether to fetch the `brian-review` branch or run `setup.sh` for you rather than only printing instructions. When the pull request was already reviewed it reviews again only when there are new commits since the last comment, and otherwise asks first. Like the `review` command it reviews and comments only, and never closes a pull request.
 
 ## The pr-check Review validation
 
