@@ -12,7 +12,7 @@ head_ref=${1:-HEAD}
 
 base_commit=$(git merge-base ${_BASE_BRANCH} ${head_ref})
 
-pr_dir=output/local
+pr_dir=output/local-$(git rev-parse --short ${head_ref})-$$
 
 mkdir --parents ${pr_dir}
 
