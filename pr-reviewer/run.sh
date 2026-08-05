@@ -6,6 +6,9 @@ set -o pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
+_PROXY_CLIENTS_DIR=/tmp/pr-reviewer-proxy-clients
+
+_proxy_client=false
 _proxy_pid=
 _proxy_started=false
 
@@ -532,12 +535,18 @@ function _ensure_proxy {
 		return 0
 	fi
 
+	mkdir --parents ${_PROXY_CLIENTS_DIR}
+
+	touch ${_PROXY_CLIENTS_DIR}/$$
+
+	_proxy_client=true
+
 	if ss --listening --numeric --tcp | grep --quiet "127.0.0.1:8118"
 	then
 		return 0
 	fi
 
-	python3 proxy.py > /tmp/pr-reviewer-proxy.log 2>&1 &
+	python3 proxy.py > /tmp/pr-reviewer-proxy-$$.log 2>&1 &
 
 	_proxy_pid=$!
 	_proxy_started=true
@@ -894,12 +903,31 @@ function _salvage_violations {
 }
 
 function _stop_proxy {
-	if ${_proxy_started}
+	if ${_proxy_client}
 	then
-		kill ${_proxy_pid} 2> /dev/null || true
+		rm --force ${_PROXY_CLIENTS_DIR}/$$
 
-		_proxy_started=false
+		_proxy_client=false
 	fi
+
+	if ! ${_proxy_started}
+	then
+		return 0
+	fi
+
+	local client
+
+	for client in ${_PROXY_CLIENTS_DIR}/*
+	do
+		if [ -f ${client} ] && kill -0 $(basename ${client}) 2> /dev/null
+		then
+			return 0
+		fi
+	done
+
+	kill ${_proxy_pid} 2> /dev/null || true
+
+	_proxy_started=false
 }
 
 function _update_points {
