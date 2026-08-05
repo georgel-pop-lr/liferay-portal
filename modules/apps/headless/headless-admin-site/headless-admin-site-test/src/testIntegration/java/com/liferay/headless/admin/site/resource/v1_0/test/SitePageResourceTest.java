@@ -131,6 +131,7 @@ import com.liferay.portal.kernel.service.CompanyLocalServiceUtil;
 import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.TestInfo;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
@@ -3548,6 +3549,15 @@ public class SitePageResourceTest extends BaseSitePageResourceTestCase {
 			SitePage expectedSitePage, Group group, SitePage sitePage)
 		throws Exception {
 
+		return _testPutSiteSitePage(
+			expectedSitePage, group, sitePage, sitePageResource);
+	}
+
+	private SitePage _testPutSiteSitePage(
+			SitePage expectedSitePage, Group group, SitePage sitePage,
+			SitePageResource sitePageResource)
+		throws Exception {
+
 		SitePage putSitePage = sitePageResource.putSiteSitePage(
 			group.getExternalReferenceCode(),
 			sitePage.getExternalReferenceCode(), false, sitePage);
@@ -4574,45 +4584,70 @@ public class SitePageResourceTest extends BaseSitePageResourceTestCase {
 			ServiceContext serviceContext)
 		throws Exception {
 
+		String password = RandomTestUtil.randomString();
+
+		User user = UserTestUtil.addCompanyAdminUser(testCompany);
+
+		_userLocalService.updatePassword(
+			user.getUserId(), password, password, false, true);
+
+		SitePageResource userSitePageResource = SitePageResource.builder(
+		).authentication(
+			user.getEmailAddress(), password
+		).endpoint(
+			testCompany.getVirtualHostname(),
+			PortalUtil.getPortalServerPort(false), "http"
+		).locale(
+			LocaleUtil.getDefault()
+		).build();
+
 		_testPutSiteSitePageWithStagingImport(
-			serviceContext, SitePage.Type.CONTENT_PAGE);
+			serviceContext, SitePage.Type.CONTENT_PAGE, user,
+			userSitePageResource);
 		_testPutSiteSitePageWithStagingImport(
-			serviceContext, SitePage.Type.EMBEDDED_PAGE);
+			serviceContext, SitePage.Type.EMBEDDED_PAGE, user,
+			userSitePageResource);
 		_testPutSiteSitePageWithStagingImport(
-			serviceContext, SitePage.Type.LINK_TO_PAGE_PAGE);
+			serviceContext, SitePage.Type.LINK_TO_PAGE_PAGE, user,
+			userSitePageResource);
 		_testPutSiteSitePageWithStagingImport(
-			serviceContext, SitePage.Type.LINK_TO_URL_PAGE);
+			serviceContext, SitePage.Type.LINK_TO_URL_PAGE, user,
+			userSitePageResource);
 		_testPutSiteSitePageWithStagingImport(
-			serviceContext, SitePage.Type.PAGE_SET_PAGE);
+			serviceContext, SitePage.Type.PAGE_SET_PAGE, user,
+			userSitePageResource);
 		_testPutSiteSitePageWithStagingImport(
-			serviceContext, SitePage.Type.WIDGET_PAGE);
+			serviceContext, SitePage.Type.WIDGET_PAGE, user,
+			userSitePageResource);
 	}
 
 	private void _testPutSiteSitePageWithStagingImport(
-			ServiceContext serviceContext, SitePage.Type type)
+			ServiceContext serviceContext, SitePage.Type type, User user,
+			SitePageResource userSitePageResource)
 		throws Exception {
 
 		SitePage sitePage = sitePageResource.postSiteSitePage(
-			irrelevantGroup.getExternalReferenceCode(), false,
-			_getRandomSitePage(
-				ServiceContextTestUtil.getServiceContext(
-					irrelevantGroup, TestPropsValues.getUserId()),
-				type));
+			testGroup.getExternalReferenceCode(), false,
+			_getRandomSitePage(serviceContext, type));
 
 		_testPutSiteSitePageWithStagingImport(
-			null, false, false, _getRandomSitePage(serviceContext, sitePage));
+			null, false, false, _getRandomSitePage(serviceContext, sitePage),
+			userSitePageResource);
 		_testPutSiteSitePageWithStagingImport(
-			null, false, true, _getRandomSitePage(serviceContext, sitePage));
+			null, false, true, _getRandomSitePage(serviceContext, sitePage),
+			userSitePageResource);
 		_testPutSiteSitePageWithStagingImport(
-			null, true, false, _getRandomSitePage(serviceContext, sitePage));
+			null, true, false, _getRandomSitePage(serviceContext, sitePage),
+			userSitePageResource);
 		_testPutSiteSitePageWithStagingImport(
-			TestPropsValues.getUser(), true, true,
-			_getRandomSitePage(serviceContext, sitePage));
+			user, true, true, _getRandomSitePage(serviceContext, sitePage),
+			userSitePageResource);
 	}
 
 	private void _testPutSiteSitePageWithStagingImport(
 			User lastImportUser, boolean layoutImportInProcess,
-			boolean layoutStagingInProcess, SitePage sitePage)
+			boolean layoutStagingInProcess, SitePage sitePage,
+			SitePageResource userSitePageResource)
 		throws Exception {
 
 		try (SafeCloseable safeCloseable1 =
@@ -4622,7 +4657,8 @@ public class SitePageResourceTest extends BaseSitePageResourceTestCase {
 				_setExportImportThreadLocalWithSafeCloseable(
 					"_layoutStagingInProcess", layoutStagingInProcess)) {
 
-			_testPutSiteSitePage(sitePage, testGroup, sitePage);
+			_testPutSiteSitePage(
+				sitePage, testGroup, sitePage, userSitePageResource);
 
 			Layout layout =
 				_layoutLocalService.getLayoutByExternalReferenceCode(
@@ -4913,5 +4949,8 @@ public class SitePageResourceTest extends BaseSitePageResourceTestCase {
 
 	@Inject
 	private SegmentsExperienceLocalService _segmentsExperienceLocalService;
+
+	@Inject
+	private UserLocalService _userLocalService;
 
 }
