@@ -25,21 +25,21 @@ public class LastImportSettingsUtil {
 			return Collections.emptyMap();
 		}
 
+		HashMapBuilder.HashMapWrapper<String, String> hashMapWrapper =
+			HashMapBuilder.put(
+				"last-import-date", String.valueOf(System.currentTimeMillis()));
+
 		User user = UserLocalServiceUtil.fetchUser(userId);
 
-		if (user == null) {
-			return HashMapBuilder.put(
-				"last-import-date", String.valueOf(System.currentTimeMillis())
-			).build();
+		if (user != null) {
+			hashMapWrapper.put(
+				"last-import-user-name", user::getFullName
+			).put(
+				"last-import-user-uuid", user::getUuid
+			);
 		}
 
-		return HashMapBuilder.put(
-			"last-import-date", String.valueOf(System.currentTimeMillis())
-		).put(
-			"last-import-user-name", user::getFullName
-		).put(
-			"last-import-user-uuid", user::getUuid
-		).build();
+		return hashMapWrapper.build();
 	}
 
 }
