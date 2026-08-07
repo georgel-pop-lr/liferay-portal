@@ -812,25 +812,30 @@ public class FragmentEntryLinkLocalServiceImpl
 			FragmentEntryLinkTable fragmentEntryLinkTable)
 		throws PortalException {
 
-		Group group = _groupLocalService.getGroup(fragmentEntry.getGroupId());
-
 		return fragmentEntryLinkTable.fragmentEntryERC.eq(
 			fragmentEntry.getExternalReferenceCode()
 		).and(
-			Predicate.withParentheses(
-				fragmentEntryLinkTable.fragmentEntryScopeERC.eq(
-					group.getExternalReferenceCode()
-				).or(
-					Predicate.withParentheses(
-						fragmentEntryLinkTable.fragmentEntryScopeERC.isNull(
-						).and(
-							fragmentEntryLinkTable.groupId.eq(
-								group.getGroupId())
-						))
-				))
+			_getFragmentEntryGroupScopePredicate(
+				fragmentEntryLinkTable,
+				_groupLocalService.getGroup(fragmentEntry.getGroupId()))
 		).and(
 			fragmentEntryLinkTable.deleted.eq(false)
 		);
+	}
+
+	private Predicate _getFragmentEntryGroupScopePredicate(
+		FragmentEntryLinkTable fragmentEntryLinkTable, Group group) {
+
+		return Predicate.withParentheses(
+			fragmentEntryLinkTable.fragmentEntryScopeERC.eq(
+				group.getExternalReferenceCode()
+			).or(
+				Predicate.withParentheses(
+					fragmentEntryLinkTable.fragmentEntryScopeERC.isNull(
+					).and(
+						fragmentEntryLinkTable.groupId.eq(group.getGroupId())
+					))
+			));
 	}
 
 	private Predicate _getFragmentEntryLinksByFragmentEntryPredicate(
