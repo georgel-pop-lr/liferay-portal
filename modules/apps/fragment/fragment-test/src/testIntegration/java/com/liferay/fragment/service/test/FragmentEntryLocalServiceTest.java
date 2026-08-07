@@ -18,6 +18,7 @@ import com.liferay.fragment.configuration.FragmentServiceConfiguration;
 import com.liferay.fragment.constants.FragmentConstants;
 import com.liferay.fragment.exception.DuplicateFragmentEntryExternalReferenceCodeException;
 import com.liferay.fragment.exception.NoSuchEntryException;
+import com.liferay.fragment.exception.RequiredFragmentEntryException;
 import com.liferay.fragment.model.FragmentCollection;
 import com.liferay.fragment.model.FragmentEntry;
 import com.liferay.fragment.model.FragmentEntryLink;
@@ -126,11 +127,13 @@ public class FragmentEntryLocalServiceTest {
 	}
 
 	@Test
+	@TestInfo("LPD-99652")
 	public void testDeleteFragmentEntry() throws Exception {
 		_testDeleteFragmentEntry();
 		_testDeleteFragmentEntryByExternalReferenceCode();
 		_testDeleteFragmentEntryDraftByExternalReferenceCode();
 		_testDeleteFragmentEntryNonexistentByExternalReferenceCode();
+		_testDeleteFragmentEntryWithMissingLayoutFragmentEntryLink();
 	}
 
 	@Test
@@ -891,6 +894,30 @@ public class FragmentEntryLocalServiceTest {
 			NoSuchEntryException.class,
 			() -> _fragmentEntryLocalService.deleteFragmentEntry(
 				RandomTestUtil.randomString(), _group.getGroupId()));
+	}
+
+	private void _testDeleteFragmentEntryWithMissingLayoutFragmentEntryLink()
+		throws Exception {
+
+		FragmentEntry fragmentEntry = FragmentEntryTestUtil.addFragmentEntry(
+			_fragmentCollection.getFragmentCollectionId());
+
+		FragmentEntryLink fragmentEntryLink =
+			FragmentTestUtil.addFragmentEntryLink(
+				fragmentEntry, RandomTestUtil.randomLong());
+
+		Assert.assertThrows(
+			RequiredFragmentEntryException.class,
+			() -> _fragmentEntryLocalService.deleteFragmentEntry(
+				fragmentEntry.getFragmentEntryId()));
+
+		Assert.assertNotNull(
+			_fragmentEntryLocalService.fetchFragmentEntry(
+				fragmentEntry.getFragmentEntryId()));
+
+		Assert.assertNotNull(
+			_fragmentEntryLinkLocalService.fetchFragmentEntryLink(
+				fragmentEntryLink.getFragmentEntryLinkId()));
 	}
 
 	private void _testFetchFragmentEntryByFragmentEntryId() throws Exception {
