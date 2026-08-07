@@ -24,12 +24,15 @@ import com.liferay.portal.kernel.dao.search.EmptyOnClickRowChecker;
 import com.liferay.portal.kernel.dao.search.SearchContainer;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.portlet.SearchOrderByUtil;
 import com.liferay.portal.kernel.portlet.url.builder.PortletURLBuilder;
 import com.liferay.portal.kernel.service.LayoutLocalServiceUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ParamUtil;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 
@@ -39,6 +42,8 @@ import jakarta.portlet.RenderResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -364,6 +369,9 @@ public class FragmentEntryLinkDisplayContext {
 						fragmentEntry));
 		}
 
+		_logMissingLayoutPlids(
+			fragmentEntry, fragmentEntryLinksSearchContainer.getResults());
+
 		_searchContainer = fragmentEntryLinksSearchContainer;
 
 		return _searchContainer;
@@ -485,6 +493,37 @@ public class FragmentEntryLinkDisplayContext {
 
 		return _themeDisplay;
 	}
+
+	private void _logMissingLayoutPlids(
+		FragmentEntry fragmentEntry,
+		List<FragmentEntryLink> fragmentEntryLinks) {
+
+		if (_log.isWarnEnabled()) {
+			List<Long> missingLayoutPlids = new ArrayList<>();
+
+			for (FragmentEntryLink fragmentEntryLink : fragmentEntryLinks) {
+				Layout layout = LayoutLocalServiceUtil.fetchLayout(
+					fragmentEntryLink.getPlid());
+
+				if (layout == null) {
+					missingLayoutPlids.add(fragmentEntryLink.getPlid());
+				}
+			}
+
+			if (!missingLayoutPlids.isEmpty()) {
+				_log.warn(
+					StringBundler.concat(
+						"Fragment entry ",
+						fragmentEntry.getExternalReferenceCode(),
+						" references missing layouts ",
+						StringUtil.merge(
+							missingLayoutPlids, StringPool.COMMA_AND_SPACE)));
+			}
+		}
+	}
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		FragmentEntryLinkDisplayContext.class);
 
 	private Long _fragmentCollectionId;
 	private FragmentEntry _fragmentEntry;
