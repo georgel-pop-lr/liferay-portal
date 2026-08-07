@@ -36,6 +36,7 @@ import com.liferay.portal.kernel.util.OrderByComparator;
 import java.io.Serializable;
 
 import java.util.List;
+import java.util.Map;
 
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -466,6 +467,11 @@ public interface FragmentEntryLinkLocalService
 			int layoutPageTemplateType)
 		throws PortalException;
 
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public Map<String, List<Long>> getMissingLayoutPlidsMap(
+			long fragmentCollectionId)
+		throws PortalException;
+
 	/**
 	 * Returns the OSGi service identifier.
 	 *
@@ -538,4 +544,4 @@ public interface FragmentEntryLinkLocalService
 		throws E;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:1523302530
+// LIFERAY-SERVICE-BUILDER-HASH:2137562996

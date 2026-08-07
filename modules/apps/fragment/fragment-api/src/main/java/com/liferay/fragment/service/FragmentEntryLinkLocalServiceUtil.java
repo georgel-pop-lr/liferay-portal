@@ -16,6 +16,7 @@ import com.liferay.portal.kernel.util.OrderByComparator;
 import java.io.Serializable;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Provides the local service utility for FragmentEntryLink. This utility wraps
@@ -634,6 +635,13 @@ public class FragmentEntryLinkLocalServiceUtil {
 				groupId, fragmentEntry, layoutPageTemplateType);
 	}
 
+	public static Map<String, List<Long>> getMissingLayoutPlidsMap(
+			long fragmentCollectionId)
+		throws PortalException {
+
+		return getService().getMissingLayoutPlidsMap(fragmentCollectionId);
+	}
+
 	/**
 	 * Returns the OSGi service identifier.
 	 *
@@ -728,4 +736,4 @@ public class FragmentEntryLinkLocalServiceUtil {
 			FragmentEntryLinkLocalService.class);
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1331238008
+// LIFERAY-SERVICE-BUILDER-HASH:1306778833
