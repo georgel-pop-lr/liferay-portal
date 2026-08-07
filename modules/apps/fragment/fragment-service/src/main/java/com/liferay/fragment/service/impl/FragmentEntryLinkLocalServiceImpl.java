@@ -13,6 +13,7 @@ import com.liferay.fragment.model.FragmentCollection;
 import com.liferay.fragment.model.FragmentEntry;
 import com.liferay.fragment.model.FragmentEntryLink;
 import com.liferay.fragment.model.FragmentEntryLinkTable;
+import com.liferay.fragment.model.FragmentEntryTable;
 import com.liferay.fragment.processor.DefaultFragmentEntryProcessorContext;
 import com.liferay.fragment.processor.FragmentEntryProcessorContext;
 import com.liferay.fragment.processor.FragmentEntryProcessorRegistry;
@@ -41,6 +42,7 @@ import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.CompanyConstants;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.LayoutTable;
@@ -68,8 +70,11 @@ import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -579,6 +584,69 @@ public class FragmentEntryLinkLocalServiceImpl
 				DSLQueryFactoryUtil.countDistinct(
 					FragmentEntryLinkTable.INSTANCE.plid),
 				layoutPageTemplateType, false, groupId));
+	}
+
+	@Override
+	public Map<String, List<Long>> getMissingLayoutPlidsMap(
+			long fragmentCollectionId)
+		throws PortalException {
+
+		Map<String, List<Long>> missingLayoutPlidsMap = new HashMap<>();
+
+		FragmentCollection fragmentCollection =
+			_fragmentCollectionPersistence.fetchByPrimaryKey(
+				fragmentCollectionId);
+
+		if ((fragmentCollection == null) ||
+			(fragmentCollection.getGroupId() == CompanyConstants.SYSTEM)) {
+
+			return missingLayoutPlidsMap;
+		}
+
+		List<Object[]> results = fragmentEntryLinkPersistence.dslQuery(
+			DSLQueryFactoryUtil.selectDistinct(
+				FragmentEntryLinkTable.INSTANCE.fragmentEntryERC,
+				FragmentEntryLinkTable.INSTANCE.plid
+			).from(
+				FragmentEntryLinkTable.INSTANCE
+			).innerJoinON(
+				FragmentEntryTable.INSTANCE,
+				FragmentEntryTable.INSTANCE.externalReferenceCode.eq(
+					FragmentEntryLinkTable.INSTANCE.fragmentEntryERC
+				).and(
+					FragmentEntryTable.INSTANCE.groupId.eq(
+						fragmentCollection.getGroupId())
+				)
+			).where(
+				FragmentEntryTable.INSTANCE.fragmentCollectionId.eq(
+					fragmentCollectionId
+				).and(
+					_getFragmentEntryGroupScopePredicate(
+						FragmentEntryLinkTable.INSTANCE,
+						_groupLocalService.getGroup(
+							fragmentCollection.getGroupId()))
+				).and(
+					FragmentEntryLinkTable.INSTANCE.deleted.eq(false)
+				).and(
+					FragmentEntryLinkTable.INSTANCE.plid.notIn(
+						DSLQueryFactoryUtil.select(
+							LayoutTable.INSTANCE.plid
+						).from(
+							LayoutTable.INSTANCE
+						))
+				)
+			).orderBy(
+				FragmentEntryLinkTable.INSTANCE.plid.ascending()
+			));
+
+		for (Object[] result : results) {
+			List<Long> plids = missingLayoutPlidsMap.computeIfAbsent(
+				(String)result[0], fragmentEntryERC -> new ArrayList<>());
+
+			plids.add((Long)result[1]);
+		}
+
+		return missingLayoutPlidsMap;
 	}
 
 	@Override
