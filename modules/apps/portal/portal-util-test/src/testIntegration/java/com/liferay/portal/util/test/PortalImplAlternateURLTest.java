@@ -57,6 +57,7 @@ import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.PrefsPropsUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.PropsValues;
+import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.TreeMapBuilder;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
@@ -427,6 +428,50 @@ public class PortalImplAlternateURLTest {
 			"test.com",
 			Arrays.asList(LocaleUtil.US, LocaleUtil.SPAIN, LocaleUtil.GERMANY),
 			LocaleUtil.SPAIN, LocaleUtil.US, "/en");
+	}
+
+	@Test
+	@TestInfo("LPD-99541")
+	public void testChangeLanguageURLs() throws Exception {
+		TestPropsUtil.set(PropsKeys.LOCALE_PREPEND_FRIENDLY_URL_STYLE, "1");
+
+		_group = GroupTestUtil.updateDisplaySettings(
+			_group.getGroupId(), Arrays.asList(LocaleUtil.SPAIN, LocaleUtil.US),
+			LocaleUtil.US);
+
+		Layout layout = LayoutTestUtil.addTypePortletLayout(
+			_group.getGroupId(), RandomTestUtil.randomString(), false);
+
+		String canonicalURL = _generateURL(
+			"localhost", StringPool.BLANK, _group.getFriendlyURL(),
+			layout.getFriendlyURL());
+
+		ThemeDisplay themeDisplay = _getThemeDisplay(_group, canonicalURL);
+
+		Map<Locale, String> alternateURLs = _portal.getAlternateURLs(
+			canonicalURL, themeDisplay, layout,
+			SetUtil.fromArray(LocaleUtil.SPAIN, LocaleUtil.US));
+
+		String spanishURL = _generateURL(
+			"localhost", "/es", _group.getFriendlyURL(),
+			layout.getFriendlyURL());
+
+		Assert.assertEquals(canonicalURL, alternateURLs.get(LocaleUtil.US));
+		Assert.assertEquals(spanishURL, alternateURLs.get(LocaleUtil.SPAIN));
+
+		Map<Locale, String> changeLanguageURLs = _portal.getChangeLanguageURLs(
+			canonicalURL, themeDisplay, layout,
+			SetUtil.fromArray(LocaleUtil.SPAIN, LocaleUtil.US));
+
+		String englishChangeLanguageURL = _generateURL(
+			"localhost", "/en", _group.getFriendlyURL(),
+			layout.getFriendlyURL());
+
+		Assert.assertEquals(
+			englishChangeLanguageURL, changeLanguageURLs.get(LocaleUtil.US));
+
+		Assert.assertEquals(
+			spanishURL, changeLanguageURLs.get(LocaleUtil.SPAIN));
 	}
 
 	@Test
