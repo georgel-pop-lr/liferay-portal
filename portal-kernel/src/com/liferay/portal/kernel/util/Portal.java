@@ -382,6 +382,11 @@ public interface Portal {
 	 */
 	public String getCDNHostHttps(long companyId);
 
+	public Map<Locale, String> getChangeLanguageURLs(
+			String canonicalURL, ThemeDisplay themeDisplay, Layout layout,
+			Set<Locale> availableLocales)
+		throws PortalException;
+
 	/**
 	 * Returns the fully qualified name of the class from its ID.
 	 *

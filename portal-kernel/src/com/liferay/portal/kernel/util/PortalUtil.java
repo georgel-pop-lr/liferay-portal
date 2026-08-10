@@ -483,6 +483,15 @@ public class PortalUtil {
 		return _portal.getCDNHostHttps(companyId);
 	}
 
+	public static Map<Locale, String> getChangeLanguageURLs(
+			String canonicalURL, ThemeDisplay themeDisplay, Layout layout,
+			Set<Locale> availableLocales)
+		throws PortalException {
+
+		return _portal.getChangeLanguageURLs(
+			canonicalURL, themeDisplay, layout, availableLocales);
+	}
+
 	/**
 	 * Returns the fully qualified name of the class from its ID.
 	 *
