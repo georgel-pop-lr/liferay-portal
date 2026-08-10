@@ -62,15 +62,15 @@ Start with `review` or `--dry-run check` on a single pull request to see the out
 
 It reviews the diff from the merge base with `_BASE_BRANCH` to the given ref, using the same filtered diff, sandbox, and proxy as `review`, and prints the same JSON. It does not fetch, comment, or touch any remote. Overriding the configuration variables works the same way, for example `_MODELS='(sonnet-4.6)' ./run_local.sh`.
 
-## The brian-review skill
+## The code-review-liferay-pr skill
 
-For interactive use there is a Claude Code skill, `brian-review`, that wraps the reviewer. From a Claude Code session in a `liferay-portal` checkout, run it with a pull request URL.
+For interactive use there is a Claude Code skill, `code-review-liferay-pr`, that wraps the reviewer. From a Claude Code session in a `liferay-portal` checkout, run it with a pull request URL.
 
 ```
-/brian-review https://github.com/<org>/liferay-portal/pull/<number>
+/code-review-liferay-pr https://github.com/<org>/liferay-portal/pull/<number>
 ```
 
-The skill takes the organization from the URL and works against any `liferay-portal` repository, not only the stability team, by overriding `_REPO` and `_GIT_REMOTE` for that run. Before reviewing it confirms the reviewer and the setup are in place, and when either is missing it asks whether to fetch the `brian-review` branch or run `setup.sh` for you rather than only printing instructions. When the pull request was already reviewed it reviews again only when there are new commits since the last comment, and otherwise asks first. Like the `review` command it reviews and comments only, and never closes a pull request.
+The skill takes the organization from the URL and works against any `liferay-portal` repository, not only the stability team, by overriding `_REPO` and `_GIT_REMOTE` for that run. Before reviewing it confirms the reviewer and the setup are in place, and when either is missing it asks whether to fetch the `code-review-liferay` branch or run `setup.sh` for you rather than only printing instructions. When the pull request was already reviewed it reviews again only when there are new commits since the last comment, and otherwise asks first. Like the `review` command it reviews and comments only, and never closes a pull request.
 
 ## The pr-check Review validation
 
@@ -84,7 +84,7 @@ When you run the looping `check` command, the reviewer also closes any open pull
 
 ## Configuration
 
-The settings are the variables in the block at the bottom of `run.sh`. Each one reads an environment variable of the same name and falls back to the default below, so you can override any of them for a single run without editing the file. This is how the `brian-review` skill points the reviewer at a different organization.
+The settings are the variables in the block at the bottom of `run.sh`. Each one reads an environment variable of the same name and falls back to the default below, so you can override any of them for a single run without editing the file. This is how the `code-review-liferay-pr` skill points the reviewer at a different organization.
 
 ```
 _REPO=other-org/liferay-portal _GIT_REMOTE=other ./run.sh review 123

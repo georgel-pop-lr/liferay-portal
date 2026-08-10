@@ -2,12 +2,12 @@
 
 allowed-tools: [Bash]
 argument-hint: "<pr-url>"
-description: Review any liferay-portal PR against Brian Chan's rules with the pr-reviewer bot and post the verdict comment.
-name: brian-review
+description: Review any liferay-portal PR against Brian Chan's rules with Liferay's pr-reviewer bot and post the verdict comment. Use when Georgel gives a PR URL to brian-review, brian-check, or code-review-liferay; for a checked-out branch with no PR use the global code-review-liferay skill.
+name: code-review-liferay-pr
 
 ---
 
-# Brian Review
+# Liferay code review (pull request)
 
 Review one pull request against Brian Chan's style rules and post the verdict as a comment, the same way the `pr-reviewer` bot does. The skill drives `pr-reviewer/run.sh`: it fetches the pull request, runs Claude against the style guide and the numbered rules inside the bubblewrap sandbox, and posts a comment estimating the chance that Brian would reject the pull request. It works against any `liferay-portal` repository, taking the organization from the pull request URL. The skill reviews and comments only. It never closes a pull request.
 
@@ -21,11 +21,11 @@ Run every step from the repository root, `repo_root=$(git rev-parse --show-tople
 
 ### 1. Ensure the reviewer is present
 
-The reviewer lives on the `brian-review` branch, `https://github.com/georgel-pop-lr/liferay-portal/tree/brian-review`, which carries the latest fixes: `run_local.sh`, a per-run output directory, and the proxy client refcount. It started as the stability team's `pr-review` branch (`https://github.com/liferay-stability-team/liferay-portal/tree/pr-review`), so fetch that one only to pick up their changes, never to bootstrap a checkout, since it predates those fixes. When `${repo_root}/pr-reviewer/run.sh` is missing, do not just report it. Ask the user **"The pr-reviewer harness is not in this checkout. Should I fetch it from the brian-review branch? (yes/no)"**. On yes, run the commands below and continue. On no, stop.
+The reviewer lives on the `code-review-liferay` branch, `https://github.com/georgel-pop-lr/liferay-portal/tree/code-review-liferay`, which carries the latest fixes: `run_local.sh`, a per-run output directory, and the proxy client refcount. It started as the stability team's `pr-review` branch (`https://github.com/liferay-stability-team/liferay-portal/tree/pr-review`), so fetch that one only to pick up their changes, never to bootstrap a checkout, since it predates those fixes. When `${repo_root}/pr-reviewer/run.sh` is missing, do not just report it. Ask the user **"The pr-reviewer harness is not in this checkout. Should I fetch it from the code-review-liferay branch? (yes/no)"**. On yes, run the commands below and continue. On no, stop.
 
 ```bash
-git fetch git@github.com:georgel-pop-lr/liferay-portal.git brian-review
-git checkout FETCH_HEAD -- pr-reviewer .claude/skills/brian-review
+git fetch git@github.com:georgel-pop-lr/liferay-portal.git code-review-liferay
+git checkout FETCH_HEAD -- pr-reviewer .claude/skills/code-review-liferay-pr
 ```
 
 ### 2. Ensure setup is done
@@ -85,7 +85,7 @@ remote=$(git remote --verbose | awk -v repo="${org}/liferay-portal([.]git)?\$" '
 
 if [ -z "${remote}" ]
 then
-	remote="brian-review-${org}"
+	remote="code-review-liferay-${org}"
 
 	git remote add "${remote}" "git@github.com:${org}/liferay-portal.git" 2> /dev/null || \
 		git remote set-url "${remote}" "git@github.com:${org}/liferay-portal.git"
