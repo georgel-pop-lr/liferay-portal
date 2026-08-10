@@ -5,7 +5,9 @@
 
 package com.liferay.site.navigation.taglib.servlet.taglib;
 
+import com.liferay.petra.string.CharPool;
 import com.liferay.petra.string.StringBundler;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -14,6 +16,7 @@ import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.portlet.FriendlyURLResolverRegistryUtil;
 import com.liferay.portal.kernel.portletdisplaytemplate.PortletDisplayTemplateManagerUtil;
 import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
+import com.liferay.portal.kernel.service.PortletLocalServiceUtil;
 import com.liferay.portal.kernel.servlet.taglib.ui.LanguageEntry;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
@@ -200,6 +203,24 @@ public class LanguageTag extends IncludeTag {
 		return SKIP_BODY;
 	}
 
+	private String _addMappingPart(String url, String mappingPart) {
+		if (Validator.isNull(mappingPart)) {
+			return url;
+		}
+
+		String queryString = StringPool.BLANK;
+
+		int index = url.indexOf(CharPool.QUESTION);
+
+		if (index != -1) {
+			queryString = url.substring(index);
+
+			url = url.substring(0, index);
+		}
+
+		return url + mappingPart + queryString;
+	}
+
 	private Map<Locale, String> _getChangeLanguageURLs(
 		Layout layout, Collection<Locale> locales, ThemeDisplay themeDisplay) {
 
@@ -215,6 +236,13 @@ public class LanguageTag extends IncludeTag {
 		}
 
 		try {
+			String mappingPart = _getMappingPart(
+				currentCompleteURL, layout, themeDisplay);
+
+			if (mappingPart == null) {
+				return Collections.emptyMap();
+			}
+
 			Map<Locale, String> portalChangeLanguageURLs =
 				PortalUtil.getChangeLanguageURLs(
 					PortalUtil.getCanonicalURL(
@@ -252,7 +280,8 @@ public class LanguageTag extends IncludeTag {
 					}
 				}
 
-				changeLanguageURLs.put(locale, changeLanguageURL);
+				changeLanguageURLs.put(
+					locale, _addMappingPart(changeLanguageURL, mappingPart));
 			}
 
 			return changeLanguageURLs;
@@ -423,6 +452,52 @@ public class LanguageTag extends IncludeTag {
 				WebKeys.THEME_DISPLAY);
 
 		return LanguageUtil.getAvailableLocales(themeDisplay.getSiteGroupId());
+	}
+
+	private String _getMappingPart(
+		String url, Layout layout, ThemeDisplay themeDisplay) {
+
+		String path = url;
+
+		int index = path.indexOf(CharPool.QUESTION);
+
+		if (index != -1) {
+			path = path.substring(0, index);
+		}
+
+		String layoutFriendlyURL = themeDisplay.getLayoutFriendlyURL(layout);
+
+		for (index = path.lastIndexOf(layoutFriendlyURL); index != -1;
+			 index = path.lastIndexOf(layoutFriendlyURL, index - 1)) {
+
+			String mappingPart =
+				PortletLocalServiceUtil.getPortletFriendlyURLMappingPart(
+					path.substring(index + layoutFriendlyURL.length()));
+
+			if (Validator.isNotNull(mappingPart)) {
+				return mappingPart;
+			}
+		}
+
+		Group group = layout.getGroup();
+
+		String groupFriendlyURL = group.getFriendlyURL();
+
+		index = path.indexOf(groupFriendlyURL);
+
+		if (index != -1) {
+			return PortletLocalServiceUtil.getPortletFriendlyURLMappingPart(
+				path.substring(index + groupFriendlyURL.length()));
+		}
+
+		if (Validator.isNotNull(
+				PortletLocalServiceUtil.getPortletFriendlyURLMappingPart(
+					path))) {
+
+			return null;
+		}
+
+		return StringPool.BLANK;
 	}
 
 	private String _getNamespacedName() {
