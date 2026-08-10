@@ -15,7 +15,6 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.VirtualLayoutConstants;
-import com.liferay.portal.kernel.portlet.FriendlyURLMapper;
 import com.liferay.portal.kernel.portlet.FriendlyURLResolverRegistryUtil;
 import com.liferay.portal.kernel.portlet.LayoutFriendlyURLSeparatorComposite;
 import com.liferay.portal.kernel.service.PortletLocalServiceUtil;
@@ -39,7 +38,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
-import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -208,34 +206,24 @@ public class UpdateLanguageAction implements Action {
 		}
 
 		if (currentLayoutFriendlyURLIndex != -1) {
-			int fromIndex =
-				currentLayoutFriendlyURLIndex +
-					currentLayoutFriendlyURL.length();
+			mappingPart =
+				PortletLocalServiceUtil.getPortletFriendlyURLMappingPart(
+					layoutURL.substring(
+						currentLayoutFriendlyURLIndex +
+							currentLayoutFriendlyURL.length()));
+		}
+		else {
+			Group group = layout.getGroup();
 
-			List<FriendlyURLMapper> friendlyURLMappers =
-				PortletLocalServiceUtil.getFriendlyURLMappers();
+			String groupFriendlyURL = group.getFriendlyURL();
 
-			for (FriendlyURLMapper friendlyURLMapper : friendlyURLMappers) {
-				if (friendlyURLMapper.isCheckMappingWithPrefix()) {
-					continue;
-				}
+			int groupFriendlyURLIndex = layoutURL.indexOf(groupFriendlyURL);
 
-				String mappingPath =
-					StringPool.SLASH + friendlyURLMapper.getMapping();
-
-				int mappingIndex = layoutURL.indexOf(mappingPath, fromIndex);
-
-				if (mappingIndex == -1) {
-					continue;
-				}
-
-				int mappingEndIndex = mappingIndex + mappingPath.length();
-
-				if ((mappingEndIndex == layoutURL.length()) ||
-					(layoutURL.charAt(mappingEndIndex) == CharPool.SLASH)) {
-
-					mappingPart = layoutURL.substring(mappingIndex);
-				}
+			if (groupFriendlyURLIndex != -1) {
+				mappingPart =
+					PortletLocalServiceUtil.getPortletFriendlyURLMappingPart(
+						layoutURL.substring(
+							groupFriendlyURLIndex + groupFriendlyURL.length()));
 			}
 		}
 
