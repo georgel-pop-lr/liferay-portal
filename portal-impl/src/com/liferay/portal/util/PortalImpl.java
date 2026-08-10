@@ -7509,6 +7509,10 @@ public class PortalImpl implements Portal {
 				alternateURL = canonicalURLPrefix.concat(alternateURLSuffix);
 			}
 
+			if (Validator.isNull(alternateURLSuffix)) {
+				alternateURLSuffix = canonicalURLSuffix;
+			}
+
 			String i18NPath = _buildI18NPath(
 				languageId, locale, themeDisplay.getSiteGroup());
 
