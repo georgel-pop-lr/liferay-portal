@@ -308,6 +308,33 @@ public class PortalImplAlternateURLTest {
 	}
 
 	@Test
+	@TestInfo("LPD-99541")
+	public void testAlternateURLsWithoutLayoutFriendlyURL() throws Exception {
+		TestPropsUtil.set(PropsKeys.LOCALE_PREPEND_FRIENDLY_URL_STYLE, "1");
+
+		_group = GroupTestUtil.updateDisplaySettings(
+			_group.getGroupId(), Arrays.asList(LocaleUtil.SPAIN, LocaleUtil.US),
+			LocaleUtil.US);
+
+		Layout layout = LayoutTestUtil.addTypePortletLayout(
+			_group.getGroupId(), RandomTestUtil.randomString(), false);
+
+		String canonicalURL = _generateURL(
+			"localhost", StringPool.BLANK, _group.getFriendlyURL(),
+			StringPool.SLASH);
+
+		Map<Locale, String> alternateURLs = _portal.getAlternateURLs(
+			canonicalURL, _getThemeDisplay(_group, canonicalURL), layout,
+			SetUtil.fromArray(LocaleUtil.SPAIN, LocaleUtil.US));
+
+		String alternateURL = _generateURL(
+			"localhost", "/es", _group.getFriendlyURL(), StringPool.SLASH);
+
+		Assert.assertEquals(canonicalURL, alternateURLs.get(LocaleUtil.US));
+		Assert.assertEquals(alternateURL, alternateURLs.get(LocaleUtil.SPAIN));
+	}
+
+	@Test
 	public void testAlternateURLWithAssetDisplayPageEntry() throws Exception {
 		Collection<Locale> availableLocales = Arrays.asList(
 			LocaleUtil.US, LocaleUtil.SPAIN, LocaleUtil.GERMANY);
