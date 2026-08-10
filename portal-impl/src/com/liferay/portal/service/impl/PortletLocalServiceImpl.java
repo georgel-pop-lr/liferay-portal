@@ -898,6 +898,30 @@ public class PortletLocalServiceImpl extends PortletLocalServiceBaseImpl {
 
 	@Override
 	@Transactional(enabled = false)
+	public String getPortletFriendlyURLMappingPart(String url) {
+		if (Validator.isNull(url)) {
+			return StringPool.BLANK;
+		}
+
+		PortletFriendlyURLMapperMatch portletFriendlyURLMapperMatch =
+			getPortletFriendlyURLMapperMatch(url);
+
+		if (portletFriendlyURLMapperMatch == null) {
+			return StringPool.BLANK;
+		}
+
+		FriendlyURLMapper friendlyURLMapper =
+			portletFriendlyURLMapperMatch.getFriendlyURLMapper();
+
+		if (friendlyURLMapper.isCheckMappingWithPrefix()) {
+			return StringPool.BLANK;
+		}
+
+		return url.substring(portletFriendlyURLMapperMatch.getPosition());
+	}
+
+	@Override
+	@Transactional(enabled = false)
 	public List<Portlet> getPortlets() {
 		return ListUtil.fromMapValues(_portletsMap);
 	}
