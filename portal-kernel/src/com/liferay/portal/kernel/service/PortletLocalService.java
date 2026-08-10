@@ -316,6 +316,9 @@ public interface PortletLocalService
 		String url);
 
 	@Transactional(enabled = false)
+	public String getPortletFriendlyURLMappingPart(String url);
+
+	@Transactional(enabled = false)
 	public List<Portlet> getPortlets();
 
 	/**
@@ -398,4 +401,4 @@ public interface PortletLocalService
 	public void visitPortlets(long companyId, Consumer<Portlet> consumer);
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:705430672
+// LIFERAY-SERVICE-BUILDER-HASH:1610591780

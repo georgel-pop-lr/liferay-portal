@@ -375,6 +375,10 @@ public class PortletLocalServiceUtil {
 		return getService().getPortletFriendlyURLMapperMatch(url);
 	}
 
+	public static String getPortletFriendlyURLMappingPart(String url) {
+		return getService().getPortletFriendlyURLMappingPart(url);
+	}
+
 	public static List<Portlet> getPortlets() {
 		return getService().getPortlets();
 	}
@@ -498,4 +502,4 @@ public class PortletLocalServiceUtil {
 	private static volatile PortletLocalService _service;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:823056039
+// LIFERAY-SERVICE-BUILDER-HASH:-2093949445

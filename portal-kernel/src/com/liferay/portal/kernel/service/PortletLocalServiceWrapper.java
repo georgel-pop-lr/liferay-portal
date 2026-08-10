@@ -447,6 +447,11 @@ public class PortletLocalServiceWrapper
 	}
 
 	@Override
+	public String getPortletFriendlyURLMappingPart(String url) {
+		return _portletLocalService.getPortletFriendlyURLMappingPart(url);
+	}
+
+	@Override
 	public java.util.List<com.liferay.portal.kernel.model.Portlet>
 		getPortlets() {
 
@@ -607,4 +612,4 @@ public class PortletLocalServiceWrapper
 	private PortletLocalService _portletLocalService;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:751490583
+// LIFERAY-SERVICE-BUILDER-HASH:-665980387
