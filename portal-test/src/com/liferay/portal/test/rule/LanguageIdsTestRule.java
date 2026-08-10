@@ -12,8 +12,12 @@ import com.liferay.portal.kernel.test.util.CompanyTestUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.PrefsPropsUtil;
+import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.PropsValues;
 import com.liferay.portal.kernel.util.StringUtil;
+
+import jakarta.portlet.PortletPreferences;
 
 import org.junit.runner.Description;
 
@@ -35,9 +39,16 @@ public class LanguageIdsTestRule extends ClassTestRule<Void> {
 			return;
 		}
 
-		_setCompanyLocales(
-			_originalAvailableLanguageIds, _originalDefaultLanguageId,
-			_originalLocalesEnabled);
+		try {
+			_setCompanyLocales(
+				_originalAvailableLanguageIds, _originalDefaultLanguageId,
+				_originalLocalesEnabled);
+		}
+		finally {
+			if (_originalAvailableLanguageIds == null) {
+				_unsetCompanyLocales();
+			}
+		}
 	}
 
 	@Override
@@ -48,8 +59,12 @@ public class LanguageIdsTestRule extends ClassTestRule<Void> {
 			return null;
 		}
 
-		_originalAvailableLanguageIds = StringUtil.merge(
-			LocaleUtil.toLanguageIds(LanguageUtil.getAvailableLocales()));
+		PortletPreferences portletPreferences = PrefsPropsUtil.getPreferences(
+			PortalUtil.getDefaultCompanyId());
+
+		_originalAvailableLanguageIds = portletPreferences.getValue(
+			PropsKeys.LOCALES, null);
+
 		_originalDefaultLanguageId = LocaleUtil.toLanguageId(
 			LocaleUtil.getDefault());
 		_originalLocalesEnabled = PropsValues.LOCALES_ENABLED;
@@ -70,11 +85,28 @@ public class LanguageIdsTestRule extends ClassTestRule<Void> {
 
 		LanguageUtil.init();
 
+		if (availableLanguageIds == null) {
+			availableLanguageIds = StringUtil.merge(localesEnabled);
+		}
+
 		CompanyTestUtil.resetCompanyLocales(
 			PortalUtil.getDefaultCompanyId(), availableLanguageIds,
 			defaultLanguageId);
 
 		PropsValues.LOCALES_ENABLED = localesEnabled;
+	}
+
+	private void _unsetCompanyLocales() throws Exception {
+		long companyId = PortalUtil.getDefaultCompanyId();
+
+		PortletPreferences portletPreferences = PrefsPropsUtil.getPreferences(
+			companyId);
+
+		portletPreferences.reset(PropsKeys.LOCALES);
+
+		portletPreferences.store();
+
+		LanguageUtil.resetAvailableLocales(companyId);
 	}
 
 	private String _originalAvailableLanguageIds;
