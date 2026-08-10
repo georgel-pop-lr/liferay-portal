@@ -5,9 +5,13 @@
 
 package com.liferay.site.navigation.taglib.servlet.taglib;
 
+import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.language.LanguageUtil;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.portlet.FriendlyURLResolverRegistryUtil;
 import com.liferay.portal.kernel.portletdisplaytemplate.PortletDisplayTemplateManagerUtil;
 import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.servlet.taglib.ui.LanguageEntry;
@@ -19,6 +23,8 @@ import com.liferay.portal.kernel.util.HttpComponentsUtil;
 import com.liferay.portal.kernel.util.JavaConstants;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.PrefsPropsUtil;
+import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.site.navigation.taglib.internal.servlet.ServletContextUtil;
@@ -36,11 +42,14 @@ import jakarta.servlet.jsp.PageContext;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.NavigableMap;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -191,6 +200,76 @@ public class LanguageTag extends IncludeTag {
 		return SKIP_BODY;
 	}
 
+	private Map<Locale, String> _getChangeLanguageURLs(
+		Layout layout, Collection<Locale> locales, ThemeDisplay themeDisplay) {
+
+		if (layout == null) {
+			return Collections.emptyMap();
+		}
+
+		String currentCompleteURL = PortalUtil.getCurrentCompleteURL(
+			getRequest());
+
+		if (_hasRedirectParameter(currentCompleteURL)) {
+			return Collections.emptyMap();
+		}
+
+		try {
+			Map<Locale, String> portalChangeLanguageURLs =
+				PortalUtil.getChangeLanguageURLs(
+					PortalUtil.getCanonicalURL(
+						currentCompleteURL, themeDisplay, layout,
+						!_hasFriendlyURLResolverSeparator(currentCompleteURL),
+						true),
+					themeDisplay, layout, new HashSet<>(locales));
+
+			String portalURL = themeDisplay.getPortalURL();
+
+			NavigableMap<String, String> virtualHostnames =
+				PortalUtil.getVirtualHostnames(themeDisplay.getLayoutSet());
+
+			Map<Locale, String> changeLanguageURLs = new HashMap<>();
+
+			for (Map.Entry<Locale, String> entry :
+					portalChangeLanguageURLs.entrySet()) {
+
+				Locale locale = entry.getKey();
+				String changeLanguageURL = entry.getValue();
+
+				if (changeLanguageURL.startsWith(portalURL)) {
+					changeLanguageURL = changeLanguageURL.substring(
+						portalURL.length());
+				}
+				else {
+					String virtualHostnameLanguageId = virtualHostnames.get(
+						HttpComponentsUtil.getDomain(changeLanguageURL));
+
+					if (!Objects.equals(
+							virtualHostnameLanguageId,
+							LocaleUtil.toLanguageId(locale))) {
+
+						continue;
+					}
+				}
+
+				changeLanguageURLs.put(locale, changeLanguageURL);
+			}
+
+			return changeLanguageURLs;
+		}
+		catch (Exception exception) {
+			if (_log.isWarnEnabled()) {
+				_log.warn(
+					StringBundler.concat(
+						"Unable to build the language selector localized URLs ",
+						"for \"", currentCompleteURL, "\""),
+					exception);
+			}
+
+			return Collections.emptyMap();
+		}
+	}
+
 	private long _getDisplayStyleGroupId() {
 		HttpServletRequest httpServletRequest = getRequest();
 
@@ -273,28 +352,51 @@ public class LanguageTag extends IncludeTag {
 			}
 		}
 
-		Locale currentLocale = null;
+		HttpServletRequest httpServletRequest = getRequest();
+
+		ThemeDisplay themeDisplay =
+			(ThemeDisplay)httpServletRequest.getAttribute(
+				WebKeys.THEME_DISPLAY);
+
+		Locale currentLocale = themeDisplay.getLocale();
 
 		if (Validator.isNotNull(_languageId)) {
 			currentLocale = LocaleUtil.fromLanguageId(_languageId);
 		}
-		else {
-			HttpServletRequest httpServletRequest = getRequest();
 
-			ThemeDisplay themeDisplay =
-				(ThemeDisplay)httpServletRequest.getAttribute(
-					WebKeys.THEME_DISPLAY);
+		boolean useChangeLanguageURLs = false;
 
-			currentLocale = themeDisplay.getLocale();
+		if (Validator.isNull(_formAction) && !themeDisplay.isSignedIn()) {
+			int localePrependFriendlyURLStyle = PrefsPropsUtil.getInteger(
+				themeDisplay.getCompanyId(),
+				PropsKeys.LOCALE_PREPEND_FRIENDLY_URL_STYLE);
+
+			if (localePrependFriendlyURLStyle != 0) {
+				useChangeLanguageURLs = true;
+			}
 		}
+
+		Map<Locale, String> changeLanguageURLs = null;
 
 		for (Locale locale : locales) {
 			boolean disabled = false;
 			String url = null;
 
 			if (!LocaleUtil.equals(locale, currentLocale)) {
-				url = HttpComponentsUtil.setParameter(
-					formAction, parameterName, LocaleUtil.toLanguageId(locale));
+				if (useChangeLanguageURLs && (changeLanguageURLs == null)) {
+					changeLanguageURLs = _getChangeLanguageURLs(
+						themeDisplay.getLayout(), locales, themeDisplay);
+				}
+
+				if (changeLanguageURLs != null) {
+					url = changeLanguageURLs.get(locale);
+				}
+
+				if (Validator.isNull(url)) {
+					url = HttpComponentsUtil.setParameter(
+						formAction, parameterName,
+						LocaleUtil.toLanguageId(locale));
+				}
 			}
 			else if (!displayCurrentLocale) {
 				disabled = true;
@@ -349,7 +451,34 @@ public class LanguageTag extends IncludeTag {
 		return name;
 	}
 
+	private boolean _hasFriendlyURLResolverSeparator(String url) {
+		for (String urlSeparator :
+				FriendlyURLResolverRegistryUtil.getURLSeparators()) {
+
+			if (url.contains(urlSeparator)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private boolean _hasRedirectParameter(String url) {
+		for (String parameterName :
+				HttpComponentsUtil.getParameterNames(
+					HttpComponentsUtil.getQueryString(url))) {
+
+			if (parameterName.endsWith("redirect")) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	private static final String _PAGE = "/language/page.jsp";
+
+	private static final Log _log = LogFactoryUtil.getLog(LanguageTag.class);
 
 	private String _ddmTemplateGroupKey;
 	private String _ddmTemplateKey;
