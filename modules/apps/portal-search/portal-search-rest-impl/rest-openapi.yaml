@@ -173,6 +173,10 @@ components:
                     description:
                         Title of the item. The value depends on the locale specified by the 'Accept-Language' request header where applicable.
                     type: string
+                type:
+                    description:
+                        Type of the item within its entry class name, for the entities where a single class name covers more than one type. Masters, display page templates, content page templates, and widget templates are all com.liferay.layout.page.template.model.LayoutPageTemplateEntry and differ only by this value, so it is the only way to tell them apart. The value is the indexed type field, and therefore a string even where the underlying type is numeric (for example, 3 for a master). Entities that a class name already identifies do not index a type and leave the value null.
+                    type: string
         Suggestion:
             properties:
                 attributes:
