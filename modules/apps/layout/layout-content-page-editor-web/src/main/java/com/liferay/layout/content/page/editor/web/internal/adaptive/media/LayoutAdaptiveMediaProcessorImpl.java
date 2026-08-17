@@ -50,6 +50,22 @@ public class LayoutAdaptiveMediaProcessorImpl
 	implements LayoutAdaptiveMediaProcessor {
 
 	@Override
+	public String getBackgroundImageCSS(String cssSelector, long fileEntryId) {
+		try {
+			return _getMediaQuery(cssSelector, fileEntryId);
+		}
+		catch (Exception exception) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(
+					"Unable to get adaptive media background image CSS",
+					exception);
+			}
+
+			return StringPool.BLANK;
+		}
+	}
+
+	@Override
 	public String processAdaptiveMediaContent(String content) {
 		String processedContent = _contentTransformerHandler.transform(content);
 
@@ -156,7 +172,7 @@ public class LayoutAdaptiveMediaProcessorImpl
 		parentElement.prependChild(sourceElement);
 	}
 
-	private String _getMediaQuery(String elementId, long fileEntryId)
+	private String _getMediaQuery(String cssSelector, long fileEntryId)
 		throws PortalException {
 
 		StringBundler sb = new StringBundler();
@@ -182,8 +198,7 @@ public class LayoutAdaptiveMediaProcessorImpl
 			}
 
 			sb.append(StringPool.OPEN_CURLY_BRACE);
-			sb.append(StringPool.POUND);
-			sb.append(elementId);
+			sb.append(cssSelector);
 			sb.append("{background-image: url(");
 			sb.append(mediaQuery.getSrc());
 			sb.append(") !important;}}");
@@ -229,7 +244,8 @@ public class LayoutAdaptiveMediaProcessorImpl
 			while (matcher.find()) {
 				sb.append(
 					_getMediaQuery(
-						elementId, GetterUtil.getLong(matcher.group(1))));
+						StringPool.POUND + elementId,
+						GetterUtil.getLong(matcher.group(1))));
 			}
 
 			if (sb.length() > 0) {

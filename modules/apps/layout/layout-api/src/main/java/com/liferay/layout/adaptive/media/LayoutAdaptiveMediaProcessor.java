@@ -5,10 +5,18 @@
 
 package com.liferay.layout.adaptive.media;
 
+import com.liferay.petra.string.StringPool;
+
 /**
  * @author Pavel Savinov
  */
 public interface LayoutAdaptiveMediaProcessor {
+
+	public default String getBackgroundImageCSS(
+		String cssSelector, long fileEntryId) {
+
+		return StringPool.BLANK;
+	}
 
 	public String processAdaptiveMediaContent(String content);
 
