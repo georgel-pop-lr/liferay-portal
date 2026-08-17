@@ -61,6 +61,18 @@ public abstract class DLAppTestUtil {
 			ServiceContextTestUtil.getServiceContext(groupId, userId));
 	}
 
+	public static FileEntry addFileEntry(
+			long groupId, String sourceFileName, String mimeType, byte[] bytes)
+		throws Exception {
+
+		return DLAppLocalServiceUtil.addFileEntry(
+			null, TestPropsValues.getUserId(), groupId,
+			DLFolderConstants.DEFAULT_PARENT_FOLDER_ID, sourceFileName,
+			mimeType, bytes, null, null, null,
+			ServiceContextTestUtil.getServiceContext(
+				groupId, TestPropsValues.getUserId()));
+	}
+
 	public static FileEntry addFileEntry(Repository repository)
 		throws Exception {
 
