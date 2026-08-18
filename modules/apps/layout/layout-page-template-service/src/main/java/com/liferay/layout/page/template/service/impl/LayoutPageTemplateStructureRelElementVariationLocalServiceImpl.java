@@ -17,12 +17,16 @@ import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.sanitizer.SanitizerException;
+import com.liferay.portal.kernel.sanitizer.SanitizerUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.util.ArrayUtil;
+import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.Validator;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -88,7 +92,10 @@ public class LayoutPageTemplateStructureRelElementVariationLocalServiceImpl
 			serviceContext.getModifiedDate(new Date()));
 		layoutPageTemplateStructureRelElementVariation.setActive(active);
 		layoutPageTemplateStructureRelElementVariation.setHide(hide);
-		layoutPageTemplateStructureRelElementVariation.setHtmlMap(htmlMap);
+		layoutPageTemplateStructureRelElementVariation.setHtmlMap(
+			_sanitizeHtmlMap(
+				htmlMap, layoutPageTemplateStructureRelElementVariation,
+				userId));
 		layoutPageTemplateStructureRelElementVariation.setJsMap(jsMap);
 		layoutPageTemplateStructureRelElementVariation.setName(name);
 		layoutPageTemplateStructureRelElementVariation.setPlid(plid);
@@ -207,6 +214,37 @@ public class LayoutPageTemplateStructureRelElementVariationLocalServiceImpl
 
 		return layoutPageTemplateStructureRelElementVariationPersistence.update(
 			layoutPageTemplateStructureRelElementVariation);
+	}
+
+	private Map<Locale, String> _sanitizeHtmlMap(
+			Map<Locale, String> htmlMap,
+			LayoutPageTemplateStructureRelElementVariation
+				layoutPageTemplateStructureRelElementVariation,
+			long userId)
+		throws SanitizerException {
+
+		if (htmlMap == null) {
+			return null;
+		}
+
+		Map<Locale, String> sanitizedHtmlMap = new HashMap<>();
+
+		for (Map.Entry<Locale, String> entry : htmlMap.entrySet()) {
+			sanitizedHtmlMap.put(
+				entry.getKey(),
+				SanitizerUtil.sanitize(
+					layoutPageTemplateStructureRelElementVariation.
+						getCompanyId(),
+					layoutPageTemplateStructureRelElementVariation.getGroupId(),
+					userId,
+					LayoutPageTemplateStructureRelElementVariation.class.
+						getName(),
+					layoutPageTemplateStructureRelElementVariation.
+						getPrimaryKey(),
+					ContentTypes.TEXT_HTML, entry.getValue()));
+		}
+
+		return sanitizedHtmlMap;
 	}
 
 	private void _validate(

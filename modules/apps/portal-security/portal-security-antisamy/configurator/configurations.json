@@ -10,5 +10,9 @@
 	"com.liferay.portal.security.antisamy.configuration.AntiSamyClassNameConfiguration~knowledgebase": {
 		"className": "com.liferay.knowledge.base.model.KBArticle",
 		"configurationFileURL": "/META-INF/resources/knowledge-base-sanitizer-configuration.xml"
+	},
+	"com.liferay.portal.security.antisamy.configuration.AntiSamyClassNameConfiguration~layout": {
+		"className": "com.liferay.layout.page.template.model.LayoutPageTemplateStructureRelElementVariation",
+		"configurationFileURL": "/META-INF/resources/fragment-sanitizer-configuration.xml"
 	}
 }
