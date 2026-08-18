@@ -429,7 +429,9 @@ public class LayoutStructureCommonStylesCSSServlet extends HttpServlet {
 			layoutStructure.getLayoutStructureItems(),
 			layoutStructureItem -> {
 				if (!(layoutStructureItem instanceof
-						StyledLayoutStructureItem)) {
+						StyledLayoutStructureItem) ||
+					layoutStructure.isItemMarkedForDeletion(
+						layoutStructureItem.getItemId())) {
 
 					return null;
 				}
