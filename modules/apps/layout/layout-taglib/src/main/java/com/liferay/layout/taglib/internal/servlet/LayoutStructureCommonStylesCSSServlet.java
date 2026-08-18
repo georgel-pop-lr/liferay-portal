@@ -112,14 +112,17 @@ public class LayoutStructureCommonStylesCSSServlet extends HttpServlet {
 				}
 			}
 
-			if (user != null) {
-				PrincipalThreadLocal.setName(user.getUserId());
-				PrincipalThreadLocal.setPassword(
-					_portal.getUserPassword(httpServletRequest));
-
-				PermissionThreadLocal.setPermissionChecker(
-					_permissionCheckerFactory.create(user));
+			if (user == null) {
+				user = _userLocalService.getGuestUser(
+					_portal.getCompanyId(httpServletRequest));
 			}
+
+			PrincipalThreadLocal.setName(user.getUserId());
+			PrincipalThreadLocal.setPassword(
+				_portal.getUserPassword(httpServletRequest));
+
+			PermissionThreadLocal.setPermissionChecker(
+				_permissionCheckerFactory.create(user));
 		}
 		catch (PortalException portalException) {
 			if (_log.isDebugEnabled()) {
