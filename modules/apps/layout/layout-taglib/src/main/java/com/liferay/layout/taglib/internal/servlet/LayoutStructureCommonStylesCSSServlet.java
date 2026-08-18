@@ -9,6 +9,7 @@ import com.liferay.frontend.token.definition.FrontendToken;
 import com.liferay.frontend.token.definition.FrontendTokenDefinition;
 import com.liferay.frontend.token.definition.FrontendTokenDefinitionRegistry;
 import com.liferay.frontend.token.definition.FrontendTokenMapping;
+import com.liferay.layout.adaptive.media.LayoutAdaptiveMediaProcessor;
 import com.liferay.layout.provider.LayoutStructureProvider;
 import com.liferay.layout.responsive.ViewportSize;
 import com.liferay.layout.taglib.internal.util.SegmentsExperienceUtil;
@@ -259,6 +260,42 @@ public class LayoutStructureCommonStylesCSSServlet extends HttpServlet {
 				printWriter.print(StringPool.CLOSE_CURLY_BRACE);
 			}
 		}
+
+		for (LayoutStructureItem layoutStructureItem : layoutStructureItems) {
+			if (!(layoutStructureItem instanceof StyledLayoutStructureItem)) {
+				continue;
+			}
+
+			StyledLayoutStructureItem styledLayoutStructureItem =
+				(StyledLayoutStructureItem)layoutStructureItem;
+
+			printWriter.print(
+				_getBackgroundImageCSS(styledLayoutStructureItem));
+		}
+	}
+
+	private String _getBackgroundImageCSS(
+		StyledLayoutStructureItem styledLayoutStructureItem) {
+
+		JSONObject backgroundImageJSONObject =
+			styledLayoutStructureItem.getBackgroundImageJSONObject();
+
+		long fileEntryId = backgroundImageJSONObject.getLong("fileEntryId");
+
+		if (fileEntryId <= 0) {
+			return StringPool.BLANK;
+		}
+
+		LayoutAdaptiveMediaProcessor layoutAdaptiveMediaProcessor =
+			ServletContextUtil.getLayoutAdaptiveMediaProcessor();
+
+		if (layoutAdaptiveMediaProcessor == null) {
+			return StringPool.BLANK;
+		}
+
+		return layoutAdaptiveMediaProcessor.getBackgroundImageCSS(
+			StringPool.PERIOD + styledLayoutStructureItem.getUniqueCssClass(),
+			fileEntryId);
 	}
 
 	private String _getCustomCSS(

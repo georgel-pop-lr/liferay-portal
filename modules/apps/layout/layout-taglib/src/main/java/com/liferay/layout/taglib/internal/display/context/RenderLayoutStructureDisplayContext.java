@@ -603,12 +603,14 @@ public class RenderLayoutStructureDisplayContext {
 		JSONObject backgroundImageJSONObject =
 			styledLayoutStructureItem.getBackgroundImageJSONObject();
 
-		long fileEntryId = _getFileEntryId(backgroundImageJSONObject);
+		if (!backgroundImageJSONObject.has("fileEntryId")) {
+			long fileEntryId = _getFileEntryId(backgroundImageJSONObject);
 
-		if (fileEntryId != 0) {
-			sb.append("--background-image-file-entry-id:");
-			sb.append(fileEntryId);
-			sb.append(StringPool.SEMICOLON);
+			if (fileEntryId != 0) {
+				sb.append("--background-image-file-entry-id:");
+				sb.append(fileEntryId);
+				sb.append(StringPool.SEMICOLON);
+			}
 		}
 
 		String backgroundImageURL = _getBackgroundImage(
