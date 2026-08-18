@@ -16,8 +16,8 @@ import com.liferay.layout.taglib.internal.util.SegmentsExperienceUtil;
 import com.liferay.layout.util.structure.CommonStylesUtil;
 import com.liferay.layout.util.structure.ContainerStyledLayoutStructureItem;
 import com.liferay.layout.util.structure.LayoutStructure;
-import com.liferay.layout.util.structure.LayoutStructureItem;
 import com.liferay.layout.util.structure.StyledLayoutStructureItem;
+import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.petra.lang.SafeCloseable;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
@@ -211,23 +211,14 @@ public class LayoutStructureCommonStylesCSSServlet extends HttpServlet {
 			layout.getGroupId(), layout,
 			ParamUtil.getBoolean(httpServletRequest, "styleBookEntryPreview"));
 
-		List<LayoutStructureItem> layoutStructureItems =
-			layoutStructure.getLayoutStructureItems();
+		List<StyledLayoutStructureItem> styledLayoutStructureItems =
+			_getStyledLayoutStructureItems(layoutStructure);
 
 		for (ViewportSize viewportSize : _sortedViewportSizes) {
 			StringBundler cssSB = new StringBundler();
 
-			for (LayoutStructureItem layoutStructureItem :
-					layoutStructureItems) {
-
-				if (!(layoutStructureItem instanceof
-						StyledLayoutStructureItem)) {
-
-					continue;
-				}
-
-				StyledLayoutStructureItem styledLayoutStructureItem =
-					(StyledLayoutStructureItem)layoutStructureItem;
+			for (StyledLayoutStructureItem styledLayoutStructureItem :
+					styledLayoutStructureItems) {
 
 				cssSB.append(
 					_getLayoutStructureItemCSS(
@@ -261,13 +252,8 @@ public class LayoutStructureCommonStylesCSSServlet extends HttpServlet {
 			}
 		}
 
-		for (LayoutStructureItem layoutStructureItem : layoutStructureItems) {
-			if (!(layoutStructureItem instanceof StyledLayoutStructureItem)) {
-				continue;
-			}
-
-			StyledLayoutStructureItem styledLayoutStructureItem =
-				(StyledLayoutStructureItem)layoutStructureItem;
+		for (StyledLayoutStructureItem styledLayoutStructureItem :
+				styledLayoutStructureItems) {
 
 			printWriter.print(
 				_getBackgroundImageCSS(styledLayoutStructureItem));
@@ -434,6 +420,22 @@ public class LayoutStructureCommonStylesCSSServlet extends HttpServlet {
 		cssSB.append("}\n");
 
 		return cssSB.toString();
+	}
+
+	private List<StyledLayoutStructureItem> _getStyledLayoutStructureItems(
+		LayoutStructure layoutStructure) {
+
+		return TransformUtil.transform(
+			layoutStructure.getLayoutStructureItems(),
+			layoutStructureItem -> {
+				if (!(layoutStructureItem instanceof
+						StyledLayoutStructureItem)) {
+
+					return null;
+				}
+
+				return (StyledLayoutStructureItem)layoutStructureItem;
+			});
 	}
 
 	private String _getStyleFromStyleBookEntry(
