@@ -16,6 +16,7 @@ import com.liferay.layout.test.util.LayoutTestUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.test.TestInfo;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
@@ -58,11 +59,19 @@ public class LayoutPageTemplateStructureRelElementVariationLocalServiceTest {
 	}
 
 	@Test
+	@TestInfo("LPD-102184")
 	public void testAddOrUpdateLayoutPageTemplateStructureRelElementVariation()
 		throws Exception {
 
 		_testAddOrUpdateLayoutPageTemplateStructureRelElementVariationWithDuplicateAudienceEntryERCForTargetElement();
 		_testAddOrUpdateLayoutPageTemplateStructureRelElementVariationWithDuplicateAudienceEntryERCs();
+		_testAddOrUpdateLayoutPageTemplateStructureRelElementVariationWithHtml(
+			"<img src=\"x\">", "<img src=x onerror=alert(document.domain)>");
+		_testAddOrUpdateLayoutPageTemplateStructureRelElementVariationWithHtml(
+			"<p>Element variation</p>", "<p>Element variation</p>");
+		_testAddOrUpdateLayoutPageTemplateStructureRelElementVariationWithHtml(
+			"<svg><circle cx=\"1\"></circle></svg>",
+			"<svg><circle cx=\"1\"></circle></svg>");
 		_testAddOrUpdateLayoutPageTemplateStructureRelElementVariationWithSameAudienceEntryERCForDifferentSegmentsExperience();
 		_testAddOrUpdateLayoutPageTemplateStructureRelElementVariationWithSameAudienceEntryERCForDifferentTargetElement();
 	}
@@ -200,6 +209,36 @@ public class LayoutPageTemplateStructureRelElementVariationLocalServiceTest {
 						RandomTestUtil.randomString(),
 						new String[] {audienceEntryERC, audienceEntryERC},
 						_serviceContext));
+	}
+
+	private void
+			_testAddOrUpdateLayoutPageTemplateStructureRelElementVariationWithHtml(
+				String expectedHtml, String html)
+		throws Exception {
+
+		Layout layout = LayoutTestUtil.addTypeContentLayout(_group);
+
+		LayoutPageTemplateStructureRelElementVariation
+			layoutPageTemplateStructureRelElementVariation =
+				_layoutPageTemplateStructureRelElementVariationLocalService.
+					addOrUpdateLayoutPageTemplateStructureRelElementVariation(
+						RandomTestUtil.randomString(),
+						TestPropsValues.getUserId(), _group.getGroupId(),
+						RandomTestUtil.randomBoolean(),
+						RandomTestUtil.randomString(),
+						Collections.singletonMap(LocaleUtil.US, html),
+						Collections.singletonMap(
+							LocaleUtil.US, RandomTestUtil.randomString()),
+						RandomTestUtil.randomString(), layout.getPlid(),
+						RandomTestUtil.randomString(),
+						RandomTestUtil.randomString(),
+						new String[] {RandomTestUtil.randomString()},
+						_serviceContext);
+
+		Assert.assertEquals(
+			expectedHtml,
+			layoutPageTemplateStructureRelElementVariation.getHtml(
+				LocaleUtil.US));
 	}
 
 	private void _testAddOrUpdateLayoutPageTemplateStructureRelElementVariationWithSameAudienceEntryERCForDifferentSegmentsExperience()
