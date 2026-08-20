@@ -1,0 +1,22 @@
+.menu-display-fragment {
+	.list-menu ul {
+		list-style: none;
+	}
+
+	.nav {
+		font-size: inherit;
+		font-weight: inherit;
+	}
+
+	.lfr-nav-item > a {
+		color: inherit;
+	}
+
+	.lfr-nav-item.selected > a {
+		color: var(--menu-display-selected-item-color, inherit);
+	}
+
+	.lfr-nav-item > a:hover {
+		color: var(--menu-display-hovered-item-color, inherit);
+	}
+}
