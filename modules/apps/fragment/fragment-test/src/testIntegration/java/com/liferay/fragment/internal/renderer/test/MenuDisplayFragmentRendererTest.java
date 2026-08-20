@@ -24,6 +24,7 @@ import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
+import com.liferay.portal.kernel.servlet.taglib.util.OutputData;
 import com.liferay.portal.kernel.test.TestInfo;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
@@ -31,6 +32,7 @@ import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.UnicodePropertiesBuilder;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.struts.Definition;
@@ -92,6 +94,91 @@ public class MenuDisplayFragmentRendererTest {
 	@After
 	public void tearDown() {
 		ServiceContextThreadLocal.popServiceContext();
+	}
+
+	@Test
+	@TestInfo("LPD-103203")
+	public void testRenderStylesheet() throws Exception {
+		String editableValues = JSONUtil.put(
+			FragmentEntryProcessorConstants.
+				KEY_FREEMARKER_FRAGMENT_ENTRY_PROCESSOR,
+			JSONUtil.put(
+				"hoveredItemColor", "#3E3E94"
+			).put(
+				"selectedItemColor", "#666666"
+			)
+		).toString();
+
+		FragmentEntryLink fragmentEntryLink = _addFragmentEntryLink(
+			editableValues, _layout.getPlid());
+
+		HttpServletRequest httpServletRequest = _getHttpServletRequest();
+
+		String content = _render(
+			fragmentEntryLink, httpServletRequest,
+			FragmentEntryLinkConstants.VIEW);
+
+		Assert.assertTrue(
+			content, content.contains("<div class=\"menu-display-fragment\""));
+		Assert.assertFalse(content, content.contains("<link"));
+		Assert.assertFalse(content, content.contains("<style"));
+
+		_render(
+			_addFragmentEntryLink(editableValues, _layout.getPlid()),
+			httpServletRequest, FragmentEntryLinkConstants.VIEW);
+
+		OutputData outputData = (OutputData)httpServletRequest.getAttribute(
+			WebKeys.OUTPUT_DATA);
+
+		String pageTop = String.valueOf(
+			outputData.getMergedDataSB(WebKeys.PAGE_TOP));
+
+		Assert.assertEquals(
+			pageTop, 1, StringUtil.count(pageTop, _LINK_PREFIX));
+		Assert.assertEquals(
+			pageTop, 2,
+			StringUtil.count(
+				pageTop, "<style data-senna-track=\"temporary\">"));
+		Assert.assertTrue(
+			pageTop,
+			pageTop.contains("--menu-display-hovered-item-color:#3E3E94"));
+		Assert.assertTrue(
+			pageTop,
+			pageTop.contains("--menu-display-selected-item-color:#666666"));
+
+		HttpServletRequest editModeHttpServletRequest =
+			_getHttpServletRequest();
+
+		String editModeContent = _render(
+			fragmentEntryLink, editModeHttpServletRequest,
+			FragmentEntryLinkConstants.EDIT);
+
+		Assert.assertTrue(
+			editModeContent, editModeContent.contains(_LINK_PREFIX));
+		Assert.assertTrue(
+			editModeContent,
+			editModeContent.contains(
+				"--menu-display-selected-item-color:#666666"));
+
+		Assert.assertNull(
+			editModeHttpServletRequest.getAttribute(WebKeys.OUTPUT_DATA));
+
+		HttpServletRequest indexModeHttpServletRequest =
+			_getHttpServletRequest();
+
+		String indexModeContent = _render(
+			fragmentEntryLink, indexModeHttpServletRequest,
+			FragmentEntryLinkConstants.INDEX);
+
+		Assert.assertTrue(
+			indexModeContent, indexModeContent.contains(_LINK_PREFIX));
+		Assert.assertTrue(
+			indexModeContent,
+			indexModeContent.contains(
+				"--menu-display-selected-item-color:#666666"));
+
+		Assert.assertNull(
+			indexModeHttpServletRequest.getAttribute(WebKeys.OUTPUT_DATA));
 	}
 
 	@Test
@@ -183,16 +270,26 @@ public class MenuDisplayFragmentRendererTest {
 	private String _render(FragmentEntryLink fragmentEntryLink)
 		throws Exception {
 
+		return _render(
+			fragmentEntryLink, _getHttpServletRequest(),
+			FragmentEntryLinkConstants.VIEW);
+	}
+
+	private String _render(
+			FragmentEntryLink fragmentEntryLink,
+			HttpServletRequest httpServletRequest, String mode)
+		throws Exception {
+
 		DefaultFragmentRendererContext defaultFragmentRendererContext =
 			new DefaultFragmentRendererContext(fragmentEntryLink);
 
-		defaultFragmentRendererContext.setMode(FragmentEntryLinkConstants.VIEW);
+		defaultFragmentRendererContext.setMode(mode);
 
 		MockHttpServletResponse mockHttpServletResponse =
 			new MockHttpServletResponse();
 
 		_fragmentRenderer.render(
-			defaultFragmentRendererContext, _getHttpServletRequest(),
+			defaultFragmentRendererContext, httpServletRequest,
 			mockHttpServletResponse);
 
 		return mockHttpServletResponse.getContentAsString();
@@ -395,6 +492,10 @@ public class MenuDisplayFragmentRendererTest {
 				layout.getTitle(
 					_portal.getSiteDefaultLocale(_group.getGroupId()))));
 	}
+
+	private static final String _LINK_PREFIX =
+		"<link data-senna-track=\"temporary\" href=\"/o" +
+			"/fragment-renderer-menu-display-impl/css/main.";
 
 	private Company _company;
 
