@@ -16,6 +16,7 @@ import com.liferay.fragment.service.FragmentEntryLinkLocalService;
 import com.liferay.layout.test.util.ContentLayoutTestUtil;
 import com.liferay.layout.test.util.LayoutTestUtil;
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Group;
@@ -99,141 +100,11 @@ public class MenuDisplayFragmentRendererTest {
 	@Test
 	@TestInfo("LPD-103203")
 	public void testRenderStylesheet() throws Exception {
-		String editableValues = JSONUtil.put(
-			FragmentEntryProcessorConstants.
-				KEY_FREEMARKER_FRAGMENT_ENTRY_PROCESSOR,
-			JSONUtil.put(
-				"hoveredItemColor", "#3E3E94"
-			).put(
-				"selectedItemColor", "#666666"
-			)
-		).toString();
-
-		FragmentEntryLink fragmentEntryLink = _addFragmentEntryLink(
-			editableValues, _layout.getPlid());
-
-		HttpServletRequest httpServletRequest = _getHttpServletRequest();
-
-		String content = _render(
-			fragmentEntryLink, httpServletRequest,
-			FragmentEntryLinkConstants.VIEW);
-
-		Assert.assertTrue(
-			content, content.contains("<div class=\"menu-display-fragment\""));
-		Assert.assertFalse(content, content.contains("<link"));
-		Assert.assertFalse(content, content.contains("<style"));
-
-		_render(
-			_addFragmentEntryLink(editableValues, _layout.getPlid()),
-			httpServletRequest, FragmentEntryLinkConstants.VIEW);
-
-		OutputData outputData = (OutputData)httpServletRequest.getAttribute(
-			WebKeys.OUTPUT_DATA);
-
-		String pageTop = String.valueOf(
-			outputData.getMergedDataSB(WebKeys.PAGE_TOP));
-
-		Assert.assertEquals(
-			pageTop, 1, StringUtil.count(pageTop, _LINK_PREFIX));
-		Assert.assertEquals(
-			pageTop, 2,
-			StringUtil.count(
-				pageTop, "<style data-senna-track=\"temporary\">"));
-		Assert.assertTrue(
-			pageTop,
-			pageTop.contains("--menu-display-hovered-item-color:#3E3E94"));
-		Assert.assertTrue(
-			pageTop,
-			pageTop.contains("--menu-display-selected-item-color:#666666"));
-
-		HttpServletRequest defaultColorsHttpServletRequest =
-			_getHttpServletRequest();
-
-		_render(
-			_addFragmentEntryLink(
-				JSONUtil.put(
-					FragmentEntryProcessorConstants.
-						KEY_FREEMARKER_FRAGMENT_ENTRY_PROCESSOR,
-					JSONUtil.put("displayStyle", "stacked")
-				).toString(),
-				_layout.getPlid()),
-			defaultColorsHttpServletRequest, FragmentEntryLinkConstants.VIEW);
-
-		OutputData defaultColorsOutputData =
-			(OutputData)defaultColorsHttpServletRequest.getAttribute(
-				WebKeys.OUTPUT_DATA);
-
-		String defaultColorsPageTop = String.valueOf(
-			defaultColorsOutputData.getMergedDataSB(WebKeys.PAGE_TOP));
-
-		Assert.assertTrue(
-			defaultColorsPageTop, defaultColorsPageTop.contains(_LINK_PREFIX));
-		Assert.assertFalse(
-			defaultColorsPageTop, defaultColorsPageTop.contains("<style"));
-
-		HttpServletRequest hoveredItemColorHttpServletRequest =
-			_getHttpServletRequest();
-
-		_render(
-			_addFragmentEntryLink(
-				JSONUtil.put(
-					FragmentEntryProcessorConstants.
-						KEY_FREEMARKER_FRAGMENT_ENTRY_PROCESSOR,
-					JSONUtil.put("hoveredItemColor", "#3E3E94")
-				).toString(),
-				_layout.getPlid()),
-			hoveredItemColorHttpServletRequest,
-			FragmentEntryLinkConstants.VIEW);
-
-		OutputData hoveredItemColorOutputData =
-			(OutputData)hoveredItemColorHttpServletRequest.getAttribute(
-				WebKeys.OUTPUT_DATA);
-
-		String hoveredItemColorPageTop = String.valueOf(
-			hoveredItemColorOutputData.getMergedDataSB(WebKeys.PAGE_TOP));
-
-		Assert.assertTrue(
-			hoveredItemColorPageTop,
-			hoveredItemColorPageTop.contains(
-				"--menu-display-hovered-item-color:#3E3E94"));
-		Assert.assertTrue(
-			hoveredItemColorPageTop,
-			hoveredItemColorPageTop.contains(
-				"--menu-display-selected-item-color:inherit"));
-
-		HttpServletRequest editModeHttpServletRequest =
-			_getHttpServletRequest();
-
-		String editModeContent = _render(
-			fragmentEntryLink, editModeHttpServletRequest,
-			FragmentEntryLinkConstants.EDIT);
-
-		Assert.assertTrue(
-			editModeContent, editModeContent.contains(_LINK_PREFIX));
-		Assert.assertTrue(
-			editModeContent,
-			editModeContent.contains(
-				"--menu-display-selected-item-color:#666666"));
-
-		Assert.assertNull(
-			editModeHttpServletRequest.getAttribute(WebKeys.OUTPUT_DATA));
-
-		HttpServletRequest indexModeHttpServletRequest =
-			_getHttpServletRequest();
-
-		String indexModeContent = _render(
-			fragmentEntryLink, indexModeHttpServletRequest,
-			FragmentEntryLinkConstants.INDEX);
-
-		Assert.assertTrue(
-			indexModeContent, indexModeContent.contains(_LINK_PREFIX));
-		Assert.assertTrue(
-			indexModeContent,
-			indexModeContent.contains(
-				"--menu-display-selected-item-color:#666666"));
-
-		Assert.assertNull(
-			indexModeHttpServletRequest.getAttribute(WebKeys.OUTPUT_DATA));
+		_testRenderStylesheet(FragmentEntryLinkConstants.EDIT);
+		_testRenderStylesheet(FragmentEntryLinkConstants.INDEX);
+		_testRenderStylesheetWithColors();
+		_testRenderStylesheetWithHoveredItemColor();
+		_testRenderStylesheetWithoutColors();
 	}
 
 	@Test
@@ -303,6 +174,14 @@ public class MenuDisplayFragmentRendererTest {
 			ServiceContextTestUtil.getServiceContext(groupId));
 	}
 
+	private String _getEditableValues(JSONObject configurationJSONObject) {
+		return JSONUtil.put(
+			FragmentEntryProcessorConstants.
+				KEY_FREEMARKER_FRAGMENT_ENTRY_PROCESSOR,
+			configurationJSONObject
+		).toString();
+	}
+
 	private HttpServletRequest _getHttpServletRequest() throws Exception {
 		HttpServletRequest httpServletRequest = new MockHttpServletRequest();
 
@@ -320,6 +199,13 @@ public class MenuDisplayFragmentRendererTest {
 		_serviceContext.setRequest(httpServletRequest);
 
 		return httpServletRequest;
+	}
+
+	private String _getPageTop(HttpServletRequest httpServletRequest) {
+		OutputData outputData = (OutputData)httpServletRequest.getAttribute(
+			WebKeys.OUTPUT_DATA);
+
+		return String.valueOf(outputData.getMergedDataSB(WebKeys.PAGE_TOP));
 	}
 
 	private String _render(FragmentEntryLink fragmentEntryLink)
@@ -348,6 +234,97 @@ public class MenuDisplayFragmentRendererTest {
 			mockHttpServletResponse);
 
 		return mockHttpServletResponse.getContentAsString();
+	}
+
+	private void _testRenderStylesheet(String mode) throws Exception {
+		HttpServletRequest httpServletRequest = _getHttpServletRequest();
+
+		String content = _render(
+			_addFragmentEntryLink(
+				_getEditableValues(
+					JSONUtil.put("selectedItemColor", "#666666")),
+				_layout.getPlid()),
+			httpServletRequest, mode);
+
+		Assert.assertTrue(content, content.contains(_LINK_PREFIX));
+		Assert.assertTrue(
+			content,
+			content.contains("--menu-display-selected-item-color:#666666"));
+
+		Assert.assertNull(httpServletRequest.getAttribute(WebKeys.OUTPUT_DATA));
+	}
+
+	private void _testRenderStylesheetWithColors() throws Exception {
+		String editableValues = _getEditableValues(
+			JSONUtil.put(
+				"hoveredItemColor", "#3E3E94"
+			).put(
+				"selectedItemColor", "#666666"
+			));
+
+		HttpServletRequest httpServletRequest = _getHttpServletRequest();
+
+		String content = _render(
+			_addFragmentEntryLink(editableValues, _layout.getPlid()),
+			httpServletRequest, FragmentEntryLinkConstants.VIEW);
+
+		Assert.assertTrue(
+			content, content.contains("<div class=\"menu-display-fragment\""));
+		Assert.assertFalse(content, content.contains("<link"));
+		Assert.assertFalse(content, content.contains("<style"));
+
+		_render(
+			_addFragmentEntryLink(editableValues, _layout.getPlid()),
+			httpServletRequest, FragmentEntryLinkConstants.VIEW);
+
+		String pageTop = _getPageTop(httpServletRequest);
+
+		Assert.assertEquals(
+			pageTop, 1, StringUtil.count(pageTop, _LINK_PREFIX));
+		Assert.assertEquals(
+			pageTop, 2,
+			StringUtil.count(
+				pageTop, "<style data-senna-track=\"temporary\">"));
+		Assert.assertTrue(
+			pageTop,
+			pageTop.contains("--menu-display-hovered-item-color:#3E3E94"));
+		Assert.assertTrue(
+			pageTop,
+			pageTop.contains("--menu-display-selected-item-color:#666666"));
+	}
+
+	private void _testRenderStylesheetWithHoveredItemColor() throws Exception {
+		HttpServletRequest httpServletRequest = _getHttpServletRequest();
+
+		_render(
+			_addFragmentEntryLink(
+				_getEditableValues(JSONUtil.put("hoveredItemColor", "#3E3E94")),
+				_layout.getPlid()),
+			httpServletRequest, FragmentEntryLinkConstants.VIEW);
+
+		String pageTop = _getPageTop(httpServletRequest);
+
+		Assert.assertTrue(
+			pageTop,
+			pageTop.contains("--menu-display-hovered-item-color:#3E3E94"));
+		Assert.assertTrue(
+			pageTop,
+			pageTop.contains("--menu-display-selected-item-color:inherit"));
+	}
+
+	private void _testRenderStylesheetWithoutColors() throws Exception {
+		HttpServletRequest httpServletRequest = _getHttpServletRequest();
+
+		_render(
+			_addFragmentEntryLink(
+				_getEditableValues(JSONUtil.put("displayStyle", "stacked")),
+				_layout.getPlid()),
+			httpServletRequest, FragmentEntryLinkConstants.VIEW);
+
+		String pageTop = _getPageTop(httpServletRequest);
+
+		Assert.assertTrue(pageTop, pageTop.contains(_LINK_PREFIX));
+		Assert.assertFalse(pageTop, pageTop.contains("<style"));
 	}
 
 	private void _testRenderWithExternalReferenceCodeReference(
