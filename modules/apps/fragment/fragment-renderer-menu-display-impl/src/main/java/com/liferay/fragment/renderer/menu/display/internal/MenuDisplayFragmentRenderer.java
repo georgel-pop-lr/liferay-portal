@@ -31,6 +31,7 @@ import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.ResourceBundleUtil;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.url.builder.AbsolutePortalURLBuilder;
 import com.liferay.portal.url.builder.AbsolutePortalURLBuilderFactory;
@@ -148,6 +149,15 @@ public class MenuDisplayFragmentRenderer implements FragmentRenderer {
 		}
 	}
 
+	private Object _getFieldValue(
+		JSONObject configurationJSONObject, JSONObject editableValuesJSONObject,
+		String name) {
+
+		return _fragmentEntryConfigurationParser.getFieldValue(
+			configurationJSONObject, editableValuesJSONObject,
+			LocaleUtil.getMostRelevantLocale(), name);
+	}
+
 	private StringBundler _getLinkSB(HttpServletRequest httpServletRequest) {
 		AbsolutePortalURLBuilder absolutePortalURLBuilder =
 			_absolutePortalURLBuilderFactory.getAbsolutePortalURLBuilder(
@@ -177,9 +187,9 @@ public class MenuDisplayFragmentRenderer implements FragmentRenderer {
 		NavigationMenuTag navigationMenuTag = new NavigationMenuTag();
 
 		String displayStyle = GetterUtil.getString(
-			_fragmentEntryConfigurationParser.getFieldValue(
+			_getFieldValue(
 				configurationJSONObject, editableValuesJSONObject,
-				LocaleUtil.getMostRelevantLocale(), "displayStyle"));
+				"displayStyle"));
 
 		DDMTemplate ddmTemplate = _getTagDDMTemplate(companyId, displayStyle);
 
@@ -189,16 +199,15 @@ public class MenuDisplayFragmentRenderer implements FragmentRenderer {
 		}
 
 		int sublevels = GetterUtil.getInteger(
-			_fragmentEntryConfigurationParser.getFieldValue(
+			_getFieldValue(
 				configurationJSONObject, editableValuesJSONObject,
-				LocaleUtil.getMostRelevantLocale(), "sublevels"));
+				"sublevels"));
 
 		navigationMenuTag.setDisplayDepth(sublevels + 1);
 
 		String source = GetterUtil.getString(
-			_fragmentEntryConfigurationParser.getFieldValue(
-				configurationJSONObject, editableValuesJSONObject,
-				LocaleUtil.getMostRelevantLocale(), "source"));
+			_getFieldValue(
+				configurationJSONObject, editableValuesJSONObject, "source"));
 
 		FragmentEntryMenuDisplayConfiguration
 			fragmentEntryMenuDisplayConfiguration =
@@ -232,6 +241,50 @@ public class MenuDisplayFragmentRenderer implements FragmentRenderer {
 		return outputData;
 	}
 
+	private StringBundler _getStyleSB(
+		JSONObject configurationJSONObject, JSONObject editableValuesJSONObject,
+		String fragmentElementId, HttpServletRequest httpServletRequest) {
+
+		String hoveredItemColor = GetterUtil.getString(
+			_getFieldValue(
+				configurationJSONObject, editableValuesJSONObject,
+				"hoveredItemColor"));
+		String selectedItemColor = GetterUtil.getString(
+			_getFieldValue(
+				configurationJSONObject, editableValuesJSONObject,
+				"selectedItemColor"));
+
+		if (Validator.isNull(hoveredItemColor) &&
+			Validator.isNull(selectedItemColor)) {
+
+			return null;
+		}
+
+		if (Validator.isNull(hoveredItemColor)) {
+			hoveredItemColor = "inherit";
+		}
+
+		if (Validator.isNull(selectedItemColor)) {
+			selectedItemColor = "inherit";
+		}
+
+		StringBundler sb = new StringBundler(9);
+
+		sb.append("<style data-senna-track=\"temporary\"");
+		sb.append(
+			ContentSecurityPolicyNonceProviderUtil.getNonceAttribute(
+				httpServletRequest));
+		sb.append(">#");
+		sb.append(fragmentElementId);
+		sb.append("{--menu-display-hovered-item-color:");
+		sb.append(hoveredItemColor);
+		sb.append(";--menu-display-selected-item-color:");
+		sb.append(selectedItemColor);
+		sb.append(";}</style>");
+
+		return sb;
+	}
+
 	private DDMTemplate _getTagDDMTemplate(long companyId, String displayStyle)
 		throws PortalException {
 
@@ -253,33 +306,16 @@ public class MenuDisplayFragmentRenderer implements FragmentRenderer {
 		String fragmentElementId, HttpServletRequest httpServletRequest,
 		boolean inlineCss, PrintWriter printWriter) {
 
-		StringBundler styleSB = new StringBundler(9);
-
-		styleSB.append("<style data-senna-track=\"temporary\"");
-		styleSB.append(
-			ContentSecurityPolicyNonceProviderUtil.getNonceAttribute(
-				httpServletRequest));
-		styleSB.append(">#");
-		styleSB.append(fragmentElementId);
-		styleSB.append("{--menu-display-hovered-item-color:");
-		styleSB.append(
-			GetterUtil.getString(
-				_fragmentEntryConfigurationParser.getFieldValue(
-					configurationJSONObject, editableValuesJSONObject,
-					LocaleUtil.getMostRelevantLocale(), "hoveredItemColor"),
-				"inherit"));
-		styleSB.append(";--menu-display-selected-item-color:");
-		styleSB.append(
-			GetterUtil.getString(
-				_fragmentEntryConfigurationParser.getFieldValue(
-					configurationJSONObject, editableValuesJSONObject,
-					LocaleUtil.getMostRelevantLocale(), "selectedItemColor"),
-				"inherit"));
-		styleSB.append(";}</style>");
+		StringBundler styleSB = _getStyleSB(
+			configurationJSONObject, editableValuesJSONObject,
+			fragmentElementId, httpServletRequest);
 
 		if (inlineCss) {
 			printWriter.write(String.valueOf(_getLinkSB(httpServletRequest)));
-			printWriter.write(styleSB.toString());
+
+			if (styleSB != null) {
+				printWriter.write(String.valueOf(styleSB));
+			}
 
 			return;
 		}
@@ -291,7 +327,9 @@ public class MenuDisplayFragmentRenderer implements FragmentRenderer {
 				_CSS_PATH, WebKeys.PAGE_TOP, _getLinkSB(httpServletRequest));
 		}
 
-		outputData.addDataSB(fragmentElementId, WebKeys.PAGE_TOP, styleSB);
+		if (styleSB != null) {
+			outputData.addDataSB(fragmentElementId, WebKeys.PAGE_TOP, styleSB);
+		}
 	}
 
 	private static final String _CSS_PATH =
