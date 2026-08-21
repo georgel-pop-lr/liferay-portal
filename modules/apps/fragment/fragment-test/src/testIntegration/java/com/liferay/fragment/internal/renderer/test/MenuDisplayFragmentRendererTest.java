@@ -146,6 +146,61 @@ public class MenuDisplayFragmentRendererTest {
 			pageTop,
 			pageTop.contains("--menu-display-selected-item-color:#666666"));
 
+		HttpServletRequest defaultColorsHttpServletRequest =
+			_getHttpServletRequest();
+
+		_render(
+			_addFragmentEntryLink(
+				JSONUtil.put(
+					FragmentEntryProcessorConstants.
+						KEY_FREEMARKER_FRAGMENT_ENTRY_PROCESSOR,
+					JSONUtil.put("displayStyle", "stacked")
+				).toString(),
+				_layout.getPlid()),
+			defaultColorsHttpServletRequest, FragmentEntryLinkConstants.VIEW);
+
+		OutputData defaultColorsOutputData =
+			(OutputData)defaultColorsHttpServletRequest.getAttribute(
+				WebKeys.OUTPUT_DATA);
+
+		String defaultColorsPageTop = String.valueOf(
+			defaultColorsOutputData.getMergedDataSB(WebKeys.PAGE_TOP));
+
+		Assert.assertTrue(
+			defaultColorsPageTop, defaultColorsPageTop.contains(_LINK_PREFIX));
+		Assert.assertFalse(
+			defaultColorsPageTop, defaultColorsPageTop.contains("<style"));
+
+		HttpServletRequest hoveredItemColorHttpServletRequest =
+			_getHttpServletRequest();
+
+		_render(
+			_addFragmentEntryLink(
+				JSONUtil.put(
+					FragmentEntryProcessorConstants.
+						KEY_FREEMARKER_FRAGMENT_ENTRY_PROCESSOR,
+					JSONUtil.put("hoveredItemColor", "#3E3E94")
+				).toString(),
+				_layout.getPlid()),
+			hoveredItemColorHttpServletRequest,
+			FragmentEntryLinkConstants.VIEW);
+
+		OutputData hoveredItemColorOutputData =
+			(OutputData)hoveredItemColorHttpServletRequest.getAttribute(
+				WebKeys.OUTPUT_DATA);
+
+		String hoveredItemColorPageTop = String.valueOf(
+			hoveredItemColorOutputData.getMergedDataSB(WebKeys.PAGE_TOP));
+
+		Assert.assertTrue(
+			hoveredItemColorPageTop,
+			hoveredItemColorPageTop.contains(
+				"--menu-display-hovered-item-color:#3E3E94"));
+		Assert.assertTrue(
+			hoveredItemColorPageTop,
+			hoveredItemColorPageTop.contains(
+				"--menu-display-selected-item-color:inherit"));
+
 		HttpServletRequest editModeHttpServletRequest =
 			_getHttpServletRequest();
 
