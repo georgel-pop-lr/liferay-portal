@@ -1,6 +1,6 @@
 ---
 name: backport
-description: Backport a fix to a Liferay patch version or release branch by branching off the target and cherry-picking the master commits, and the LBM rules that get a backport pull rejected. Use when the user asks to backport a ticket to a quarterly patch version (e.g. 2026.q1.7) or a release branch (e.g. release-2026.q1), or works a BPR ticket.
+description: Backport a fix to a Liferay patch version or release branch by branching off the target and cherry-picking the master commits, including how to choose an upgrade process's schema version so no upgrade is skipped, and the LBM rules that get a backport pull rejected. Use when the user asks to backport a ticket to a quarterly patch version (e.g. 2026.q1.7) or a release branch (e.g. release-2026.q1), works a BPR ticket, or asks which schema version a backported upgrade process should register.
 argument-hint: "<ticket-key> <target>"
 ---
 
@@ -10,7 +10,7 @@ Create a backport branch for a Liferay ticket by branching off a target ref and 
 
 This skill exists for the manual fallback, and you only reach for it when the automated path fails. For a release branch, a **BPR** (Backport Request) ticket is opened when the automated backport *fails to auto cherry-pick* onto a specific release version. For a patch version, you run this skill when Patcher Portal's *auto fix* option cannot produce the fix automatically. Conflicts during the cherry-pick are therefore the expected case here, not an anomaly. Be ready to work through them (see Cherry-Pick the Commits).
 
-**Before pushing, read Backport Review Rules (LBM)** for what gets a release-branch pull rejected outright, or Patch Version Constraints for the much narrower set of files a Patcher fix may touch.
+**Two parts of this need reading before you touch the code.** When the change registers an upgrade process, the schema version is the whole job and picking it wrong silently loses upgrades on customer databases, so read Backporting an Upgrade Process first. Before pushing, read Backport Review Rules (LBM) for what gets a release-branch pull rejected outright, or Patch Version Constraints for the much narrower set of files a Patcher fix may touch.
 
 ## Resolve the Inputs
 
@@ -76,6 +76,10 @@ git cherry-pick <oldest-sha> <next-sha> ...
 **When the target is a patch version, do not cherry-pick the test commits**, and skip any `packageinfo` or `bnd.bnd` commit. See Patch Version Constraints below, since Patcher rejects those without saying why.
 
 Conflicts are expected for BPR backports — that failure is why the manual backport exists. When one occurs, report the conflicting files and resolve each hunk by reading both sides against the original master change, preserving the intent of the fix. Show the user your resolution before continuing with `git cherry-pick --continue`. When a conflict is genuinely ambiguous, surface it and let the user decide rather than guessing.
+
+## Backporting an Upgrade Process
+
+When the cherry-pick touches `PortalUpgradeProcessRegistryImpl` or a module's upgrade step registrator, choosing the schema version is the whole job, and getting it wrong silently loses upgrades on a customer's database. Follow [`references/upgrade-process.md`](references/upgrade-process.md) before picking a number, and never just copy master's.
 
 ## Verify
 
