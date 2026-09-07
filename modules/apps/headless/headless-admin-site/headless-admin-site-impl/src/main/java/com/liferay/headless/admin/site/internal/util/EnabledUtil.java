@@ -28,6 +28,19 @@ public class EnabledUtil {
 			company.getCompanyId(), "LPD-76864");
 	}
 
+	public static void checkDesignLibrariesEnabled(Company company) {
+		if (LazyReferencingThreadLocal.isEnabled() ||
+			ExportImportThreadLocal.isExportInProcess() ||
+			ExportImportThreadLocal.isImportInProcess() ||
+			ExportImportThreadLocal.isStagingInProcess()) {
+
+			return;
+		}
+
+		FeatureFlagManagerUtil.checkEnabled(
+			company.getCompanyId(), "LPD-57283");
+	}
+
 	public static void checkEnabled(Company company) {
 		checkEnabled(company, false);
 	}
