@@ -57,6 +57,53 @@ public class PageTemplateSet implements Serializable {
 	}
 
 	@io.swagger.v3.oas.annotations.media.Schema(
+		description = "The actions and their permissions for this page template set."
+	)
+	@Valid
+	public Map<String, Map<String, String>> getActions() {
+		if (_actionsSupplier != null) {
+			actions = _actionsSupplier.get();
+
+			_actionsSupplier = null;
+		}
+
+		return actions;
+	}
+
+	public void setActions(Map<String, Map<String, String>> actions) {
+		this.actions = actions;
+
+		_actionsSupplier = null;
+	}
+
+	@JsonIgnore
+	public void setActions(
+		UnsafeSupplier<Map<String, Map<String, String>>, Exception>
+			actionsUnsafeSupplier) {
+
+		_actionsSupplier = () -> {
+			try {
+				return actionsUnsafeSupplier.get();
+			}
+			catch (RuntimeException runtimeException) {
+				throw runtimeException;
+			}
+			catch (Exception exception) {
+				throw new RuntimeException(exception);
+			}
+		};
+	}
+
+	@GraphQLField(
+		description = "The actions and their permissions for this page template set."
+	)
+	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
+	protected Map<String, Map<String, String>> actions;
+
+	@JsonIgnore
+	private Supplier<Map<String, Map<String, String>>> _actionsSupplier;
+
+	@io.swagger.v3.oas.annotations.media.Schema(
 		description = "The page template set's creator. It is not returned by default. It can be embedded via nestedFields."
 	)
 	@Valid
@@ -478,6 +525,18 @@ public class PageTemplateSet implements Serializable {
 		DateFormat liferayToJSONDateFormat = new SimpleDateFormat(
 			"yyyy-MM-dd'T'HH:mm:ss'Z'");
 
+		Map<String, Map<String, String>> actions = getActions();
+
+		if (actions != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"actions\": ");
+
+			sb.append(_toJSON(actions));
+		}
+
 		Creator creator = getCreator();
 
 		if (creator != null) {
@@ -726,4 +785,4 @@ public class PageTemplateSet implements Serializable {
 	private Map<String, Serializable> _extendedProperties;
 
 }
-// LIFERAY-REST-BUILDER-HASH:-1801722575
+// LIFERAY-REST-BUILDER-HASH:310603796
