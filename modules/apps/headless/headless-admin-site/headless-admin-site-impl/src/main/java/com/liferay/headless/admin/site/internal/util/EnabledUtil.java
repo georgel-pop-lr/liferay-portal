@@ -16,11 +16,7 @@ import com.liferay.portal.kernel.model.Company;
 public class EnabledUtil {
 
 	public static void checkAddWidgetPageEnabled(Company company) {
-		if (LazyReferencingThreadLocal.isEnabled() ||
-			ExportImportThreadLocal.isExportInProcess() ||
-			ExportImportThreadLocal.isImportInProcess() ||
-			ExportImportThreadLocal.isStagingInProcess()) {
-
+		if (_isBypassed()) {
 			return;
 		}
 
@@ -29,11 +25,7 @@ public class EnabledUtil {
 	}
 
 	public static void checkDesignLibrariesEnabled(Company company) {
-		if (LazyReferencingThreadLocal.isEnabled() ||
-			ExportImportThreadLocal.isExportInProcess() ||
-			ExportImportThreadLocal.isImportInProcess() ||
-			ExportImportThreadLocal.isStagingInProcess()) {
-
+		if (_isBypassed()) {
 			return;
 		}
 
@@ -46,11 +38,7 @@ public class EnabledUtil {
 	}
 
 	public static void checkEnabled(Company company, boolean privateLayout) {
-		if (LazyReferencingThreadLocal.isEnabled() ||
-			ExportImportThreadLocal.isExportInProcess() ||
-			ExportImportThreadLocal.isImportInProcess() ||
-			ExportImportThreadLocal.isStagingInProcess()) {
-
+		if (_isBypassed()) {
 			return;
 		}
 
@@ -66,6 +54,18 @@ public class EnabledUtil {
 	public static void checkPageSpecificationVersionEnabled(Company company) {
 		FeatureFlagManagerUtil.checkEnabled(
 			company.getCompanyId(), "LPD-10622");
+	}
+
+	private static boolean _isBypassed() {
+		if (LazyReferencingThreadLocal.isEnabled() ||
+			ExportImportThreadLocal.isExportInProcess() ||
+			ExportImportThreadLocal.isImportInProcess() ||
+			ExportImportThreadLocal.isStagingInProcess()) {
+
+			return true;
+		}
+
+		return false;
 	}
 
 }
