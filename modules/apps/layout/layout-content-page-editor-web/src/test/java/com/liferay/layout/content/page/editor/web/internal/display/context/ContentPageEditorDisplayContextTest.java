@@ -5,14 +5,20 @@
 
 package com.liferay.layout.content.page.editor.web.internal.display.context;
 
+import com.liferay.design.library.util.DesignLibraryUtil;
 import com.liferay.frontend.token.definition.FrontendTokenDefinitionRegistry;
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
+import com.liferay.portal.kernel.test.TestInfo;
+import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.test.rule.LiferayUnitTestRule;
 import com.liferay.style.book.model.StyleBookEntry;
 import com.liferay.style.book.util.StyleBookEntryProviderUtil;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -36,6 +42,72 @@ public class ContentPageEditorDisplayContextTest {
 	@AfterClass
 	public static void tearDownClass() {
 		_styleBookEntryProviderUtilMockedStatic.close();
+	}
+
+	@Test
+	@TestInfo("LPD-104844")
+	public void testGetDefaultRedirect() throws Exception {
+		ContentPageEditorDisplayContext contentPageEditorDisplayContext =
+			Mockito.mock(ContentPageEditorDisplayContext.class);
+
+		HttpServletRequest httpServletRequest = Mockito.mock(
+			HttpServletRequest.class);
+
+		ReflectionTestUtil.setFieldValue(
+			contentPageEditorDisplayContext, "httpServletRequest",
+			httpServletRequest);
+
+		ThemeDisplay themeDisplay = Mockito.mock(ThemeDisplay.class);
+
+		Group group = Mockito.mock(Group.class);
+
+		Mockito.when(
+			themeDisplay.getScopeGroup()
+		).thenReturn(
+			group
+		);
+
+		String urlCurrent = RandomTestUtil.randomString();
+
+		Mockito.when(
+			themeDisplay.getURLCurrent()
+		).thenReturn(
+			urlCurrent
+		);
+
+		ReflectionTestUtil.setFieldValue(
+			contentPageEditorDisplayContext, "themeDisplay", themeDisplay);
+
+		Assert.assertEquals(
+			urlCurrent,
+			ReflectionTestUtil.invoke(
+				contentPageEditorDisplayContext, "_getDefaultRedirect",
+				new Class<?>[0]));
+
+		try (MockedStatic<DesignLibraryUtil> designLibraryUtilMockedStatic =
+				Mockito.mockStatic(DesignLibraryUtil.class)) {
+
+			String designLibraryResourcesURL = RandomTestUtil.randomString();
+
+			designLibraryUtilMockedStatic.when(
+				() -> DesignLibraryUtil.isDesignLibraryScope(group)
+			).thenReturn(
+				true
+			);
+
+			designLibraryUtilMockedStatic.when(
+				() -> DesignLibraryUtil.getDesignLibraryResourcesURL(
+					group, httpServletRequest)
+			).thenReturn(
+				designLibraryResourcesURL
+			);
+
+			Assert.assertEquals(
+				designLibraryResourcesURL,
+				ReflectionTestUtil.invoke(
+					contentPageEditorDisplayContext, "_getDefaultRedirect",
+					new Class<?>[0]));
+		}
 	}
 
 	@Test
