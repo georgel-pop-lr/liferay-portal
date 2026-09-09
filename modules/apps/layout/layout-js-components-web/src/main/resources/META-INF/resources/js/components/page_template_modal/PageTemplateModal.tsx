@@ -15,13 +15,20 @@ import {flushSync} from 'react-dom';
 import FormField from './FormField';
 
 interface Props {
-	createTemplateURL: string;
-	getCollectionsURL: string;
-	hasMultipleSegmentsExperienceIds: boolean;
-	layoutId: string;
+	addPageTemplateSetURL?: string;
+	allowCustomName?: boolean;
+	createTemplateURL?: string;
+	getCollectionsURL?: string;
+	hasMultipleSegmentsExperienceIds?: boolean;
+	layoutId?: string;
 	namespace?: string;
 	onClose: () => {};
-	segmentsExperienceId: string;
+	onSubmitPageTemplateSet?: (
+		layoutPageTemplateCollectionId: number,
+		pageTemplateName?: string
+	) => void;
+	pageTemplateSets?: Set[];
+	segmentsExperienceId?: string;
 }
 
 interface Set {
@@ -30,34 +37,54 @@ interface Set {
 }
 
 type Errors = {
+	pageTemplateName?: string;
 	templateSetId?: string;
 	templateSetName?: string;
 };
 
-export default function PageTemplateModal({
+export default function PageTemplateModal({onClose, ...otherProps}: Props) {
+	const {observer} = useModal({
+		onClose,
+	});
+
+	return (
+		<ClayModal containerProps={{className: 'cadmin'}} observer={observer}>
+			<PageTemplateModalContent {...otherProps} closeModal={onClose} />
+		</ClayModal>
+	);
+}
+
+export function PageTemplateModalContent({
+	addPageTemplateSetURL,
+	allowCustomName = false,
+	closeModal,
 	createTemplateURL,
 	getCollectionsURL,
 	hasMultipleSegmentsExperienceIds,
 	layoutId,
 	namespace,
-	onClose,
+	onSubmitPageTemplateSet,
+	pageTemplateSets = [],
 	segmentsExperienceId,
-}: Props) {
-	const {observer} = useModal({
-		onClose,
-	});
-	const [availableSets, setAvailableSets] = useState<Set[]>([]);
+}: Omit<Props, 'onClose'> & {closeModal: () => void}) {
+	const [availableSets, setAvailableSets] = useState<Set[]>(pageTemplateSets);
 	const [formErrors, setFormErrors] = useState<Errors>({});
 	const [loading, setLoading] = useState(false);
-	const [openAddTemplateSetModal, setOpenAddTemplateSetModal] =
-		useState(false);
+	const [openAddTemplateSetModal, setOpenAddTemplateSetModal] = useState(
+		!getCollectionsURL && !pageTemplateSets.length
+	);
+	const [pageTemplateName, setPageTemplateName] = useState('');
 	const [templateSetDescription, setTemplateSetDescription] = useState('');
 	const [templateSetId, setTemplateSetId] = useState('');
-	const [templateSetName, setTemplateSetName] = useState(
-		Liferay.Language.get('untitled-set')
+	const [templateSetName, setTemplateSetName] = useState(() =>
+		getUniqueName(pageTemplateSets, Liferay.Language.get('untitled-set'))
 	);
 
 	const nameInputRef = useRef<HTMLInputElement>(null);
+
+	const nameLabel = allowCustomName
+		? Liferay.Language.get('page-template-set-name')
+		: Liferay.Language.get('name');
 
 	const templateSetSelectOptions = useMemo(
 		() => [
@@ -76,21 +103,11 @@ export default function PageTemplateModal({
 		}
 	}, []);
 
-	function getUniqueName(items: any[], languageKey: string) {
-		let name = languageKey;
-
-		const names = new Set([...items.map((item) => item.name)]);
-
-		items.forEach((_, index) => {
-			if (names.has(name)) {
-				name = `${languageKey} ${index + 2}`;
-			}
-		});
-
-		return name;
-	}
-
 	useEffect(() => {
+		if (!getCollectionsURL) {
+			return;
+		}
+
 		fetch(getCollectionsURL)
 			.then((response) => response.json())
 			.then((sets) => {
@@ -113,11 +130,18 @@ export default function PageTemplateModal({
 	const validateForm = useCallback(() => {
 		const errors: Errors = {};
 
+		if (allowCustomName && !pageTemplateName) {
+			errors.pageTemplateName = sub(
+				Liferay.Language.get('x-field-is-required'),
+				Liferay.Language.get('page-template-name')
+			);
+		}
+
 		if (openAddTemplateSetModal) {
 			if (!templateSetName) {
 				errors.templateSetName = sub(
 					Liferay.Language.get('x-field-is-required'),
-					Liferay.Language.get('name')
+					nameLabel
 				);
 			}
 		}
@@ -131,7 +155,14 @@ export default function PageTemplateModal({
 		}
 
 		return errors;
-	}, [templateSetId, templateSetName, openAddTemplateSetModal]);
+	}, [
+		allowCustomName,
+		nameLabel,
+		openAddTemplateSetModal,
+		pageTemplateName,
+		templateSetId,
+		templateSetName,
+	]);
 
 	// We are using flush here because this way we can clear errors inmediately
 	// in handleSubmit. Otherwise, React will batch setStates and will do only
@@ -146,13 +177,7 @@ export default function PageTemplateModal({
 	);
 
 	const getFormData = useCallback(
-		(body: {
-			layoutPageTemplateCollectionDescription: string;
-			layoutPageTemplateCollectionId: string;
-			layoutPageTemplateCollectionName: string;
-			plid: string;
-			segmentsExperienceId: string;
-		}): FormData => {
+		(body: Record<string, string>): FormData => {
 			const formData = new FormData();
 
 			Object.entries(body).forEach(([key, value]) => {
@@ -170,6 +195,65 @@ export default function PageTemplateModal({
 		[namespace]
 	);
 
+	const submitPageTemplateSet = useCallback(() => {
+		if (!openAddTemplateSetModal) {
+			closeModal();
+
+			onSubmitPageTemplateSet!(Number(templateSetId), pageTemplateName);
+
+			return;
+		}
+
+		fetch(addPageTemplateSetURL!, {
+			body: getFormData({
+				description: templateSetDescription,
+				name: templateSetName,
+			}),
+			method: 'POST',
+		})
+			.then((response) => response.json())
+			.then(
+				({
+					error,
+					layoutPageTemplateCollectionId,
+				}: {
+					error?: string;
+					layoutPageTemplateCollectionId?: number;
+				}) => {
+					if (!layoutPageTemplateCollectionId) {
+						throw new Error(error);
+					}
+
+					closeModal();
+
+					onSubmitPageTemplateSet!(
+						layoutPageTemplateCollectionId,
+						pageTemplateName
+					);
+				}
+			)
+			.catch((error) => {
+				setLoading(false);
+
+				openToast({
+					message:
+						error.message ||
+						Liferay.Language.get('an-unexpected-error-occurred'),
+					type: 'danger',
+				});
+			});
+	}, [
+		addPageTemplateSetURL,
+		closeModal,
+		getFormData,
+		onSubmitPageTemplateSet,
+		openAddTemplateSetModal,
+		pageTemplateName,
+		templateSetDescription,
+		templateSetId,
+		templateSetName,
+	]);
+
 	const handleSubmit = useCallback(
 		(event: any) => {
 			event.preventDefault();
@@ -186,16 +270,21 @@ export default function PageTemplateModal({
 
 			setLoading(true);
 
-			const body = {
-				layoutPageTemplateCollectionDescription: templateSetDescription,
-				layoutPageTemplateCollectionId: templateSetId,
-				layoutPageTemplateCollectionName: templateSetName,
-				plid: layoutId,
-				segmentsExperienceId,
-			};
+			if (onSubmitPageTemplateSet) {
+				submitPageTemplateSet();
 
-			fetch(createTemplateURL, {
-				body: getFormData(body),
+				return;
+			}
+
+			fetch(createTemplateURL!, {
+				body: getFormData({
+					layoutPageTemplateCollectionDescription:
+						templateSetDescription,
+					layoutPageTemplateCollectionId: templateSetId,
+					layoutPageTemplateCollectionName: templateSetName,
+					plid: layoutId!,
+					segmentsExperienceId: segmentsExperienceId!,
+				}),
 				method: 'POST',
 			})
 				.then((response) => response.json())
@@ -212,7 +301,7 @@ export default function PageTemplateModal({
 						type: 'success',
 					});
 
-					onClose();
+					closeModal();
 				})
 				.catch(() => {
 					setLoading(false);
@@ -226,12 +315,14 @@ export default function PageTemplateModal({
 				});
 		},
 		[
+			closeModal,
 			createTemplateURL,
 			getFormData,
 			layoutId,
-			onClose,
+			onSubmitPageTemplateSet,
 			resetErrors,
 			segmentsExperienceId,
+			submitPageTemplateSet,
 			templateSetDescription,
 			templateSetId,
 			templateSetName,
@@ -239,14 +330,21 @@ export default function PageTemplateModal({
 		]
 	);
 
+	let title = Liferay.Language.get('select-page-template-set');
+
+	if (allowCustomName) {
+		title = Liferay.Language.get('add-page-template');
+	}
+	else if (openAddTemplateSetModal) {
+		title = Liferay.Language.get('add-page-template-set');
+	}
+
 	return (
-		<ClayModal containerProps={{className: 'cadmin'}} observer={observer}>
+		<>
 			<ClayModal.Header
 				closeButtonAriaLabel={Liferay.Language.get('close')}
 			>
-				{openAddTemplateSetModal
-					? Liferay.Language.get('add-page-template-set')
-					: Liferay.Language.get('select-page-template-set')}
+				{title}
 			</ClayModal.Header>
 
 			<ClayModal.Body>
@@ -265,6 +363,29 @@ export default function PageTemplateModal({
 				)}
 
 				<ClayForm onSubmit={handleSubmit}>
+					{allowCustomName && (
+						<FormField
+							error={formErrors.pageTemplateName}
+							id={`${namespace}pageTemplateName`}
+							name={Liferay.Language.get('page-template-name')}
+							required
+						>
+							<ClayInput
+								id={`${namespace}pageTemplateName`}
+								onChange={(event) => {
+									setPageTemplateName(event.target.value);
+
+									setFormErrors({
+										...formErrors,
+										pageTemplateName: '',
+									});
+								}}
+								required
+								value={pageTemplateName}
+							/>
+						</FormField>
+					)}
+
 					{openAddTemplateSetModal ? (
 						<>
 							{!availableSets.length ? (
@@ -277,7 +398,7 @@ export default function PageTemplateModal({
 							<FormField
 								error={formErrors.templateSetName}
 								id={`${namespace}templateSetName`}
-								name={Liferay.Language.get('name')}
+								name={nameLabel}
 								required
 							>
 								<ClayInput
@@ -360,7 +481,10 @@ export default function PageTemplateModal({
 				}
 				last={
 					<ClayButton.Group spaced>
-						<ClayButton displayType="secondary" onClick={onClose}>
+						<ClayButton
+							displayType="secondary"
+							onClick={closeModal}
+						>
 							{Liferay.Language.get('cancel')}
 						</ClayButton>
 
@@ -382,6 +506,20 @@ export default function PageTemplateModal({
 					</ClayButton.Group>
 				}
 			/>
-		</ClayModal>
+		</>
 	);
+}
+
+function getUniqueName(items: Set[], languageKey: string) {
+	let name = languageKey;
+
+	const names = new Set(items.map((item) => item.name));
+
+	items.forEach((_, index) => {
+		if (names.has(name)) {
+			name = `${languageKey} ${index + 2}`;
+		}
+	});
+
+	return name;
 }
