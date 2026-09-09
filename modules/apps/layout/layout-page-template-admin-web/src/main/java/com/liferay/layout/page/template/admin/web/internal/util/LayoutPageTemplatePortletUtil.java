@@ -5,6 +5,7 @@
 
 package com.liferay.layout.page.template.admin.web.internal.util;
 
+import com.liferay.layout.page.template.admin.constants.LayoutPageTemplateAdminPortletKeys;
 import com.liferay.layout.page.template.model.LayoutPageTemplateCollection;
 import com.liferay.layout.page.template.model.LayoutPageTemplateEntry;
 import com.liferay.layout.page.template.service.LayoutPageTemplateCollectionLocalServiceUtil;
@@ -14,6 +15,7 @@ import com.liferay.layout.page.template.util.comparator.LayoutPageTemplateEntryC
 import com.liferay.layout.page.template.util.comparator.LayoutPageTemplateEntryNameComparator;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.ParamUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.Validator;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,8 +28,14 @@ public class LayoutPageTemplatePortletUtil {
 	public static long getLayoutPageTemplateCollectionId(
 		HttpServletRequest httpServletRequest, long groupId) {
 
+		String portletNamespace = PortalUtil.getPortletNamespace(
+			LayoutPageTemplateAdminPortletKeys.LAYOUT_PAGE_TEMPLATES);
+
 		long layoutPageTemplateCollectionId = ParamUtil.getLong(
-			httpServletRequest, "layoutPageTemplateCollectionId");
+			httpServletRequest,
+			portletNamespace + "layoutPageTemplateCollectionId",
+			ParamUtil.getLong(
+				httpServletRequest, "layoutPageTemplateCollectionId"));
 
 		if (layoutPageTemplateCollectionId > 0) {
 			return layoutPageTemplateCollectionId;
@@ -35,7 +43,11 @@ public class LayoutPageTemplatePortletUtil {
 
 		String externalReferenceCode = ParamUtil.getString(
 			httpServletRequest,
-			"layoutPageTemplateCollectionExternalReferenceCode");
+			portletNamespace +
+				"layoutPageTemplateCollectionExternalReferenceCode",
+			ParamUtil.getString(
+				httpServletRequest,
+				"layoutPageTemplateCollectionExternalReferenceCode"));
 
 		if (Validator.isNull(externalReferenceCode)) {
 			return 0;
