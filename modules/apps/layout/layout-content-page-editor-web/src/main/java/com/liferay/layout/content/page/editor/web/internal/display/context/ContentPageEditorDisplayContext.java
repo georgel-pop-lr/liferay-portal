@@ -7,6 +7,7 @@ package com.liferay.layout.content.page.editor.web.internal.display.context;
 
 import com.liferay.asset.categories.item.selector.AssetCategoryTreeNodeItemSelectorCriterion;
 import com.liferay.asset.categories.item.selector.AssetCategoryTreeNodeItemSelectorReturnType;
+import com.liferay.design.library.util.DesignLibraryUtil;
 import com.liferay.exportimport.kernel.staging.Staging;
 import com.liferay.fragment.constants.FragmentActionKeys;
 import com.liferay.fragment.constants.FragmentPortletKeys;
@@ -1466,6 +1467,17 @@ public class ContentPageEditorDisplayContext {
 		return _defaultMasterStyleBookEntry;
 	}
 
+	private String _getDefaultRedirect() {
+		Group scopeGroup = themeDisplay.getScopeGroup();
+
+		if (DesignLibraryUtil.isDesignLibraryScope(scopeGroup)) {
+			return DesignLibraryUtil.getDesignLibraryResourcesURL(
+				scopeGroup, httpServletRequest);
+		}
+
+		return themeDisplay.getURLCurrent();
+	}
+
 	private StyleBookEntry _getDefaultStyleBookEntry() {
 		if (_defaultStyleBookEntry != null) {
 			return _defaultStyleBookEntry;
@@ -1971,7 +1983,7 @@ public class ContentPageEditorDisplayContext {
 			_redirect = portal.escapeRedirect(
 				ParamUtil.getString(
 					portal.getOriginalServletRequest(httpServletRequest),
-					"p_l_back_url", themeDisplay.getURLCurrent()));
+					"p_l_back_url", _getDefaultRedirect()));
 		}
 
 		return _redirect;
