@@ -41,6 +41,7 @@ Five principles run through everything:
 - Declare each local immediately before its first use ("as used"). A wrapping object is the exception — the value the method returns, or a local whose sole purpose is to absorb another local through a setter — declared first and closed with the return statement or the setter, so it wraps the variables that build it ("burrito"). [203]
 - Order a block of locals that exists only to feed one call by that call's argument order, keeping the block together immediately above the call; a local the call does not take moves down to its own first use, and alphabetical order is the fallback for a block that feeds nothing with an order of its own. [205]
 - Keep a run of homogeneous peer statements solid: no blank line between consecutive calls of the same operation on the same receiver, or between adjacent declarations of the same type that form one preamble. `MissingEmptyLineCheck` wins wherever a variable's last reference falls inside the run, so apply this only to a genuinely uniform run. [206]
+- Terraform (HCL) files carry ordering and formatting conventions of their own, which depart from both the ecosystem defaults and rule 201: a derived `local` keeps its absolute alphabetical slot rather than moving after the values it reads. Read the rule in full before touching one. [204]
 
 ## Prefer Liferay utilities
 
@@ -108,4 +109,3 @@ Simplicity never outranks safety: when the two trade off, choose the safer form.
 - Begin an inline comment with a capital letter and surround it with a blank line before and after. [905]
 - In inline JSON, put a space after each `:` and each `,`, and none after `{` or before `}`. [906]
 - In a JSP, reach a service through its `*LocalServiceUtil` static accessor, rather than having the portlet stash its injected service in a request attribute for the JSP to cast back out. Note that `FooLocalServiceUtil` is the service while `FooUtil` is persistence. [909]
-- Terraform (HCL) files carry their own ordering and formatting conventions, which depart from the ecosystem defaults; read that rule in full before touching one. [204]
