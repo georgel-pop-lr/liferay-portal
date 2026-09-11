@@ -63,25 +63,34 @@ defect by noticing the last entry looks wrong picks up two and misses one.
 Thirty passes, five per cell: three batch sizes against two models, everything
 else identical.
 
-Each cell is five runs. There are two scores, and they run in opposite
-directions. **Planted defects found** counts how many of the 13 deliberate
-violations a run reported, so 13 is a perfect score. **Traps reported** counts
-how many of the 4 traps it wrongly reported, so 0 is a perfect score. Both
-columns list the five runs individually where they vary, rather than hiding the
-spread behind an average.
+The fixture contains **13 defects planted on purpose** and **4 traps**. A trap is
+code a rule technically applies to, written exactly the way the already-merged
+file writes it, so the right answer is to leave it alone and say nothing.
 
-| Batch | Model | Planted defects found (of 13) | Runs scoring 13 | Traps reported (of 4) | Cost/run | Time/run |
+That gives two scores, running in opposite directions:
+
+- **Defects found**, out of 13. Higher is better; 13 means the run found every
+  planted defect.
+- **Traps wrongly reported**, out of 4. Lower is better; 0 means the run fell for
+  none of them.
+
+Each row below is one configuration run five times. The "per run" column lists
+all five results rather than averaging them, because the spread turned out to
+matter more than the average.
+
+| Files per pass | Model | Defects found, per run (13 planted) | Runs that found all 13 | Traps wrongly reported | Cost per run | Time per run |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 file at a time | Opus | 13, 13, 13, 13, 13 | 5 of 5 | 0 | $0.83 | 127s |
-| 2 at a time | Opus | 13, 13, 13, 13, 13 | 5 of 5 | 0 | $0.78 | 139s |
-| 3 at once | Opus | 13, 13, 13, 13, 13 | 5 of 5 | 0 | $0.73 | 112s |
-| 1 file at a time | Sonnet | 12, 13, 9, 10, 10 | 1 of 5 | 0 | $0.33 | 264s |
-| 2 at a time | Sonnet | 11, 12, 10, 12, 9 | 0 of 5 | 0 | $0.29 | 258s |
-| 3 at once | Sonnet | 8, 11, 12, 13, 11 | 1 of 5 | 0 | $0.28 | 248s |
+| 1 | Opus | 13, 13, 13, 13, 13 | 5 of 5 | none | $0.83 | 127s |
+| 2 | Opus | 13, 13, 13, 13, 13 | 5 of 5 | none | $0.78 | 139s |
+| 3 | Opus | 13, 13, 13, 13, 13 | 5 of 5 | none | $0.73 | 112s |
+| 1 | Sonnet | 12, 13, 9, 10, 10 | 1 of 5 | none | $0.33 | 264s |
+| 2 | Sonnet | 11, 12, 10, 12, 9 | 0 of 5 | none | $0.29 | 258s |
+| 3 | Sonnet | 8, 11, 12, 13, 11 | 1 of 5 | none | $0.28 | 248s |
 
-Read it as: every Opus run found all 13 planted defects. Sonnet found between 8
-and 13, varying from run to run on the same input, and only twice out of fifteen
-did it find them all. No run on either model fell for a trap.
+In words: every Opus run found all 13 planted defects, whatever the batch size.
+Sonnet found between 8 and 13, changing from run to run on identical input, and
+found all 13 in only 2 of its 15 runs. Neither model reported a single trap in
+any of the 30 runs.
 
 ## What the numbers say
 
