@@ -2,8 +2,14 @@
 
 Do not give this file to the agent under evaluation. It is the scoring sheet.
 
-Ten seeded violations and four traps, spread over the two files in `review/`.
-Every line number is a line of the file it names, counted from 1.
+Thirteen seeded violations and four traps, spread over the three files in
+`review/`. Every line number is a line of the file it names, counted from 1.
+
+S1 to S10 are ordinary findings. H1 to H3 are the hard ones, modelled on a real
+defect that cost two closed pull requests: a repeated entry whose first argument
+is identical in every row, so the ordering has to be judged on the second
+argument, and where the short name sorts before the longer names that share its
+prefix.
 
 ## Seeded violations, all ten must be reported
 
@@ -23,6 +29,27 @@ Every line number is a line of the file it names, counted from 1.
 S5 may be reported as one finding or as two, one per variable. Either counts
 once.
 
+## The hard three, all must be reported
+
+`review/FooDepotRolePermissionsContributor.java.txt` lists twelve permission
+entries in three role blocks of four. Inside a block the first argument is the
+same role constant in every row, so the order is decided by the second argument,
+and `Foo` sorts before `FooCollection` and `FooEntry` because it is a prefix of
+both. The merged counterpart puts `Bar.class.getName()` first in all three of its
+blocks (`merged/BarDepotRolePermissionsContributor.java.txt:28`, `:43`, `:58`).
+
+| # | Line | Rule | What is wrong |
+| --- | --- | --- | --- |
+| H1 | 36 | 32 | In the `DESIGN_LIBRARY_ADMINISTRATOR` block `Foo.class.getName()` is last; it belongs before `FooCollection` and `FooEntry` |
+| H2 | 47 | 32 | In the `DESIGN_LIBRARY_CONTENT_REVIEWER` block `Foo.class.getName()` sits in the middle, between `FooCollection` and `FooEntry` |
+| H3 | 66 | 32 | In the `DESIGN_LIBRARY_OWNER` block `Foo.class.getName()` is last, the same as H1 |
+
+Each block is scored on its own. H2 is deliberately not in the same position as
+H1 and H3: a run that finds the defect by noticing the last entry looks wrong
+picks up two of the three and misses the middle one. Rule 3 or rule 23 instead
+of rule 32 still counts, as long as the fix described is moving `Foo` ahead of
+the other two in that block.
+
 ## Traps, none of these may be reported
 
 Each is a case where a rule genuinely applies to the code in isolation, and the
@@ -39,8 +66,19 @@ check.
 
 ## Scoring
 
-- Recall: seeded violations reported, out of 10.
+- Recall: seeded violations reported, out of 13, and separately the hard three
+  out of 3, since those are the ones that distinguish a careful pass.
 - Traps: traps reported, out of 4. Zero is the target.
 - Other false positives: anything reported that is neither seeded nor a trap.
   Judge these on their merits before counting them; a run may find something
   real that this key missed, and that is a finding about the key, not the run.
+  One already came back on the first scored pass and is correct: a blank line
+  splitting the paired `themeDisplay` and `group` declarations at
+  `review/FooSetResourceTest.java.txt:46`. Rule numbers are not scored strictly
+  either: accept rule 38 or rule 32 for S10, rule 4 or rule 28 for S6, and rule
+  23 or rule 32 for S4, since each pair describes the same fix.
+
+Seed one defect per site. The S2 site originally also carried a `data.toString()`
+message on the assertion, and both scored passes reported that instead of the
+blank line, so the message was removed to leave the blank line as the only thing
+wrong there.

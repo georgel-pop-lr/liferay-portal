@@ -30,7 +30,7 @@ public class FooSetResourceTest {
 
 		Assert.assertEquals("add", data.get("action"));
 
-		Assert.assertTrue(data.toString(), data.containsKey("addFooSetURL"));
+		Assert.assertTrue(data.containsKey("addFooSetURL"));
 	}
 
 	@Test
