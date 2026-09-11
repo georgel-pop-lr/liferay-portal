@@ -13,11 +13,16 @@ comparable.
 
 ## Layout
 
-- `review/` holds the files under review.
+- `review/` holds the ten files under review.
 - `merged/` holds the already-merged counterparts they were modelled on. This is
   what the skill's `## Existing Code Wins` section points at.
 - `ANSWERS.md` is the scoring sheet. **Never give it to the agent being scored.**
 - `RESULTS.md` is the write-up of the runs done so far.
+
+The first three files carry the original thirteen seeded defects and four traps,
+and the seven added on 2026-09-11 carry twenty-two more and four more traps, for
+thirty-five and eight over ten files. The first three are still scored as a
+subset, because the first batch-size matrix ran when they were the whole fixture.
 
 Everything is `.java.txt` on purpose: nothing here should be compiled, formatted,
 or picked up by the source formatter, and the line numbers in the answer key have
@@ -35,6 +40,10 @@ Give a fresh agent, with no history, a prompt containing:
    record findings, then move on.
 5. These constraints: report only, no edits, no gradle or ant, and no subagents.
 
+For a batch size other than one, say the groups explicitly (files 1 to 4, then 5
+to 8, then 9 and 10) rather than naming a number, so two runs of the same cell
+review the same groups.
+
 Ask for exactly this output, and nothing else:
 
 	# Findings: <n>
@@ -47,9 +56,10 @@ Use the bare file name and the line number counted from 1 in that file.
 
 Against `ANSWERS.md`:
 
-- **Recall**, how many of the 13 seeded violations came back, and separately how
-  many of the hard three, since those are what distinguish a careful pass.
-- **Traps**, how many of the 4 traps were reported. Zero is the target. A trap is
+- **Recall**, how many of the 35 seeded violations came back, how many of the
+  original 13, and separately how many of the hard three, since those are what
+  distinguish a careful pass.
+- **Traps**, how many of the 8 traps were reported. Zero is the target. A trap is
   code a rule genuinely applies to, written exactly as the merged counterpart
   writes it, so the correct behaviour is silence.
 - **Extras**, anything reported that is neither. Judge each on its merits: a run

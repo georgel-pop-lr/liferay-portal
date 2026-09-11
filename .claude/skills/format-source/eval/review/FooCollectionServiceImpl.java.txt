@@ -41,11 +41,11 @@ public class FooCollectionServiceImpl extends FooCollectionServiceBaseImpl {
 	}
 
 	private boolean _visible(FooCollection fooCollection) {
-		if (!fooCollection.isDraft()) {
-			return true;
+		if (fooCollection.isDraft()) {
+			return false;
 		}
 
-		return false;
+		return true;
 	}
 
 	@Reference

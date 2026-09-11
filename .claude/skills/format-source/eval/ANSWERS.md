@@ -2,8 +2,13 @@
 
 Do not give this file to the agent under evaluation. It is the scoring sheet.
 
-Thirteen seeded violations and four traps, spread over the three files in
+Thirty-five seeded violations and eight traps, spread over the ten files in
 `review/`. Every line number is a line of the file it names, counted from 1.
+
+The first three files carry the original thirteen, S1 to S10 plus H1 to H3, and
+the four original traps. Score that subset on its own as well as the full set:
+the thirty runs of the first batch-size matrix were scored against those thirteen
+alone, and the subset is what makes a later run comparable to them.
 
 S1 to S10 are ordinary findings. H1 to H3 are the hard ones, modelled on a real
 defect that cost two closed pull requests: a repeated entry whose first argument
@@ -11,7 +16,7 @@ is identical in every row, so the ordering has to be judged on the second
 argument, and where the short name sorts before the longer names that share its
 prefix.
 
-## Seeded violations, all ten must be reported
+## Files one to three: seeded violations, all ten must be reported
 
 | # | File | Line | Rule | What is wrong | Reference in `merged/` |
 | --- | --- | --- | --- | --- | --- |
@@ -50,7 +55,7 @@ picks up two of the three and misses the middle one. Rule 3 or rule 23 instead
 of rule 32 still counts, as long as the fix described is moving `Foo` ahead of
 the other two in that block.
 
-## Traps, none of these may be reported
+## Files one to three: traps, none of these may be reported
 
 Each is a case where a rule genuinely applies to the code in isolation, and the
 already-merged counterpart writes it exactly the same way, so "Existing Code
@@ -63,6 +68,45 @@ check.
 | T2 | `review/FooSetResourceTest.java.txt` | 95 | 12 | `BarSetResourceTest.java.txt:65` writes the identical single-use `Group group` |
 | T3 | `review/FooDisplayContext.java.txt` | 61 | 2 | `BarDisplayContext.java.txt:49-51` declares the same three parameters in the same order |
 | T4 | `review/FooDisplayContext.java.txt` | 72 | 40 | `BarDisplayContext.java.txt:60` carries the same `_newCreationItem` name |
+
+## Files four to ten: seeded violations, all twenty-two must be reported
+
+Written 2026-09-11, when the fixture grew from three files to ten so batch sizes
+of four, five and ten could be asked the same question as one, two and three.
+
+| # | File | Line | Rule | What is wrong | Reference in `merged/` |
+| --- | --- | --- | --- | --- | --- |
+| S11 | `review/FooBreadcrumbEntryContributorImpl.java.txt` | 41 | 2 | `_createFooCollectionBreadcrumbEntry` takes `httpServletRequest` before `fooCollection`; the call site at 37-38 passes them in that same order | `BarBreadcrumbEntryContributorImpl.java.txt:41-43` takes `barCollection` first |
+| S12 | `review/FooBreadcrumbEntryContributorImpl.java.txt` | 47 | 17 | `setURL` is called before `setTitle` on the same `breadcrumbEntry` | `BarBreadcrumbEntryContributorImpl.java.txt:47-53` sets title, then URL |
+| S13 | `review/FooBreadcrumbEntryContributorImpl.java.txt` | 61 | 12 | `fooCollectionId` is a single-use local handed straight to the next call | `BarBreadcrumbEntryContributorImpl.java.txt:61-62` inlines `ParamUtil.getLong` |
+| S14 | `review/FooBreadcrumbEntryContributorImpl.java.txt` | 67 | 38 | `_FOO_ADMIN_PREFIX` sits before `_FOO_ADMIN_LABEL` | `BarBreadcrumbEntryContributorImpl.java.txt:65-67` sorts LABEL before PREFIX |
+| S15 | `review/FooCollectionServiceImpl.java.txt` | 24 | 12 | `externalReferenceCode` is a single-use local, and it is declared above the permission check although only the return at 30 uses it | - |
+| S16 | `review/FooCollectionServiceImpl.java.txt` | 39 | 23 | No blank line between the `fooCollections` declaration and the `return` that consumes it | `BarCollectionServiceImpl.java.txt:37` has one |
+| S17 | `review/FooCollectionServiceImpl.java.txt` | 43 | 40 | `_visible` is an adjective, not a verb; it should be `_isVisible`, call site at 40 | `BarCollectionServiceImpl.java.txt:42` |
+| S18 | `review/FooEntryModelListener.java.txt` | 26 | 34 | `onBeforeRemove` overrides the base method but carries no `@Override` | `BarEntryModelListener.java.txt:26` |
+| S19 | `review/FooEntryModelListener.java.txt` | 39 | 19 | `_removeFooEntryResources` calls `deleteResource`, so the helper's verb is delete; call site at 29 | `BarEntryModelListener.java.txt:39` |
+| S20 | `review/FooEntryModelListener.java.txt` | 45 | 43 | The private helper catches `PortalException` and rethrows it wrapped; its signature can declare the checked type instead | `BarEntryModelListener.java.txt:39-40` declares `throws PortalException` and wraps only at the override |
+| S21 | `review/FooCollectionResourceImpl.java.txt` | 29 | 25 | `getFooCollection` returns a `List`, so the name is plural; call site at 25 | `BarCollectionResourceImpl.java.txt:29` |
+| S22 | `review/FooCollectionResourceImpl.java.txt` | 35 | 30 | A positive nested condition wraps the loop body; invert it and `continue` | `BarCollectionResourceImpl.java.txt:37-39` |
+| S23 | `review/FooCollectionResourceImpl.java.txt` | 42 | 37 | `ListUtil` is imported at line 3 yet written fully qualified | `BarCollectionResourceImpl.java.txt:46` |
+| S24 | `review/FooEntryUpgradeProcess.java.txt` | 22 | 42 | No blank line before `resultSet`, which consumes `preparedStatement1` | `BarEntryUpgradeProcess.java.txt:22-23` |
+| S25 | `review/FooEntryUpgradeProcess.java.txt` | 40 | 36 | Two consecutive literal `append` calls; combining them also drops the `StringBundler` size at 36 from 4 to 3 | `BarEntryUpgradeProcess.java.txt:41` |
+| S26 | `review/FooEntryUpgradeProcess.java.txt` | 46 | 41 | `_FOO_ENTRY_TABLE_NAME` leads with the value instead of the group, scattering it from `_FOO_ENTRY_VERSION_TABLE_NAME` at 48 | `BarEntryUpgradeProcess.java.txt:46` writes `_TABLE_NAME_BAR_ENTRY` |
+| S27 | `review/FooCollectionPermissionTest.java.txt` | 25 | 31 | `@BeforeClass` where `@Before` does the job, which also forces `_group` static at 61 | `BarCollectionPermissionTest.java.txt:25` |
+| S28 | `review/FooCollectionPermissionTest.java.txt` | 34 | 11 | `assertNotNull` before two assertions that dereference the same value | `BarCollectionPermissionTest.java.txt:34` drops it |
+| S29 | `review/FooCollectionPermissionTest.java.txt` | 46 | 13 | A narrative `StringBundler.concat` message on `assertTrue` restates the predicate | `BarCollectionPermissionTest.java.txt:45-47` |
+| S30 | `review/FooEntryLocalServiceImpl.java.txt` | 42 | 33 | `currentGroupIds` disagrees with `_getInheritedGroupIds`, the expression assigned to it | `BarEntryLocalServiceImpl.java.txt:42` |
+| S31 | `review/FooEntryLocalServiceImpl.java.txt` | 45 | 1 | The chain calls `groupIds`, `queryString`, `entryClassNames` | `BarEntryLocalServiceImpl.java.txt:44-52` calls `entryClassNames`, `groupIds`, `queryString` |
+| S32 | `review/FooEntryLocalServiceImpl.java.txt` | 59 | 39 | `_reindexFooEntry` is package private although only this class calls it | `BarEntryLocalServiceImpl.java.txt:59` |
+
+## Files four to ten: traps, none of these may be reported
+
+| # | File | Line | Rule that appears to apply | Why it is not a finding |
+| --- | --- | --- | --- | --- |
+| T5 | `review/FooBreadcrumbEntryContributorImpl.java.txt` | 50 | 20 | `BarBreadcrumbEntryContributorImpl.java.txt:51` passes the identical `0L, 0L` |
+| T6 | `review/FooEntryModelListener.java.txt` | 33 | 12 | `BarEntryModelListener.java.txt:47-50` writes the identical single-use `fooEntryIndexer` |
+| T7 | `review/FooCollectionPermissionTest.java.txt` | 35 | 3 | `BarCollectionPermissionTest.java.txt:34-35` asserts name then description in the same order |
+| T8 | `review/FooEntryLocalServiceImpl.java.txt` | 27 | 17 | `BarEntryLocalServiceImpl.java.txt:27-31` configures the entity in the same model-field order, and rule 17's own exception says a Service Builder entity's setter block is left as the automatic formatter produces it |
 
 ## Scoring
 
@@ -83,11 +127,14 @@ message on the assertion, and both scored passes reported that instead of the
 blank line, so the message was removed to leave the blank line as the only thing
 wrong there.
 
-## Files with no keyed violations yet
+## Scoring the original thirteen as a subset
 
-`review/FooBreadcrumbEntryContributorImpl.java.txt` and
-`review/FooCollectionServiceImpl.java.txt`, with their counterparts in `merged/`,
-are reserved for growing the fixture to five files so batch sizes of four and
-five can be tested. They carry deliberate defects but nothing in this key yet, so
-do not include them in a scored pass until their violations are written down
-here.
+S1 to S10 and H1 to H3 are the thirteen the first matrix was scored on, and T1 to
+T4 its four traps. Report recall over them separately from recall over all
+thirty-five, so a run on the ten-file fixture can be set beside the runs on the
+three-file one without either number being reconstructed afterwards.
+
+One change was made to `review/FooCollectionServiceImpl.java.txt` when it was
+keyed: `_visible` returned `true` on a negated draft check, which no rule in the
+set describes, so it was rewritten to match the merged counterpart's shape. The
+name is the seeded defect there, not the branch.
