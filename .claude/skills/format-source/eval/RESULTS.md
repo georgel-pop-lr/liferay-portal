@@ -98,21 +98,61 @@ Sonnet found between 8 and 13, changing from run to run on identical input, and
 found all 13 in only 2 of its 15 runs. Neither model reported a single trap in
 any of the 30 runs.
 
+## Round three: ten files, and where the ceiling actually is
+
+Round two saturated. Opus scored full marks in all fifteen runs, so nothing above
+three files could be ranked, and the obvious question was whether four, five or
+ten files behave differently.
+
+The fixture grew from three files to ten: 683 lines under review against 639
+lines of merged counterparts, **35 seeded defects and 8 traps**. The original
+thirteen are still scored on their own, so these runs sit beside round two's
+without either number being reconstructed. Thirty more passes, five per cell,
+three batch sizes against two models.
+
+| Files per pass | Model | Of 35 planted, per run | Of the original 13 | Traps (8 per run) | Cost per run | Time per run |
+| --- | --- | --- | --- | --- | --- | --- |
+| 4 | Opus | 35, 35, 35, 34, 34 | 13, 13, 13, 12, 12 | none | $0.92 | 178s |
+| 5 | Opus | 35, 35, 35, 35, 35 | 13, 13, 13, 13, 13 | none | $1.11 | 207s |
+| 10 | Opus | 35, 35, 35, 35, 35 | 13, 13, 13, 13, 13 | none | $1.01 | 190s |
+| 4 | Sonnet | 32, 32, 31, 31, 30 | 11, 11, 11, 9, 9 | 1 in 5 runs | $0.47 | 357s |
+| 5 | Sonnet | 31, 29, 28, 28, 28 | 9, 8, 7, 7, 7 | 3 in 5 runs | $0.40 | 343s |
+| 10 | Sonnet | 30, 30, 30, 30, 29 | 9, 9, 8, 9, 7 | none | $0.47 | 335s |
+
+Thirty runs, $21.92.
+
+**Opus does not degrade at ten files.** Twenty-eight of its thirty findings sets
+are perfect, and the two that are not are the same single miss, the blank line
+splitting two parallel assertions, in two runs of the four-file cell. Reviewing
+all ten at once was neither worse nor dearer than reviewing them four at a time.
+Whatever broke the 41-file pass in round one, it is not reached by ten files of
+this size.
+
+**Sonnet degrades, and now the degradation is visible in the batch size.** On the
+original thirteen it averaged 11.0 at three files per pass, 10.2 at four, 7.6 at
+five and 8.4 at ten. Its ceiling on the full set never reached 35: the best of
+its fifteen runs was 32. Two runs also reported traps, where Opus reported none
+in any of the thirty runs across both rounds.
+
 ## What the numbers say
 
-**Batch size does not change what is found, at three files.** Opus scored 13 of
-13 in all fifteen runs regardless of grouping, and Sonnet's spread is the same
-whichever way its files are grouped: it lands between 8 and 13 either way, and
-the difference between the three shapes is smaller than the difference between
-two Sonnet runs of the same shape. Reviewing everything at once was also the cheapest and
-the fastest, so at this size there is no case for chunking. This does not
-contradict round one, where per-file scoping beat a whole-diff pass on 41 files:
-three files fit comfortably in one pass and 41 do not. The lesson is that
-chunking buys nothing until the diff is large enough to need it.
+**Batch size does not change what Opus finds, up to ten files.** It scored full
+marks in all fifteen runs at three files and in twenty-eight of thirty across
+both rounds, whatever the grouping, and reviewing everything at once was never
+dearer or slower than chunking. This does not contradict round one, where
+per-file scoping beat a whole-diff pass on 41 files. It moves the point where
+chunking starts to pay somewhere above ten files of this size, and says the
+chunking is not free insurance below it.
 
-**Nothing reported a trap.** Thirty runs, 120 opportunities, zero. The
-merged-sibling check works when the merged file is actually put in front of the
-reviewer.
+**For Sonnet, batch size does matter.** Its recall on the original thirteen falls
+from an average of 11.0 at three files per pass to 7.6 at five and 8.4 at ten. So
+the scoping advice is model-dependent: it buys Opus nothing at this size, and
+buys Sonnet something at every size.
+
+**Almost nothing reported a trap.** Sixty runs over both rounds: Opus reported
+none at all, in 120 opportunities at three files and 120 more at ten. Sonnet
+reported four, all in round three. The merged-sibling check works when the merged
+file is actually put in front of the reviewer.
 
 **Opus and Sonnet are not interchangeable here.** Opus found all 13 in every one
 of its 15 runs. Sonnet found all 13 in 2 of its 15, and in the other 13 runs it
@@ -138,12 +178,19 @@ costs is the findings.
 
 ## What this does not settle
 
-The fixture is 3 files and 13 violations, and Opus saturates it. A saturated
-fixture cannot rank anything above the level it tests, so the batch-size result
-holds for small diffs only. Two further review files are in `review/` with no
-keyed violations yet, so that the fixture can grow to five and the same question
-can be asked where the answer might differ.
+Opus saturates this fixture too. Ten files and 35 violations did not find its
+ceiling, so the batch-size result still only says "not yet", not "never". The
+next honest test is bigger files rather than more of them: 683 lines under review
+is a fraction of the 41-file branch round one used, and total size is the more
+likely variable behind that failure than file count.
 
-The rules exercised are 3, 4, 12, 14, 20, 23, 32, 38, 40 and 45. The other
-thirty-odd are untested here, and a rule nobody has watched fire is a rule nobody
-knows works.
+The rules exercised are now 1, 2, 3, 4, 11, 12, 13, 14, 17, 19, 20, 23, 25, 30,
+31, 32, 33, 34, 36, 37, 38, 39, 40, 41, 42, 43 and 45, twenty-seven of the
+forty-seven. The remaining twenty are untested here, and a rule nobody has
+watched fire is a rule nobody knows works.
+
+One methodological wrinkle: the four-file runs were handed their prompt inline,
+while the five- and ten-file runs were handed a path to the identical prompt file
+and read it themselves. That is one extra small file read in twenty of the thirty
+runs, which is not enough to explain any gap in the table, but it is a difference
+and it is recorded here rather than smoothed over.
