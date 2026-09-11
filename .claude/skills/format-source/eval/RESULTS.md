@@ -63,20 +63,30 @@ defect by noticing the last entry looks wrong picks up two and misses one.
 Thirty passes, five per cell: three batch sizes against two models, everything
 else identical.
 
-| Batch | Model | Runs | Found of 13 | Perfect runs | Traps | Cost | Time |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 file at a time | Opus | 5 | 13.0 | 5 | 0 | $0.83 | 127s |
-| 2 at a time | Opus | 5 | 13.0 | 5 | 0 | $0.78 | 139s |
-| 3 at once | Opus | 5 | 13.0 | 5 | 0 | $0.73 | 112s |
-| 1 file at a time | Sonnet | 5 | 10.8 | 1 | 0 | $0.33 | 264s |
-| 2 at a time | Sonnet | 5 | 10.8 | 0 | 0 | $0.29 | 258s |
-| 3 at once | Sonnet | 5 | 11.0 | 1 | 0 | $0.28 | 248s |
+Each cell is five runs. "Score per run" lists what each of the five found, out
+of the 13 seeded violations, so the spread is visible rather than hidden behind
+an average.
+
+| Batch | Model | Score per run (of 13) | Full marks | Traps | Cost/run | Time/run |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 file at a time | Opus | 13, 13, 13, 13, 13 | 5 of 5 | 0 | $0.83 | 127s |
+| 2 at a time | Opus | 13, 13, 13, 13, 13 | 5 of 5 | 0 | $0.78 | 139s |
+| 3 at once | Opus | 13, 13, 13, 13, 13 | 5 of 5 | 0 | $0.73 | 112s |
+| 1 file at a time | Sonnet | 12, 13, 9, 10, 10 | 1 of 5 | 0 | $0.33 | 264s |
+| 2 at a time | Sonnet | 11, 12, 10, 12, 9 | 0 of 5 | 0 | $0.29 | 258s |
+| 3 at once | Sonnet | 8, 11, 12, 13, 11 | 1 of 5 | 0 | $0.28 | 248s |
+
+Read it as: every Opus run found all 13. Sonnet found between 8 and 13, varying
+from run to run on the same input, and only twice out of fifteen did it find
+everything.
 
 ## What the numbers say
 
 **Batch size does not change what is found, at three files.** Opus scored 13 of
-13 in all fifteen runs regardless of grouping, and Sonnet's average moved by 0.2
-across the three shapes. Reviewing everything at once was also the cheapest and
+13 in all fifteen runs regardless of grouping, and Sonnet's spread is the same
+whichever way its files are grouped: it lands between 8 and 13 either way, and
+the difference between the three shapes is smaller than the difference between
+two Sonnet runs of the same shape. Reviewing everything at once was also the cheapest and
 the fastest, so at this size there is no case for chunking. This does not
 contradict round one, where per-file scoping beat a whole-diff pass on 41 files:
 three files fit comfortably in one pass and 41 do not. The lesson is that
@@ -86,8 +96,9 @@ chunking buys nothing until the diff is large enough to need it.
 merged-sibling check works when the merged file is actually put in front of the
 reviewer.
 
-**Opus and Sonnet are not interchangeable here.** Opus was perfect in 15 of 15.
-Sonnet was perfect in 2 of 15 and averaged 10.9. Its misses are consistent rather
+**Opus and Sonnet are not interchangeable here.** Opus found all 13 in every one
+of its 15 runs. Sonnet found all 13 in 2 of its 15, and in the other 13 runs it
+missed between one and five. Its misses are consistent rather
 than random: the blank line splitting two parallel assertions, missed in 10 runs
 of 15, and the noun-only method name that rule 40 covers, missed in 8. In 6 runs
 it reported the three hard blocks as a single combined finding, which detects the
