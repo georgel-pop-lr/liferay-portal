@@ -78,7 +78,7 @@ Simplicity never outranks safety: when the two trade off, choose the safer form.
 
 - Place a test in its subject's package: a unit test at `xyz.BarTest` for source `xyz.Bar`, an integration test at `xyz.test.BarTest` for the same source. [604]
 - Consolidating trivial parallel test methods is a judgment call: fold many trivial variants into one method, but a few well named scenario methods are fine. [601]
-- Name a test method `test` plus the method it tests, keeping its `is` or `has` prefix (`testIsQuotaExceeded`, not `testQuotaExceeded`). [603]
+- Name a test method `test` plus a method the subject declares, keeping its `is` or `has` prefix (`testIsQuotaExceeded`, not `testQuotaExceeded`), and put the scenario in a qualifier after it. An integration test that drives the subject through the runtime is named the same way, never after the flow it drives. [603]
 - Randomize any test value you do not assert on, an exception message or JSON value included; keep a literal only for a value the test checks. [602]
 - Assert without a message, since JUnit already prints the expected value, the actual value, and the line number; the label belongs in the test method name. The exception is an actual value derived from a collection or a map, where the collection is the message: `Assert.assertEquals(list.toString(), expected, list.size())`. [606]
 - In a `*ResourceTest` that extends a generated `Base*ResourceTestCase`, override every base test method with `@Override @Test`, call `super.testX()` first, and add new scenarios as private `_testX*` helpers called from the override. A new top-level `@Test` method whose name does not match a base test is a violation. [605]
