@@ -49,10 +49,7 @@ Sonnet never found any of the confirmed defects at any scope tried.
 
 Round one has no denominator. It can say a run found eight real problems, not
 what fraction of the real problems that is. So the fixture in this directory
-places the violations deliberately: 13 seeded, of which three are hard, plus four
-traps where a rule applies but the merged counterpart writes the code the same
-way, and the correct behaviour is silence. All four traps are false positives
-that real runs actually produced.
+places the violations deliberately, and writes down where they are.
 
 The hard three reproduce the LPD-104558 shape: a repeated entry whose first
 argument is identical in every row, so ordering is decided by the second, and the
@@ -60,12 +57,14 @@ short name sorts before the longer ones that share its prefix. In one of the thr
 blocks the outlier sits in the middle rather than last, so a run that finds the
 defect by noticing the last entry looks wrong picks up two and misses one.
 
-Thirty passes, five per cell: three batch sizes against two models, everything
-else identical.
+It contains **13 defects planted on purpose**, three of them the hard ones just
+described, and **4 traps**. A trap is code a rule technically applies to, written
+exactly the way the already-merged file writes it, so the right answer is to
+leave it alone and say nothing. All four are false positives that real runs
+actually produced on a real branch.
 
-The fixture contains **13 defects planted on purpose** and **4 traps**. A trap is
-code a rule technically applies to, written exactly the way the already-merged
-file writes it, so the right answer is to leave it alone and say nothing.
+Thirty passes were run against it, five per cell: three batch sizes against two
+models, everything else identical.
 
 That gives two scores, running in opposite directions:
 
