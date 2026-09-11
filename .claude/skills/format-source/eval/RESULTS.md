@@ -74,11 +74,18 @@ That gives two scores, running in opposite directions:
 - **Traps wrongly reported**, out of 4. Lower is better; 0 means the run fell for
   none of them.
 
+A third column counts how many of the five runs in that row were flawless, that
+is, found all 13 planted defects with nothing missed. "5 of 5" means the
+configuration got everything every single time; "1 of 5" means it did so once and
+the other four runs each missed something. It is there because an average hides
+consistency: a configuration that scores 13 every time and one that alternates
+between 8 and 13 can look similar on paper and behave very differently in use.
+
 Each row below is one configuration run five times. The "per run" column lists
 all five results rather than averaging them, because the spread turned out to
 matter more than the average.
 
-| Files per pass | Model | Defects found, per run (13 planted) | Runs that found all 13 | Traps wrongly reported | Cost per run | Time per run |
+| Files per pass | Model | Defects found, per run (13 planted) | Runs (of 5) that found all 13 | Traps wrongly reported | Cost per run | Time per run |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Opus | 13, 13, 13, 13, 13 | 5 of 5 | none | $0.83 | 127s |
 | 2 | Opus | 13, 13, 13, 13, 13 | 5 of 5 | none | $0.78 | 139s |
