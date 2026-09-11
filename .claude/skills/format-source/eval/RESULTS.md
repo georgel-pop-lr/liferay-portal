@@ -63,11 +63,14 @@ defect by noticing the last entry looks wrong picks up two and misses one.
 Thirty passes, five per cell: three batch sizes against two models, everything
 else identical.
 
-Each cell is five runs. "Score per run" lists what each of the five found, out
-of the 13 seeded violations, so the spread is visible rather than hidden behind
-an average.
+Each cell is five runs. There are two scores, and they run in opposite
+directions. **Planted defects found** counts how many of the 13 deliberate
+violations a run reported, so 13 is a perfect score. **Traps reported** counts
+how many of the 4 traps it wrongly reported, so 0 is a perfect score. Both
+columns list the five runs individually where they vary, rather than hiding the
+spread behind an average.
 
-| Batch | Model | Score per run (of 13) | Full marks | Traps | Cost/run | Time/run |
+| Batch | Model | Planted defects found (of 13) | Runs scoring 13 | Traps reported (of 4) | Cost/run | Time/run |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 file at a time | Opus | 13, 13, 13, 13, 13 | 5 of 5 | 0 | $0.83 | 127s |
 | 2 at a time | Opus | 13, 13, 13, 13, 13 | 5 of 5 | 0 | $0.78 | 139s |
@@ -76,9 +79,9 @@ an average.
 | 2 at a time | Sonnet | 11, 12, 10, 12, 9 | 0 of 5 | 0 | $0.29 | 258s |
 | 3 at once | Sonnet | 8, 11, 12, 13, 11 | 1 of 5 | 0 | $0.28 | 248s |
 
-Read it as: every Opus run found all 13. Sonnet found between 8 and 13, varying
-from run to run on the same input, and only twice out of fifteen did it find
-everything.
+Read it as: every Opus run found all 13 planted defects. Sonnet found between 8
+and 13, varying from run to run on the same input, and only twice out of fifteen
+did it find them all. No run on either model fell for a trap.
 
 ## What the numbers say
 
