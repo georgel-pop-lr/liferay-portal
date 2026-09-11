@@ -39,10 +39,13 @@ Five principles run through everything:
 - Sort a grouped block of independent variable assignments alphabetically; place a derived assignment after the variables it depends on, near its use. [201]
 - Sort every other sortable sequence the same way — method calls on one object, a method's parameters, sibling declarations, and literal lists. Variable, field, and method names sort case insensitively in natural order (per the source formatter's `JavaTermComparator`, so `_criterions` precedes `_criterionType`); literal strings sort case sensitively in ASCII order, with `null` last. Setter calls on a generated model mirror the defining schema instead — `service.xml` columns for a ServiceBuilder entity, `rest-openapi.yaml` fields for a REST DTO. Constructor body assignments follow the parameter order with derived assignments after (see `JavaConstructorParametersCheck`), and a vararg parameter is forced to the end of a parameter list. [202]
 - Declare each local immediately before its first use ("as used"). A wrapping object is the exception — the value the method returns, or a local whose sole purpose is to absorb another local through a setter — declared first and closed with the return statement or the setter, so it wraps the variables that build it ("burrito"). [203]
+- Order a block of locals that exists only to feed one call by that call's argument order, keeping the block together immediately above the call; a local the call does not take moves down to its own first use, and alphabetical order is the fallback for a block that feeds nothing with an order of its own. [205]
+- Keep a run of homogeneous peer statements solid: no blank line between consecutive calls of the same operation on the same receiver, or between adjacent declarations of the same type that form one preamble. `MissingEmptyLineCheck` wins wherever a variable's last reference falls inside the run, so apply this only to a genuinely uniform run. [206]
 
 ## Prefer Liferay utilities
 
 - `GetterUtil` for coercion [301]; `ListUtil`, `SetUtil`, `MapUtil`, and `ArrayUtil.isEmpty` for empty checks [302]; `ArrayUtil.contains` for array membership [303]; `TransformUtil.transform` for a mapped list [304]; `JSONUtil` for building JSON [305]; `StringBundler` over `StringBuilder`, and over a `+` join of more than three pieces [306].
+- `StringPool.BLANK` for the empty string, in production code and tests alike. The convention stops at the empty string: the punctuation constants (`SPACE`, `PERIOD`, `COMMA`, and the rest) lose to the bare literal in the corpus, so follow the file and do not convert one on review. [307]
 - The principle behind the list: if Liferay already has a utility for the operation, use it. When you catch yourself writing a null and empty check, a map into a new list, or string concatenation, stop and reach for the util.
 
 ## Control flow and form
@@ -53,10 +56,11 @@ Five principles run through everything:
 - Hoist a call out of a loop only when it does real work (database, network, non trivial computation), not for cheap invariant calls like `map.get(key)`, a list index access, or a plain getter — those read more directly inline at the use site. [404]
 - In bash under `set -o errexit`, preincrement a counter with `((++var))` rather than `((var++))` or `var=$((var + 1))`; postincrementing from `0` makes the arithmetic expression evaluate to `0`, which exits `1` and trips `errexit`. [405]
 - Write a shell test as `[` when its operands need no quotes and as `[[` when `[` would need quotes; never combine `[` with quoted operands. [406]
+- When the values a loop walks are a fixed set of constants or literals written at the loop itself, write the statement out once per value instead, extracting a method when the repeated body runs to more than a line or two. Keep the loop when the collection comes from a parameter, a field, or a call. [407]
 
 ## Removing the unnecessary ("Simplify")
 
-This is the most taste driven area and the hardest to reduce to a rule, so it deserves the most explanation. The codified pieces are small: remove an assertion a later line already proves [501], and inline a private constant used once [502]. The broader instinct, which a reviewer should apply by judgment:
+This is the most taste driven area and the hardest to reduce to a rule, so it deserves the most explanation. The codified pieces are small: remove an assertion a later line already proves [501], inline a private constant used once [502], inline a single use local whose name only echoes the call that produced it, and conversely extract a local when an argument is itself a nested expression two or more calls deep [503], and delete a private setter whose whole body is one assignment to a field and which has a single caller [504]. The broader instinct, which a reviewer should apply by judgment:
 
 - Prefer the form a careful reader grasps fastest: fewer lines, fewer variables, fewer levels of nesting, fewer moving parts.
 - If removing something would not be noticed — a variable, a comment, a guard, an assertion, a wrapper, a `finally` — remove it.
@@ -75,6 +79,7 @@ Simplicity never outranks safety: when the two trade off, choose the safer form.
 - Consolidating trivial parallel test methods is a judgment call: fold many trivial variants into one method, but a few well named scenario methods are fine. [601]
 - Name a test method `test` plus the method it tests, keeping its `is` or `has` prefix (`testIsQuotaExceeded`, not `testQuotaExceeded`). [603]
 - Randomize any test value you do not assert on, an exception message or JSON value included; keep a literal only for a value the test checks. [602]
+- Assert without a message, since JUnit already prints the expected value, the actual value, and the line number; the label belongs in the test method name. The exception is an actual value derived from a collection or a map, where the collection is the message: `Assert.assertEquals(list.toString(), expected, list.size())`. [606]
 - In a `*ResourceTest` that extends a generated `Base*ResourceTestCase`, override every base test method with `@Override @Test`, call `super.testX()` first, and add new scenarios as private `_testX*` helpers called from the override. A new top-level `@Test` method whose name does not match a base test is a violation. [605]
 - Remove an `assertNotNull` whose next line already dereferences or asserts something stronger. [501]
 - Name a test helper after what it asserts. A method called from one place is `private`. [801]
@@ -101,3 +106,6 @@ Simplicity never outranks safety: when the two trade off, choose the safer form.
 - In shell commands, use long form flags in alphabetical order [903], and put each argument of a multiline command on its own line [904].
 - In a shell script, define public functions like `main` before private underscore prefixed ones, sorted alphabetically within each group. [907]
 - Begin an inline comment with a capital letter and surround it with a blank line before and after. [905]
+- In inline JSON, put a space after each `:` and each `,`, and none after `{` or before `}`. [906]
+- In a JSP, reach a service through its `*LocalServiceUtil` static accessor, rather than having the portlet stash its injected service in a request attribute for the JSP to cast back out. Note that `FooLocalServiceUtil` is the service while `FooUtil` is persistence. [909]
+- Terraform (HCL) files carry their own ordering and formatting conventions, which depart from the ecosystem defaults; read that rule in full before touching one. [204]
