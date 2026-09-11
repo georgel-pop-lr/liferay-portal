@@ -82,3 +82,12 @@ Seed one defect per site. The S2 site originally also carried a `data.toString()
 message on the assertion, and both scored passes reported that instead of the
 blank line, so the message was removed to leave the blank line as the only thing
 wrong there.
+
+## Files with no keyed violations yet
+
+`review/FooBreadcrumbEntryContributorImpl.java.txt` and
+`review/FooCollectionServiceImpl.java.txt`, with their counterparts in `merged/`,
+are reserved for growing the fixture to five files so batch sizes of four and
+five can be tested. They carry deliberate defects but nothing in this key yet, so
+do not include them in a scored pass until their violations are written down
+here.
