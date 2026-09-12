@@ -16,7 +16,7 @@ Five principles run through everything:
 
 1. **Be relentlessly consistent.** Match the surrounding code, the sibling method, and the established convention. Do not introduce a second way to do something the codebase already does one way. When in doubt, mirror what is next to you.
 
-1. **Remove everything that does not earn its place.** Delete redundant assertions, constants and methods used once, narrating comments, guards for cases that cannot happen, throwaway temporary collections, and verbose messages. Let the code speak.
+1. **Remove everything that does not earn its place.** Delete redundant assertions, constants and expression sized methods used once, narrating comments, guards for cases that cannot happen, throwaway temporary collections, and verbose messages. Let the code speak.
 
 1. **Declare and order things by use.** A reader should meet each value where it is used, in the order the method actually runs.
 
@@ -61,7 +61,7 @@ Five principles run through everything:
 
 ## Removing the unnecessary ("Simplify")
 
-This is the most taste driven area and the hardest to reduce to a rule, so it deserves the most explanation. The codified pieces are small: remove an assertion a later line already proves [501], inline a private constant used once [502], inline a single use local whose name only echoes the call that produced it, and conversely extract a local when an argument is itself a nested expression two or more calls deep [503], and delete a private setter whose whole body is one assignment to a field and which has a single caller [504]. The broader instinct, which a reviewer should apply by judgment:
+This is the most taste driven area and the hardest to reduce to a rule, so it deserves the most explanation. The codified pieces are small: remove an assertion a later line already proves [501], inline a private constant used once [502], inline a single use local whose name only echoes the call that produced it, and conversely extract a local when an argument is itself a nested expression two or more calls deep [503], and delete a private setter whose whole body is one assignment to a field and which has a single caller [504], and inline a private helper with a single caller whose body is one expression, while keeping one that decomposes a long method [505]. The broader instinct, which a reviewer should apply by judgment:
 
 - Prefer the form a careful reader grasps fastest: fewer lines, fewer variables, fewer levels of nesting, fewer moving parts.
 - If removing something would not be noticed — a variable, a comment, a guard, an assertion, a wrapper, a `finally` — remove it.
