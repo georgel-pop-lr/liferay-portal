@@ -77,7 +77,7 @@ Simplicity never outranks safety: when the two trade off, choose the safer form.
 ## Tests
 
 - Place a test in its subject's package: a unit test at `xyz.BarTest` for source `xyz.Bar`, an integration test at `xyz.test.BarTest` for the same source. [604]
-- Consolidating trivial parallel test methods is a judgment call: fold many trivial variants into one method, but a few well named scenario methods are fine. [601]
+- Consolidating parallel test methods is a judgment call: fold many trivial variants into one method, and fold sibling scenarios of one method into one `@Test` that builds the fixture once and calls a `_test<MethodUnderTest><Scenario>` helper per scenario, but a few well named scenario methods with fixtures of their own are fine. [601]
 - Name a test method `test` plus a method the subject declares, keeping its `is` or `has` prefix (`testIsQuotaExceeded`, not `testQuotaExceeded`), and put the scenario in a qualifier after it. An integration test that drives the subject through the runtime is named the same way, never after the flow it drives. [603]
 - Randomize any test value you do not assert on, an exception message or JSON value included; keep a literal only for a value the test checks. [602]
 - Assert without a message, since JUnit already prints the expected value, the actual value, and the line number; the label belongs in the test method name. The exception is an actual value derived from a collection or a map, where the collection is the message: `Assert.assertEquals(list.toString(), expected, list.size())`. [606]
