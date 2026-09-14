@@ -788,6 +788,7 @@ function _review_in_sandbox {
 			--bind ${_SANDBOX_HOME} ${HOME} \
 			--ro-bind ${HOME}/.local/bin ${HOME}/.local/bin \
 			--ro-bind ${HOME}/.local/share/claude ${HOME}/.local/share/claude \
+			--ro-bind ${_LIFERAY_PORTAL_GIT_DIR} ${_LIFERAY_PORTAL_GIT_DIR} \
 			--chdir /tmp \
 			--clearenv \
 			--dev /dev \
@@ -1077,6 +1078,7 @@ _IGNORED_FILENAMES="CHANGELOG.md package-lock.json package.json"
 _IGNORED_PATTERNS="(^|/)Language_.*[.]properties$"
 _IGNORED_SUFFIXES="css js jsx lock lockfile macro path scss snap testcase ts tsx"
 _LIFERAY_PORTAL_DIR=$(git rev-parse --show-toplevel)
+_LIFERAY_PORTAL_GIT_DIR=$(readlink --canonicalize "$(git rev-parse --git-common-dir)")
 #_MODELS=(deepseek-v4-flash deepseek-v4-pro glm-5 mimo-v2-5 minimax-m2-7)
 _MODELS=(sonnet-4.6)
 _NAME_ONLY_SUFFIXES="bmp gif ico jpeg jpg png svg webp"
