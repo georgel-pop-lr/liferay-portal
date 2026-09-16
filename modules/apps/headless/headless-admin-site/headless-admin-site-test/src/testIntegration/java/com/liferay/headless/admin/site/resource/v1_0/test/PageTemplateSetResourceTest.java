@@ -16,6 +16,7 @@ import com.liferay.headless.admin.site.client.pagination.Page;
 import com.liferay.headless.admin.site.client.pagination.Pagination;
 import com.liferay.headless.admin.site.client.problem.Problem;
 import com.liferay.headless.admin.site.client.resource.v1_0.PageTemplateSetResource;
+import com.liferay.headless.admin.site.resource.v1_0.test.util.DesignLibraryTestUtil;
 import com.liferay.layout.page.template.constants.LayoutPageTemplateCollectionTypeConstants;
 import com.liferay.layout.page.template.constants.LayoutPageTemplateConstants;
 import com.liferay.layout.page.template.model.LayoutPageTemplateCollection;
@@ -147,11 +148,12 @@ public class PageTemplateSetResourceTest
 
 	@Override
 	@Test
-	@TestInfo("LPD-104838")
+	@TestInfo({"LPD-104838", "LPD-105724"})
 	public void testGetDesignLibraryPageTemplateSet() throws Exception {
 		super.testGetDesignLibraryPageTemplateSet();
 
 		_testGetDesignLibraryPageTemplateSetActions();
+		_testGetDesignLibraryPageTemplateSetWithoutViewDepotEntryPermission();
 	}
 
 	@Override
@@ -592,6 +594,20 @@ public class PageTemplateSetResourceTest
 	}
 
 	private PageTemplateSetResource
+			_getUserWithViewPermissionPageTemplateSetResource()
+		throws Exception {
+
+		String password = RandomTestUtil.randomString();
+
+		User user =
+			DesignLibraryTestUtil.
+				addUserWithViewLayoutPageTemplateCollectionPermission(
+					testCompany, password);
+
+		return _getPageTemplateSetResource(password, user);
+	}
+
+	private PageTemplateSetResource
 			_getUserWithoutPermissionsPageTemplateSetResource()
 		throws Exception {
 
@@ -690,6 +706,26 @@ public class PageTemplateSetResourceTest
 				"/page-template-sets/",
 				pageTemplateSet.getExternalReferenceCode()),
 			"delete", "get");
+	}
+
+	private void _testGetDesignLibraryPageTemplateSetWithoutViewDepotEntryPermission()
+		throws Exception {
+
+		Group group = _depotEntry.getGroup();
+
+		PageTemplateSet pageTemplateSet = _addDesignLibraryPageTemplateSet(
+			group, randomPageTemplateSet());
+
+		PageTemplateSetResource userWithViewPermissionPageTemplateSetResource =
+			_getUserWithViewPermissionPageTemplateSetResource();
+
+		_assertProblemException(
+			"NOT_FOUND", null,
+			() ->
+				userWithViewPermissionPageTemplateSetResource.
+					getDesignLibraryPageTemplateSet(
+						group.getExternalReferenceCode(),
+						pageTemplateSet.getExternalReferenceCode()));
 	}
 
 	private void _testGetDesignLibraryPageTemplateSetsPageAsDesignLibraryOwner()
