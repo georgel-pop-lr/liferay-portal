@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
+import {getSpritemap} from '@liferay/frontend-icons-web';
 import {
 	CreationModal,
 	openModalComponent,
@@ -10,9 +11,24 @@ import {
 import {openSelectionModal} from 'frontend-js-components-web';
 import {getCheckedCheckboxes, setFormValues} from 'frontend-js-web';
 
+import openContentTypeModal from '../commands/openContentTypeModal';
 import openDeletePageTemplateModal from '../commands/openDeletePageTemplateModal';
 
-export default function propsTransformer({portletNamespace, ...otherProps}) {
+export default function propsTransformer({
+	additionalProps: {mappingTypes},
+	portletNamespace,
+	...otherProps
+}) {
+	const addDisplayPage = (itemData) => {
+		openContentTypeModal({
+			formSubmitURL: itemData?.addDisplayPageURL,
+			mappingTypes,
+			namespace: portletNamespace,
+			spritemap: getSpritemap(),
+			title: Liferay.Language.get('add-display-page-template'),
+		});
+	};
+
 	const copySelectedEntries = (itemData) => {
 		openSelectionModal({
 			height: '70vh',
@@ -135,7 +151,10 @@ export default function propsTransformer({portletNamespace, ...otherProps}) {
 		onCreationMenuItemClick(event, {item}) {
 			const data = item?.data;
 
-			if (data?.action === 'addDisplayPageCollection') {
+			if (data?.action === 'addDisplayPage') {
+				addDisplayPage(data);
+			}
+			else if (data?.action === 'addDisplayPageCollection') {
 				openModalComponent({
 					ModalComponent: CreationModal,
 					modalComponentProps: {

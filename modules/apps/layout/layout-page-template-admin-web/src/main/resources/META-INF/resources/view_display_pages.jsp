@@ -28,6 +28,11 @@ DisplayPageManagementToolbarDisplayContext displayPageManagementToolbarDisplayCo
 %>
 
 <clay:management-toolbar
+	additionalProps='<%=
+		HashMapBuilder.<String, Object>put(
+			"mappingTypes", displayPageDisplayContext.getMappingTypesJSONArray()
+		).build()
+	%>'
 	managementToolbarDisplayContext="<%= displayPageManagementToolbarDisplayContext %>"
 	propsTransformer="{DisplayPageManagementToolbarPropsTransformer} from layout-page-template-admin-web"
 />

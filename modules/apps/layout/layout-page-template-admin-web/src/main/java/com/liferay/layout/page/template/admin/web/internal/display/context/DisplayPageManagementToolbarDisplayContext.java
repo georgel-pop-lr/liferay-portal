@@ -5,6 +5,7 @@
 
 package com.liferay.layout.page.template.admin.web.internal.display.context;
 
+import com.liferay.design.library.util.DesignLibraryUtil;
 import com.liferay.frontend.taglib.clay.servlet.taglib.display.context.SearchContainerManagementToolbarDisplayContext;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.CreationMenu;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.CreationMenuBuilder;
@@ -271,19 +272,18 @@ public class DisplayPageManagementToolbarDisplayContext
 			}
 		).addDropdownItem(
 			dropdownItem -> {
-				dropdownItem.setHref(
-					PortletURLBuilder.createRenderURL(
-						liferayPortletResponse
-					).setMVCPath(
-						"/select_display_page_master_layout.jsp"
-					).setRedirect(
-						_themeDisplay.getURLCurrent()
-					).setParameter(
-						"layoutPageTemplateCollectionId",
-						ParamUtil.getLong(
-							httpServletRequest,
-							"layoutPageTemplateCollectionId")
-					).buildString());
+				if (DesignLibraryUtil.isDesignLibraryScope(
+						_themeDisplay.getScopeGroup())) {
+
+					dropdownItem.putData("action", "addDisplayPage");
+					dropdownItem.putData(
+						"addDisplayPageURL", _getAddDisplayPageURL());
+				}
+				else {
+					dropdownItem.setHref(
+						_getSelectDisplayPageMasterLayoutURL());
+				}
+
 				dropdownItem.setLabel(
 					LanguageUtil.get(
 						httpServletRequest, "display-page-template"));
@@ -327,6 +327,17 @@ public class DisplayPageManagementToolbarDisplayContext
 	@Override
 	protected String[] getOrderByKeys() {
 		return new String[] {"create-date", "modified-date", "name"};
+	}
+
+	private String _getAddDisplayPageURL() {
+		return PortletURLBuilder.createActionURL(
+			liferayPortletResponse
+		).setActionName(
+			"/layout_page_template_admin/add_display_page"
+		).setParameter(
+			"layoutPageTemplateCollectionId",
+			_displayPageDisplayContext.getLayoutPageTemplateCollectionId()
+		).buildString();
 	}
 
 	private String _getDeleteSelectedEntriesURL() {
@@ -382,6 +393,20 @@ public class DisplayPageManagementToolbarDisplayContext
 				layoutPageTemplateCollectionTreeNodeItemSelectorCriterion));
 
 		return _itemSelectorURL;
+	}
+
+	private String _getSelectDisplayPageMasterLayoutURL() {
+		return PortletURLBuilder.createRenderURL(
+			liferayPortletResponse
+		).setMVCPath(
+			"/select_display_page_master_layout.jsp"
+		).setRedirect(
+			_themeDisplay.getURLCurrent()
+		).setParameter(
+			"layoutPageTemplateCollectionId",
+			ParamUtil.getLong(
+				httpServletRequest, "layoutPageTemplateCollectionId")
+		).buildString();
 	}
 
 	private final DisplayPageDisplayContext _displayPageDisplayContext;
