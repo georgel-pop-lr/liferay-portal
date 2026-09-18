@@ -12,6 +12,7 @@ import com.liferay.info.item.provider.InfoItemFormVariationsProvider;
 import com.liferay.info.localized.InfoLocalizedValue;
 import com.liferay.info.permission.provider.InfoPermissionProvider;
 import com.liferay.layout.page.template.admin.constants.LayoutPageTemplateAdminPortletKeys;
+import com.liferay.layout.page.template.admin.web.internal.constants.LayoutPageTemplateAdminWebKeys;
 import com.liferay.layout.page.template.constants.LayoutPageTemplateConstants;
 import com.liferay.layout.page.template.constants.LayoutPageTemplateEntryTypeConstants;
 import com.liferay.layout.page.template.info.item.capability.DisplayPageInfoItemCapability;
@@ -232,10 +233,14 @@ public class DisplayPageDisplayContext {
 			return _layoutPageTemplateCollectionId;
 		}
 
-		_layoutPageTemplateCollectionId = ParamUtil.getLong(
-			_httpServletRequest, "layoutPageTemplateCollectionId",
-			LayoutPageTemplateConstants.
-				PARENT_LAYOUT_PAGE_TEMPLATE_COLLECTION_ID_DEFAULT);
+		_layoutPageTemplateCollectionId = GetterUtil.getLong(
+			_httpServletRequest.getAttribute(
+				LayoutPageTemplateAdminWebKeys.
+					LAYOUT_PAGE_TEMPLATE_COLLECTION_ID),
+			ParamUtil.getLong(
+				_httpServletRequest, "layoutPageTemplateCollectionId",
+				LayoutPageTemplateConstants.
+					PARENT_LAYOUT_PAGE_TEMPLATE_COLLECTION_ID_DEFAULT));
 
 		return _layoutPageTemplateCollectionId;
 	}
