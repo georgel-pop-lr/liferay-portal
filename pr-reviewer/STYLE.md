@@ -8,6 +8,8 @@ Before any rule below: follow the existing convention. When a file already does 
 
 When the existing code is not consistent — two or more forms for the same kind of call — pick the form that complies with these rules and apply it across every similar call in the file. A split convention is no convention; do not compound it by adding to either side. [002]
 
+Either way, count before you name. Before introducing a name the codebase does not already carry, `git grep --cached` a fragment of it over the kind of file you are editing: zero hits is a finding in itself, because the concept already had a name, and a handful of hits is the convention to match, outliers already in the tree included. [003]
+
 ## Philosophy
 
 Five principles run through everything:
