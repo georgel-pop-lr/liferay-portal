@@ -110,4 +110,5 @@ Simplicity never outranks safety: when the two trade off, choose the safer form.
 - In a shell script, define public functions like `main` before private underscore prefixed ones, sorted alphabetically within each group. [907]
 - Begin an inline comment with a capital letter and surround it with a blank line before and after. [905]
 - In inline JSON, put a space after each `:` and each `,`, and none after `{` or before `}`. [906]
+- In frontend code, use the Clay component and the shared hook the repo already has, and put a fixed value in a class rather than an inline `style` attribute; `!important` and a hardcoded hex are not violations on their own, since the codebase splits on both. [910]
 - In a JSP, reach a service through its `*LocalServiceUtil` static accessor, rather than having the portlet stash its injected service in a request attribute for the JSP to cast back out. Note that `FooLocalServiceUtil` is the service while `FooUtil` is persistence. [909]
