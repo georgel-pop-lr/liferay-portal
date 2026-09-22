@@ -62,6 +62,22 @@ Start with `review` or `--dry-run check` on a single pull request to see the out
 
 It reviews the diff from the merge base with `_BASE_BRANCH` to the given ref, using the same filtered diff, sandbox, and proxy as `review`, and prints the same JSON. It does not fetch, comment, or touch any remote. Overriding the configuration variables works the same way, for example `_MODELS='(sonnet-4.6)' ./run_local.sh`.
 
+`run_range.sh` reviews one slice of a branch rather than all of it, which is what you want when the branch stacks several tickets and only the top commits are new.
+
+```
+./run_range.sh <base> <head>    Review the diff from <base> to <head>.
+```
+
+It takes both ends of the range explicitly, so nothing is inferred from a merge base, and it writes to an output directory named after the head commit and the process id. The `code-review-liferay` skill drives this script, and writes a fresh copy of it when the file is missing, so a checkout that predates it still runs.
+
+`replay_diff.sh` scores a diff that an earlier review already saved, instead of building one from git.
+
+```
+./replay_diff.sh <diff>    Review a stored pr.diff again.
+```
+
+It copies the diff into a new output directory, runs the model against it, and prints `REPLAY_DIR=` followed by the same JSON. Use it to see whether a change under `rules` moves the verdict, since the diff stays fixed while the rules around it change.
+
 ## The code-review-liferay-pr skill
 
 For interactive use there is a Claude Code skill, `code-review-liferay-pr`, that wraps the reviewer. From a Claude Code session in a `liferay-portal` checkout, run it with a pull request URL.
@@ -115,6 +131,6 @@ The bundled `proxy.py` is a plain tunnel. It funnels the sandbox traffic through
 
 ## Troubleshooting
 
-If a review fails, the raw model output is saved at `/tmp/pr-reviewer/<pr>/sonnet-4.6.raw` and the parsed result at `/tmp/pr-reviewer/<pr>/sonnet-4.6.json`. The proxy log is at `/tmp/pr-reviewer-proxy.log`. If the reviewer reports that it cannot authenticate, run `claude` once outside the sandbox to refresh your login and rerun `./setup.sh` to recopy the credentials.
+If a review fails, the raw model output is saved at `output/<run>/sonnet-4.6.raw` and the parsed result at `output/<run>/sonnet-4.6.json`, where `<run>` is the pull request number for `review` and `local-<sha>-<pid>` for a local one. The proxy log is at `/tmp/pr-reviewer-proxy-<pid>.log`. If the reviewer reports that it cannot authenticate, run `claude` once outside the sandbox to refresh your login and rerun `./setup.sh` to recopy the credentials.
 
 If every model fails after 0 seconds with `bwrap: setting up uid map: Permission denied`, the host is blocking unprivileged user namespaces, which the sandbox needs. On recent Ubuntu this is the AppArmor restriction `kernel.apparmor_restrict_unprivileged_userns`. Confirm with `cat /proc/sys/kernel/apparmor_restrict_unprivileged_userns` (a `1` means it is on) and lift it with `sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0`, or install an AppArmor profile for `bwrap`. This affects `review` and `run_local.sh` the same way, since both use the same sandbox.
