@@ -8,6 +8,8 @@ Do not force the merge when the two are not actually the same. Check the parts t
 
 `BaseAssetDisplayPageFriendlyURLResolver#getConnectedDesignLibraryGroupIds` in `modules/apps/asset/asset-display-page-api` is the case worth reading. It resolves `DepotEntryLocalService` through a `Snapshot` and returns `GetterUtil.DEFAULT_LONG_VALUES` when the depot module is absent or the call throws, so it is reusable only by a caller that wants those defaults. A caller that wants the failure is not served by it, and that, not the shape of the body, is what decides whether a second implementation is justified.
 
+The same holds for a TypeScript type. Before declaring a type by hand, read the `export type` and `export interface` lines of the `index.ts` of each `@liferay/*` dependency in the module's `package.json`, such as `@liferay/layout-js-components-web` or `@liferay/design-library-web`, and import the one that fits. A contract that lives in an unexported type, like the `closeModal` of `CreationModalComponent` in `openCreationModal.tsx`, cannot be imported, so declaring it by hand is correct and is not a violation.
+
 **Rationale:** Two implementations of one computation are a bug waiting for the next change to either. The cost is not the duplicated lines, it is that a reader who finds one has no way to know the other exists, so a fix lands in one and the other keeps the old behavior. It is also why the check belongs in review: the duplicate is invisible in a diff, which only ever shows the copy being added.
 
 A violation is a new method whose body reproduces an existing method's logic, where the existing one is reachable or could be moved somewhere both callers reach, and no difference in contract justifies the second copy.
