@@ -6,6 +6,8 @@ Repeated blocks are rule 506, not this rule, and come first: a block the test re
 
 Do not overdo it. The test must still show what it asserts: keep the call under test and the final assertions visible in the test method rather than hiding them in helpers, and do not split a test that reads fine just to shorten it. Judge only tests the pull adds or modifies.
 
+This rule covers Java test methods. A frontend `it()` that walks one user flow under rule 915 is long by design, so do not cite this rule against it.
+
 **Rationale:** A test is read when it fails, by someone who needs to see quickly what it set up and what it expected. Counted over `modules/apps` at `24e6a0c4eb7e9`, Commerce excluded, 25,566 of the 30,299 test methods are 30 non-blank lines or fewer and 29,033 are 60 or fewer, while only 387 (1.3 percent) exceed 100. A test that long is an outlier the reader has to scroll through, where one that names its phases can be read from its outline.
 
 A violation is an added or modified test method over 100 non-blank lines left as one undivided body when it has distinct phases that could be named.
