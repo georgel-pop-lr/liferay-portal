@@ -11,5 +11,3 @@ Two things this rule deliberately does not say, because the code contradicts the
 **Rationale:** Clay is the design system the product ships, so markup that bypasses it has to be restyled by hand every time the system moves, and it drifts visibly from the screens around it. The inline style case is sharper still, since a fixed value in an attribute cannot be overridden by a theme or a customer stylesheet without `!important`, which is how a stylesheet ends up with the 434 above.
 
 A violation is hand written markup duplicating a Clay component, a reimplementation of a shared component or hook that already exists, or an inline `style` attribute carrying a value that does not change at runtime.
-
-**Note:** `run.sh` strips `css` and `scss` from the diff through `_IGNORED_SUFFIXES` until that list is changed, and it still strips `js`, `jsx`, `ts` and `tsx`, so the tsx half of this rule is documentation rather than something the reviewer can fire on today.

@@ -118,7 +118,7 @@ _REPO=other-org/liferay-portal _GIT_REMOTE=other ./run.sh review 123
 | `_LIFERAY_PORTAL_DIR` | the repository root | The checkout bound read only into the sandbox for `git grep`. |
 | `_IGNORED_FILENAMES` | `CHANGELOG.md package-lock.json package.json` | Exact file names dropped from the reviewed diff. |
 | `_IGNORED_PATTERNS` | the `Language_*.properties` regex | Path regexes dropped from the diff. |
-| `_IGNORED_SUFFIXES` | `css js jsx lock ...` | File extensions dropped from the diff entirely. |
+| `_IGNORED_SUFFIXES` | `lock lockfile macro ...` | File extensions dropped from the diff entirely. |
 | `_NAME_ONLY_SUFFIXES` | `bmp gif ico jpeg jpg png svg webp` | Image extensions included as a file name only, with no content. |
 
 Files marked `@generated` are always excluded from the diff, regardless of these lists.
