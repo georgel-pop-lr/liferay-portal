@@ -118,4 +118,5 @@ Simplicity never outranks safety: when the two trade off, choose the safer form.
 - In a frontend test, prefer `userEvent` over `fireEvent`, as a preference only, since the codebase has not settled it. [912]
 - Do not prefix a frontend function with `_`; that marker is Java only. [913]
 - Title a frontend `it()` block after what the test does, not after the function it tests. [914]
+- Walk the steps of one user flow in one frontend `it()` rather than one `it()` per step, as a preference; keep a test separate when its path ends early or needs another fixture. [915]
 - In a JSP, reach a service through its `*LocalServiceUtil` static accessor, rather than having the portlet stash its injected service in a request attribute for the JSP to cast back out. Note that `FooLocalServiceUtil` is the service while `FooUtil` is persistence. [909]
