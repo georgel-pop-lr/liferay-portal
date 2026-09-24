@@ -115,4 +115,5 @@ Simplicity never outranks safety: when the two trade off, choose the safer form.
 - In inline JSON, put a space after each `:` and each `,`, and none after `{` or before `}`. [906]
 - In frontend code, use the Clay component and the shared hook the repo already has, and put a fixed value in a class rather than an inline `style` attribute; `!important` and a hardcoded hex are not violations on their own, since the codebase splits on both. [910]
 - Author a new frontend file in TypeScript; editing an existing `.js` file in place is fine. [911]
+- In a frontend test, prefer `userEvent` over `fireEvent`, as a preference only, since the codebase has not settled it. [912]
 - In a JSP, reach a service through its `*LocalServiceUtil` static accessor, rather than having the portlet stash its injected service in a request attribute for the JSP to cast back out. Note that `FooLocalServiceUtil` is the service while `FooUtil` is persistence. [909]
