@@ -70,7 +70,7 @@ public class LayoutPageTemplateDepotRolePermissionsContributorTest {
 
 	@FeatureFlags(featureFlags = @FeatureFlag("LPD-57283"))
 	@Test
-	@TestInfo("LPD-104558")
+	@TestInfo({"LPD-104558", "LPD-107080"})
 	public void testGetDepotRolePermissions() throws Exception {
 		DepotEntry depotEntry = _depotEntryLocalService.addDepotEntry(
 			RandomTestUtil.randomLocaleStringMap(),
@@ -125,6 +125,14 @@ public class LayoutPageTemplateDepotRolePermissionsContributorTest {
 		try (ContextUserReplace contextUserReplace = new ContextUserReplace(
 				nonownerUser)) {
 
+			long layoutPageTemplateCollectionId =
+				layoutPageTemplateEntry.getLayoutPageTemplateCollectionId();
+
+			Assert.assertNotNull(
+				_layoutPageTemplateCollectionService.
+					fetchLayoutPageTemplateCollection(
+						layoutPageTemplateCollectionId));
+
 			LayoutPageTemplateStructure layoutPageTemplateStructure =
 				_layoutPageTemplateStructureService.
 					updateLayoutPageTemplateStructureData(
@@ -136,8 +144,6 @@ public class LayoutPageTemplateDepotRolePermissionsContributorTest {
 				layoutPageTemplateStructure.getData(
 					SegmentsExperienceConstants.ID_DEFAULT));
 
-			long layoutPageTemplateCollectionId =
-				layoutPageTemplateEntry.getLayoutPageTemplateCollectionId();
 			String layoutPageTemplateCollectionName =
 				RandomTestUtil.randomString();
 
@@ -231,6 +237,9 @@ public class LayoutPageTemplateDepotRolePermissionsContributorTest {
 
 		ServiceContext serviceContext =
 			ServiceContextTestUtil.getServiceContext(group.getGroupId());
+
+		serviceContext.setAddGroupPermissions(false);
+		serviceContext.setAddGuestPermissions(false);
 
 		ServiceContextThreadLocal.pushServiceContext(serviceContext);
 
