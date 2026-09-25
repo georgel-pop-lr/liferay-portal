@@ -18,6 +18,8 @@ if (Validator.isNull(backURL)) {
 
 SelectLayoutPageTemplateEntryDisplayContext selectLayoutPageTemplateEntryDisplayContext = (SelectLayoutPageTemplateEntryDisplayContext)request.getAttribute(SelectLayoutPageTemplateEntryDisplayContext.class.getName());
 
+Group designLibraryGroup = selectLayoutPageTemplateEntryDisplayContext.getDesignLibraryGroup();
+
 portletDisplay.setShowBackIcon(true);
 portletDisplay.setURLBack(backURL);
 portletDisplay.setURLBackTitle(portletDisplay.getPortletDisplayName());
@@ -49,6 +51,7 @@ renderResponse.setTitle(LanguageUtil.get(request, "select-template"));
 			lg="9"
 		>
 			<clay:sheet
+				cssClass='<%= (designLibraryGroup != null) ? "design-library-page-template-set" : StringPool.BLANK %>'
 				size="full"
 			>
 				<h2 class="sheet-title">
@@ -58,26 +61,55 @@ renderResponse.setTitle(LanguageUtil.get(request, "select-template"));
 						<clay:content-col
 							expand="<%= true %>"
 						>
-							<span class="text-uppercase">
-								<c:choose>
-									<c:when test="<%= selectLayoutPageTemplateEntryDisplayContext.isContentPages() %>">
+							<div class="inline-item">
+								<span class="text-uppercase">
+									<c:choose>
+										<c:when test="<%= selectLayoutPageTemplateEntryDisplayContext.isContentPages() %>">
 
-										<%
-										LayoutPageTemplateCollection layoutPageTemplateCollection = LayoutPageTemplateCollectionLocalServiceUtil.fetchLayoutPageTemplateCollection(selectLayoutPageTemplateEntryDisplayContext.getLayoutPageTemplateCollectionId());
-										%>
+											<%
+											LayoutPageTemplateCollection layoutPageTemplateCollection = LayoutPageTemplateCollectionLocalServiceUtil.fetchLayoutPageTemplateCollection(selectLayoutPageTemplateEntryDisplayContext.getLayoutPageTemplateCollectionId());
+											%>
 
-										<c:if test="<%= layoutPageTemplateCollection != null %>">
-											<%= HtmlUtil.escape(layoutPageTemplateCollection.getName()) %>
-										</c:if>
-									</c:when>
-									<c:when test="<%= selectLayoutPageTemplateEntryDisplayContext.isBasicTemplates() %>">
-										<liferay-ui:message key="basic-templates" />
-									</c:when>
-									<c:when test="<%= selectLayoutPageTemplateEntryDisplayContext.isGlobalTemplates() %>">
-										<liferay-ui:message key="global-templates" />
-									</c:when>
-								</c:choose>
-							</span>
+											<c:if test="<%= layoutPageTemplateCollection != null %>">
+												<%= HtmlUtil.escape(layoutPageTemplateCollection.getName()) %>
+											</c:if>
+										</c:when>
+										<c:when test="<%= selectLayoutPageTemplateEntryDisplayContext.isBasicTemplates() %>">
+											<liferay-ui:message key="basic-templates" />
+										</c:when>
+										<c:when test="<%= selectLayoutPageTemplateEntryDisplayContext.isGlobalTemplates() %>">
+											<liferay-ui:message key="global-templates" />
+										</c:when>
+									</c:choose>
+								</span>
+
+								<c:if test="<%= designLibraryGroup != null %>">
+
+									<%
+									String designLibraryName = designLibraryGroup.getDescriptiveName(locale);
+									%>
+
+									<clay:label
+										aria-label='<%= LanguageUtil.format(request, "page-template-set-from-x-design-library", designLibraryName) %>'
+										cssClass="c-ml-2"
+										displayType="inverse-content-5"
+										large="<%= true %>"
+									>
+										<clay:label-item-before>
+											<clay:sticker
+												cssClass="bg-white rounded"
+												icon="books-brush"
+												inline="<%= true %>"
+												size="xs"
+											/>
+										</clay:label-item-before>
+
+										<clay:label-item-expand>
+											<%= HtmlUtil.escape(designLibraryName) %>
+										</clay:label-item-expand>
+									</clay:label>
+								</c:if>
+							</div>
 						</clay:content-col>
 					</clay:content-row>
 				</h2>

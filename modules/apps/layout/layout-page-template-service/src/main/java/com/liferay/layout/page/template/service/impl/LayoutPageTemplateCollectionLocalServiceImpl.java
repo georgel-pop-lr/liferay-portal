@@ -173,7 +173,7 @@ public class LayoutPageTemplateCollectionLocalServiceImpl
 
 		List<LayoutPageTemplateEntry> layoutPageTemplateEntries =
 			_layoutPageTemplateEntryLocalService.getLayoutPageTemplateEntries(
-				sourceLayoutPageTemplateCollection.getGroupId(),
+			 	sourceLayoutPageTemplateCollection.getGroupId(),
 				sourceLayoutPageTemplateCollection.
 					getLayoutPageTemplateCollectionId());
 
