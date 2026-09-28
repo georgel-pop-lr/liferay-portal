@@ -236,7 +236,7 @@ public class DisplayPageTemplateResourceTest
 
 	@Override
 	@Test
-	@TestInfo({"LPD-106070", "LPD-107020"})
+	@TestInfo({"LPD-106070", "LPD-107020", "LPD-107121"})
 	public void testGetDesignLibraryDisplayPageTemplate() throws Exception {
 		super.testGetDesignLibraryDisplayPageTemplate();
 
@@ -252,6 +252,9 @@ public class DisplayPageTemplateResourceTest
 		Assert.assertTrue(actions.containsKey("delete"));
 		Assert.assertTrue(actions.containsKey("get"));
 		Assert.assertTrue(actions.containsKey("permissions"));
+
+		_testGetDesignLibraryDisplayPageTemplateWithoutViewDepotEntryPermission(
+			displayPageTemplate);
 	}
 
 	@Override
@@ -1521,6 +1524,20 @@ public class DisplayPageTemplateResourceTest
 		).build();
 	}
 
+	private DisplayPageTemplateResource _getDisplayPageTemplateResource(
+		String password, User user) {
+
+		return DisplayPageTemplateResource.builder(
+		).authentication(
+			user.getEmailAddress(), password
+		).endpoint(
+			testCompany.getVirtualHostname(),
+			PortalUtil.getPortalServerPort(false), "http"
+		).locale(
+			LocaleUtil.getDefault()
+		).build();
+	}
+
 	private DisplayPageTemplate _getDisplayPageTemplateWithPageElements(
 			PageElement[] draftPageElements,
 			PageElement[] publishedPageElements)
@@ -1902,6 +1919,27 @@ public class DisplayPageTemplateResourceTest
 							getExternalReferenceCode(),
 						testGroup.getGroupId()));
 		}
+	}
+
+	private void
+			_testGetDesignLibraryDisplayPageTemplateWithoutViewDepotEntryPermission(
+				DisplayPageTemplate displayPageTemplate)
+		throws Exception {
+
+		String password = RandomTestUtil.randomString();
+
+		User user = UserTestUtil.addUser(testCompany, password);
+
+		DisplayPageTemplateResource userDisplayPageTemplateResource =
+			_getDisplayPageTemplateResource(password, user);
+
+		_assertProblemException(
+			"NOT_FOUND", null,
+			() ->
+				userDisplayPageTemplateResource.
+					getDesignLibraryDisplayPageTemplate(
+						_getDesignLibraryExternalReferenceCode(),
+						displayPageTemplate.getExternalReferenceCode()));
 	}
 
 	private void _testGetSiteDisplayPageTemplate(
