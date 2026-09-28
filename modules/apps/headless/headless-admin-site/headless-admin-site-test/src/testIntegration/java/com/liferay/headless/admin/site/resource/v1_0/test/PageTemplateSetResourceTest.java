@@ -94,7 +94,8 @@ public class PageTemplateSetResourceTest
 		FeatureFlagTestUtil.invokeFeatureFlagListeners(
 			TestPropsValues.getCompanyId(), true, "LPD-57283");
 
-		_depotEntry = _addDepotEntry(DepotConstants.TYPE_DESIGN_LIBRARY);
+		_depotEntry = DesignLibraryTestUtil.addDepotEntry(
+			testGroup.getGroupId());
 	}
 
 	@Ignore
@@ -475,15 +476,6 @@ public class PageTemplateSetResourceTest
 			testGroup.getExternalReferenceCode(), pageTemplateSet);
 	}
 
-	private DepotEntry _addDepotEntry(int type) throws Exception {
-		return _depotEntryLocalService.addDepotEntry(
-			Collections.singletonMap(
-				LocaleUtil.getDefault(), RandomTestUtil.randomString()),
-			null, type,
-			ServiceContextTestUtil.getServiceContext(
-				testGroup.getGroupId(), TestPropsValues.getUserId()));
-	}
-
 	private PageTemplateSet _addDesignLibraryPageTemplateSet(
 			Group group, PageTemplateSet pageTemplateSet)
 		throws Exception {
@@ -638,8 +630,13 @@ public class PageTemplateSetResourceTest
 	private void _testDeleteDesignLibraryPageTemplateSetWithAssetLibraryExternalReferenceCodeProblemException()
 		throws Exception {
 
-		DepotEntry assetLibraryDepotEntry = _addDepotEntry(
-			DepotConstants.TYPE_ASSET_LIBRARY);
+		DepotEntry assetLibraryDepotEntry =
+			_depotEntryLocalService.addDepotEntry(
+				Collections.singletonMap(
+					LocaleUtil.getDefault(), RandomTestUtil.randomString()),
+				null, DepotConstants.TYPE_ASSET_LIBRARY,
+				ServiceContextTestUtil.getServiceContext(
+					testGroup.getGroupId(), TestPropsValues.getUserId()));
 
 		Group group = assetLibraryDepotEntry.getGroup();
 
