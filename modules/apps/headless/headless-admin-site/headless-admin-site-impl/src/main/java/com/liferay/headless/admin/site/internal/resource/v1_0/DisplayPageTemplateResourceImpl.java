@@ -9,6 +9,7 @@ import com.liferay.client.extension.type.manager.CETManager;
 import com.liferay.depot.constants.DepotConstants;
 import com.liferay.depot.model.DepotEntry;
 import com.liferay.depot.service.DepotEntryLocalService;
+import com.liferay.depot.service.DepotEntryService;
 import com.liferay.exportimport.constants.ExportImportConstants;
 import com.liferay.exportimport.vulcan.batch.engine.ExportImportVulcanBatchEngineTaskItemDelegate;
 import com.liferay.fragment.processor.FragmentEntryProcessorRegistry;
@@ -154,11 +155,15 @@ public class DisplayPageTemplateResourceImpl
 
 		EnabledUtil.checkDesignLibrariesEnabled(contextCompany);
 
+		long groupId = _getDesignLibraryGroupId(
+			designLibraryExternalReferenceCode);
+
+		_depotEntryService.getGroupDepotEntry(groupId);
+
 		return _toDesignLibraryDisplayPageTemplate(
 			designLibraryExternalReferenceCode,
 			_getLayoutPageTemplateEntry(
-				displayPageTemplateExternalReferenceCode,
-				_getDesignLibraryGroupId(designLibraryExternalReferenceCode)));
+				displayPageTemplateExternalReferenceCode, groupId));
 	}
 
 	@Override
@@ -289,6 +294,8 @@ public class DisplayPageTemplateResourceImpl
 
 		if (group.isDepot()) {
 			EnabledUtil.checkDesignLibrariesEnabled(contextCompany);
+
+			_depotEntryService.getGroupDepotEntry(group.getGroupId());
 
 			return _toDesignLibraryDisplayPageTemplate(
 				group.getExternalReferenceCode(), layoutPageTemplateEntry);
@@ -1178,6 +1185,9 @@ public class DisplayPageTemplateResourceImpl
 	@Reference(target = "(model.class.name=com.liferay.depot.model.DepotEntry)")
 	private ModelResourcePermission<DepotEntry>
 		_depotEntryModelResourcePermission;
+
+	@Reference
+	private DepotEntryService _depotEntryService;
 
 	@Reference(
 		target = "(component.name=com.liferay.headless.admin.site.internal.dto.v1_0.converter.DisplayPageTemplateDTOConverter)"
