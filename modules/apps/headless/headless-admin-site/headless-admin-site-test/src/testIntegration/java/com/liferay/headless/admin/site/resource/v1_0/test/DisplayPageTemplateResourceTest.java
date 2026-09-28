@@ -244,15 +244,7 @@ public class DisplayPageTemplateResourceTest
 			_addDesignLibraryDisplayPageTemplate(
 				_getDesignLibraryExternalReferenceCode());
 
-		Map<String, Map<String, String>> actions =
-			displayPageTemplate.getActions();
-
-		Assert.assertFalse(actions.containsKey("copy"));
-		Assert.assertFalse(actions.containsKey("copyWithPermission"));
-		Assert.assertTrue(actions.containsKey("delete"));
-		Assert.assertTrue(actions.containsKey("get"));
-		Assert.assertTrue(actions.containsKey("permissions"));
-
+		_testGetDesignLibraryDisplayPageTemplateActions(displayPageTemplate);
 		_testGetDesignLibraryDisplayPageTemplateWithoutViewDepotEntryPermission(
 			displayPageTemplate);
 	}
@@ -1919,6 +1911,19 @@ public class DisplayPageTemplateResourceTest
 							getExternalReferenceCode(),
 						testGroup.getGroupId()));
 		}
+	}
+
+	private void _testGetDesignLibraryDisplayPageTemplateActions(
+		DisplayPageTemplate displayPageTemplate) {
+
+		Map<String, Map<String, String>> actions =
+			displayPageTemplate.getActions();
+
+		Assert.assertFalse(actions.containsKey("copy"));
+		Assert.assertFalse(actions.containsKey("copyWithPermission"));
+		Assert.assertTrue(actions.containsKey("delete"));
+		Assert.assertTrue(actions.containsKey("get"));
+		Assert.assertTrue(actions.containsKey("permissions"));
 	}
 
 	private void
