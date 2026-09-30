@@ -1,6 +1,6 @@
 # 203: Declare Variables as They Are Used
 
-Declare each local variable immediately before its first use, set off by a blank line, rather than grouping declarations at the top of the method or block. A declaration and the statement that uses it form one short paragraph, and the next variable begins the next paragraph.
+Declare each local variable immediately before its first use, set off by a blank line, rather than grouping declarations at the top of the method or block. A declaration and the statement that uses it form one short paragraph, and the next variable begins the next paragraph. When several independent declarations are all first read by the same statement, they are one preamble and one paragraph: the blank line goes after the last of them, not between them (rule 206).
 
 The exception is a wrapping object: most often the value the method builds and returns, but also any local whose sole purpose is to receive another local through a setter. Declare the wrapper first, build the inner value, and close with the return statement or the setter call. The wrapper envelopes the steps that fill it — the wrapper is the tortilla and the build steps are the filling ("burrito") — and the variables between the opening declaration and the closing return or setter are still ordered as they are used.
 
