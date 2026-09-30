@@ -112,6 +112,7 @@ _REPO=other-org/liferay-portal _GIT_REMOTE=other ./run.sh review 123
 | `_GIT_REMOTE` | `stability` | The git remote whose `pull/<n>/head` refs and base branch are fetched. Must point at `_REPO`. |
 | `_BASE_BRANCH` | `master` | The base branch used for the merge base and the reviewed diff. |
 | `_MODELS` | `(sonnet-4.6)` | The models to run, as a bash array. Only `sonnet-4.6` (the `claude` command) works out of the box; the commented entries need `opencode`. Listing more than one runs them in parallel and reports each. |
+| `_CLAUDE_MODEL` | `opus` | The model alias the `sonnet-4.6` entry passes to `claude --model`. The entry name is only a label: the real model is whatever the alias resolves to, which `jq '.modelUsage \| keys'` on `output/<run>/sonnet-4.6.raw` shows. Set it to `sonnet` for the cheaper, faster run. |
 | `_HTTPS_PROXY` | `localhost:8118` | The proxy the sandboxed Claude uses. Set it to the empty string to send traffic directly, with no proxy. |
 | `_REVIEW_TIMEOUT_MINUTES` | `20` | The hard timeout for a single review. |
 | `_SANDBOX_HOME` | `${HOME}/.ai_sandbox/home` | The isolated home bound into the sandbox, holding the copied Claude credentials. |
