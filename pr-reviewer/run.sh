@@ -710,7 +710,7 @@ function _invoke_model {
 				claude \
 					--add-dir /review \
 					--dangerously-skip-permissions \
-					--model sonnet \
+					--model ${_CLAUDE_MODEL} \
 					--output-format json \
 					--print "Read the PR diff at /review/pr.diff, every rule file under /review/rules, and the style guide /review/STYLE.md, then review the diff against every rule. ${prompt}" || true
 	else
@@ -1074,6 +1074,7 @@ Output ONLY valid JSON, with no Markdown code fence and no surrounding prose: {"
 }
 
 _BASE_BRANCH=${_BASE_BRANCH:-master}
+_CLAUDE_MODEL=${_CLAUDE_MODEL:-opus}
 _GIT_REMOTE=${_GIT_REMOTE:-stability}
 _HTTPS_PROXY=${_HTTPS_PROXY:-localhost:8118}
 _IGNORED_FILENAMES="CHANGELOG.md package-lock.json package.json"
