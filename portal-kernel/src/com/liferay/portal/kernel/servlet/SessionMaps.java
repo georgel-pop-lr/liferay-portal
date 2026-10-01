@@ -143,7 +143,9 @@ public class SessionMaps {
 			map = _mapSupplier.get();
 		}
 
-		consumer.accept(map);
+		synchronized (map) {
+			consumer.accept(map);
+		}
 
 		httpSession.setAttribute(mapKey, map);
 	}
