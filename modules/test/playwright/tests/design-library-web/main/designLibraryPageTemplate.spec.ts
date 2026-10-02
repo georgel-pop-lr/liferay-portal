@@ -11,10 +11,13 @@ import {loginTest} from '../../../fixtures/loginTest';
 import {pageEditorPagesTest} from '../../../fixtures/pageEditorPagesTest';
 import {pageTemplatesPagesTest} from '../../../fixtures/pageTemplatesPagesTest';
 import {pagesAdminPagesTest} from '../../../fixtures/pagesAdminPagesTest';
+import {clickAndExpectToBeVisible} from '../../../utils/clickAndExpectToBeVisible';
 import getRandomString from '../../../utils/getRandomString';
+import {designLibrariesPageTest} from './fixtures/designLibrariesPageTest';
 
 const test = mergeTests(
 	dataApiHelpersTest,
+	designLibrariesPageTest,
 	featureFlagsTest({
 		'LPD-57283': {enabled: true},
 	}),
@@ -190,5 +193,197 @@ test(
 		await pagesAdminPage.clickNewButtonAndWaitForBlankTemplate();
 
 		await expect(navItem).toBeHidden();
+	}
+);
+
+test(
+	'Can add a content page template to a design library and go back from its configuration',
+	{tag: '@LPD-107609'},
+	async ({apiHelpers, designLibrariesPage, page, pageEditorPage}) => {
+
+		// Add a content page template in a new set from the design library
+
+		const designLibraryName = getRandomString();
+
+		await apiHelpers.headlessAssetLibrary.createAssetLibrary({
+			name: designLibraryName,
+			settings: {},
+			type: 'DesignLibrary',
+		});
+
+		await designLibrariesPage.goToDesignLibrary(designLibraryName);
+
+		await clickAndExpectToBeVisible({
+			autoClick: true,
+			target: page.getByRole('menuitem', {
+				name: 'New Content Page Template',
+			}),
+			trigger: page.getByRole('button', {exact: true, name: 'New'}),
+		});
+
+		const addPageTemplateModal = page.getByRole('dialog', {
+			name: 'Add Page Template',
+		});
+
+		const layoutPageTemplateEntryName = getRandomString();
+
+		await addPageTemplateModal
+			.getByLabel('Page Template Name')
+			.fill(layoutPageTemplateEntryName);
+
+		const layoutPageTemplateCollectionName = getRandomString();
+
+		await addPageTemplateModal
+			.getByLabel('Page Template Set Name')
+			.fill(layoutPageTemplateCollectionName);
+
+		await addPageTemplateModal
+			.getByRole('button', {exact: true, name: 'Save'})
+			.click();
+
+		// Check publishing it goes to the set
+
+		await pageEditorPage.publishPage();
+
+		await expect(page).toHaveTitle(
+			`Page Templates - ${designLibraryName} - Liferay`
+		);
+
+		const card = page
+			.locator('.card-type-asset')
+			.filter({hasText: layoutPageTemplateEntryName});
+
+		await expect(card).toBeVisible();
+
+		// Open the template from its card in the set
+
+		await designLibrariesPage.goToDesignLibrary(designLibraryName);
+
+		await page
+			.getByRole('link', {
+				exact: true,
+				name: layoutPageTemplateCollectionName,
+			})
+			.click();
+
+		await card.locator('.card-title').click();
+
+		// Check the Page Design Options Cancel button goes back to the editor
+
+		await pageEditorPage.goToSidebarTab('Page Design Options');
+
+		await page
+			.getByTitle('More Page Design Options', {exact: true})
+			.click();
+
+		await page.waitForURL(/edit_layout/);
+
+		await page.getByRole('button', {name: 'Cancel'}).click();
+
+		await expect(page).toHaveTitle(
+			`${layoutPageTemplateEntryName} - ${designLibraryName} - Liferay (Editing)`
+		);
+
+		// Check the page editor back button goes to the set
+
+		await page.getByRole('link', {name: 'Go to Page Templates'}).click();
+
+		await expect(page).toHaveTitle(
+			`Page Templates - ${designLibraryName} - Liferay`
+		);
+
+		await expect(card).toBeVisible();
+	}
+);
+
+test(
+	'Can move a page template to another set and open that set from the design library',
+	{tag: '@LPD-107947'},
+	async ({apiHelpers, designLibrariesPage, page, pageTemplatesPage}) => {
+
+		// Create a design library with two sets and a template in the first
+
+		const designLibraryName = getRandomString();
+
+		const designLibrary =
+			await apiHelpers.headlessAssetLibrary.createAssetLibrary({
+				name: designLibraryName,
+				settings: {},
+				type: 'DesignLibrary',
+			});
+
+		const layoutPageTemplateCollectionName1 = getRandomString();
+
+		const layoutPageTemplateCollection1 =
+			await apiHelpers.jsonWebServicesLayoutPageTemplateCollection.addLayoutPageTemplateCollection(
+				{
+					groupId: String(designLibrary.siteId),
+					name: layoutPageTemplateCollectionName1,
+				}
+			);
+
+		const layoutPageTemplateCollectionName2 = getRandomString();
+
+		await apiHelpers.jsonWebServicesLayoutPageTemplateCollection.addLayoutPageTemplateCollection(
+			{
+				groupId: String(designLibrary.siteId),
+				name: layoutPageTemplateCollectionName2,
+			}
+		);
+
+		const layoutPageTemplateEntryName = getRandomString();
+
+		await apiHelpers.jsonWebServicesLayoutPageTemplateEntry.addLayoutPageTemplateEntry(
+			{
+				groupId: String(designLibrary.siteId),
+				layoutPageTemplateCollectionId:
+					layoutPageTemplateCollection1.layoutPageTemplateCollectionId,
+				name: layoutPageTemplateEntryName,
+			}
+		);
+
+		// Move the template from the first set to the second
+
+		await designLibrariesPage.goToPageTemplateCollection(
+			designLibraryName,
+			layoutPageTemplateCollectionName1
+		);
+
+		await pageTemplatesPage.movePageTemplate(
+			layoutPageTemplateEntryName,
+			layoutPageTemplateCollectionName2
+		);
+
+		// Check the second set opens from the design library with the template
+
+		await designLibrariesPage.goToPageTemplateCollection(
+			designLibraryName,
+			layoutPageTemplateCollectionName2
+		);
+
+		await expect(
+			page.getByRole('heading', {name: layoutPageTemplateCollectionName2})
+		).toBeVisible();
+
+		await expect(
+			page
+				.locator('.card-type-asset')
+				.filter({hasText: layoutPageTemplateEntryName})
+		).toBeVisible();
+
+		// Check the first set opens from the design library empty
+
+		await designLibrariesPage.goToPageTemplateCollection(
+			designLibraryName,
+			layoutPageTemplateCollectionName1
+		);
+
+		await expect(
+			page.getByRole('heading', {name: layoutPageTemplateCollectionName1})
+		).toBeVisible();
+
+		await expect(
+			page.getByText('There are no page templates.')
+		).toBeVisible();
 	}
 );
