@@ -26,6 +26,8 @@ import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
+import org.springframework.mock.web.MockHttpSession;
+
 /**
  * @author Dante Wang
  */
@@ -182,7 +184,25 @@ public class SessionMapsTest extends BaseSessionMapsTestCase {
 	}
 
 	@Test
-	public void testRemove() {
+	public void testRemove() throws Exception {
+		_testRemove();
+		_testRemoveWithConcurrentModification();
+	}
+
+	@Test
+	public void testSize() {
+		Assert.assertEquals(0, _sessionMaps.size(httpSession, _MAP_KEY));
+
+		_sessionMaps.add(httpSession, _MAP_KEY, KEY1, VALUE1);
+
+		Assert.assertEquals(1, _sessionMaps.size(httpSession, _MAP_KEY));
+
+		_sessionMaps.clear(httpSession, _MAP_KEY);
+
+		Assert.assertEquals(0, _sessionMaps.size(httpSession, _MAP_KEY));
+	}
+
+	private void _testRemove() {
 		_sessionMaps.remove(httpSession, _MAP_KEY, KEY1);
 
 		Assert.assertNull(_sessionMaps.get(httpSession, _MAP_KEY, KEY1));
@@ -197,17 +217,27 @@ public class SessionMapsTest extends BaseSessionMapsTestCase {
 		Assert.assertNull(_sessionMaps.get(httpSession, _MAP_KEY, KEY1));
 	}
 
-	@Test
-	public void testSize() {
-		Assert.assertEquals(0, _sessionMaps.size(httpSession, _MAP_KEY));
+	private void _testRemoveWithConcurrentModification() throws Exception {
+		MockHttpSession mockHttpSession = new MockHttpSession();
 
-		_sessionMaps.add(httpSession, _MAP_KEY, KEY1, VALUE1);
+		_sessionMaps.add(mockHttpSession, _MAP_KEY, KEY1, VALUE1);
 
-		Assert.assertEquals(1, _sessionMaps.size(httpSession, _MAP_KEY));
+		Thread thread = new Thread(
+			() -> _sessionMaps.remove(mockHttpSession, _MAP_KEY, KEY1));
 
-		_sessionMaps.clear(httpSession, _MAP_KEY);
+		synchronized (mockHttpSession.getAttribute(_MAP_KEY)) {
+			thread.start();
 
-		Assert.assertEquals(0, _sessionMaps.size(httpSession, _MAP_KEY));
+			while ((thread.getState() != Thread.State.BLOCKED) &&
+				   (thread.getState() != Thread.State.TERMINATED));
+
+			Assert.assertEquals(
+				VALUE1, _sessionMaps.get(mockHttpSession, _MAP_KEY, KEY1));
+		}
+
+		thread.join();
+
+		Assert.assertNull(_sessionMaps.get(mockHttpSession, _MAP_KEY, KEY1));
 	}
 
 	private static final String _MAP_KEY = SessionMapsTest.class.getName();
