@@ -12,9 +12,11 @@ import {pageEditorPagesTest} from '../../../fixtures/pageEditorPagesTest';
 import {pageTemplatesPagesTest} from '../../../fixtures/pageTemplatesPagesTest';
 import {pagesAdminPagesTest} from '../../../fixtures/pagesAdminPagesTest';
 import getRandomString from '../../../utils/getRandomString';
+import {designLibrariesPageTest} from './fixtures/designLibrariesPageTest';
 
 const test = mergeTests(
 	dataApiHelpersTest,
+	designLibrariesPageTest,
 	featureFlagsTest({
 		'LPD-57283': {enabled: true},
 	}),
@@ -190,5 +192,97 @@ test(
 		await pagesAdminPage.clickNewButtonAndWaitForBlankTemplate();
 
 		await expect(navItem).toBeHidden();
+	}
+);
+
+test(
+	'Can move a page template to another set and open that set from the design library',
+	{tag: '@LPD-107947'},
+	async ({apiHelpers, designLibrariesPage, page, pageTemplatesPage}) => {
+
+		// Create a design library with two sets and a template in the first
+
+		const designLibraryName = getRandomString();
+
+		const designLibrary =
+			await apiHelpers.headlessAssetLibrary.createAssetLibrary({
+				name: designLibraryName,
+				settings: {},
+				type: 'DesignLibrary',
+			});
+
+		const layoutPageTemplateCollectionName1 = getRandomString();
+
+		const layoutPageTemplateCollection1 =
+			await apiHelpers.jsonWebServicesLayoutPageTemplateCollection.addLayoutPageTemplateCollection(
+				{
+					groupId: String(designLibrary.siteId),
+					name: layoutPageTemplateCollectionName1,
+				}
+			);
+
+		const layoutPageTemplateCollectionName2 = getRandomString();
+
+		await apiHelpers.jsonWebServicesLayoutPageTemplateCollection.addLayoutPageTemplateCollection(
+			{
+				groupId: String(designLibrary.siteId),
+				name: layoutPageTemplateCollectionName2,
+			}
+		);
+
+		const layoutPageTemplateEntryName = getRandomString();
+
+		await apiHelpers.jsonWebServicesLayoutPageTemplateEntry.addLayoutPageTemplateEntry(
+			{
+				groupId: String(designLibrary.siteId),
+				layoutPageTemplateCollectionId:
+					layoutPageTemplateCollection1.layoutPageTemplateCollectionId,
+				name: layoutPageTemplateEntryName,
+			}
+		);
+
+		// Move the template from the first set to the second
+
+		await designLibrariesPage.goToPageTemplateCollection(
+			designLibraryName,
+			layoutPageTemplateCollectionName1
+		);
+
+		await pageTemplatesPage.movePageTemplate(
+			layoutPageTemplateEntryName,
+			layoutPageTemplateCollectionName2
+		);
+
+		// Check the second set opens from the design library with the template
+
+		await designLibrariesPage.goToPageTemplateCollection(
+			designLibraryName,
+			layoutPageTemplateCollectionName2
+		);
+
+		await expect(
+			page.getByRole('heading', {name: layoutPageTemplateCollectionName2})
+		).toBeVisible();
+
+		await expect(
+			page
+				.locator('.card-type-asset')
+				.filter({hasText: layoutPageTemplateEntryName})
+		).toBeVisible();
+
+		// Check the first set opens from the design library empty
+
+		await designLibrariesPage.goToPageTemplateCollection(
+			designLibraryName,
+			layoutPageTemplateCollectionName1
+		);
+
+		await expect(
+			page.getByRole('heading', {name: layoutPageTemplateCollectionName1})
+		).toBeVisible();
+
+		await expect(
+			page.getByText('There are no page templates.')
+		).toBeVisible();
 	}
 );
