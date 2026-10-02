@@ -125,4 +125,16 @@ export class PageTemplatesPage {
 
 		await waitForAlert(this.page);
 	}
+
+	async movePageTemplate(name: string, pageTemplateCollectionName: string) {
+		await this.clickAction('Move To', name);
+
+		await this.page
+			.getByRole('dialog', {name: 'Select Destination'})
+			.frameLocator('iframe')
+			.getByText(pageTemplateCollectionName, {exact: true})
+			.click();
+
+		await waitForAlert(this.page);
+	}
 }
