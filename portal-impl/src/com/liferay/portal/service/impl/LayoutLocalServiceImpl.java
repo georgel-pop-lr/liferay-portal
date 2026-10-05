@@ -364,6 +364,20 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 		layout.setMasterLayoutPageTemplateEntryERC(
 			masterLayoutPageTemplateEntryERC);
 
+		String masterLayoutPageTemplateEntryScopeERC = ParamUtil.getString(
+			serviceContext, "masterLayoutPageTemplateEntryScopeERC");
+
+		if (Validator.isNotNull(masterLayoutPageTemplateEntryERC) &&
+			Validator.isNotNull(masterLayoutPageTemplateEntryScopeERC)) {
+
+			_validateMasterLayoutPageTemplateEntryERC(
+				layout, masterLayoutPageTemplateEntryERC,
+				masterLayoutPageTemplateEntryScopeERC);
+
+			layout.setMasterLayoutPageTemplateEntryScopeERC(
+				masterLayoutPageTemplateEntryScopeERC);
+		}
+
 		String portletLayoutPageTemplateEntryERC = ParamUtil.getString(
 			serviceContext, "portletLayoutPageTemplateEntryERC");
 		String portletLayoutPageTemplateEntryScopeERC = ParamUtil.getString(
@@ -834,6 +848,18 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 			layout.getStyleBookEntryScopeERC(), layout.getFaviconFileEntryERC(),
 			layout.getFaviconFileEntryScopeERC(),
 			masterLayoutPageTemplateEntryERC, serviceContext);
+
+		String masterLayoutPageTemplateEntryScopeERC = ParamUtil.getString(
+			serviceContext, "masterLayoutPageTemplateEntryScopeERC");
+
+		if (Validator.isNotNull(masterLayoutPageTemplateEntryERC) &&
+			Validator.isNotNull(masterLayoutPageTemplateEntryScopeERC)) {
+
+			layout = layoutLocalService.updateMasterLayoutPageTemplateEntry(
+				layout.getGroupId(), layout.isPrivateLayout(),
+				layout.getLayoutId(), masterLayoutPageTemplateEntryERC,
+				masterLayoutPageTemplateEntryScopeERC);
+		}
 
 		if (Objects.equals(type, LayoutConstants.TYPE_CONTENT) &&
 			(layout.fetchDraftLayout() == null)) {
@@ -3178,7 +3204,7 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 			groupId, privateLayout, layoutId, parentLayoutId);
 
 		_validateMasterLayoutPageTemplateEntryERC(
-			layout, masterLayoutPageTemplateEntryERC);
+			layout, masterLayoutPageTemplateEntryERC, null);
 
 		if (parentLayoutId != layout.getParentLayoutId()) {
 			layout.setParentPlid(
@@ -3209,6 +3235,14 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 		layout.setStyleBookEntryScopeERC(styleBookEntryScopeERC);
 		layout.setFaviconFileEntryERC(faviconFileEntryERC);
 		layout.setFaviconFileEntryScopeERC(faviconFileEntryScopeERC);
+
+		if (!Objects.equals(
+				layout.getMasterLayoutPageTemplateEntryERC(),
+				masterLayoutPageTemplateEntryERC)) {
+
+			layout.setMasterLayoutPageTemplateEntryScopeERC(null);
+		}
+
 		layout.setMasterLayoutPageTemplateEntryERC(
 			masterLayoutPageTemplateEntryERC);
 
@@ -3315,7 +3349,7 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 		validateTypeSettingsProperties(layout, typeSettingsUnicodeProperties);
 
 		_validateMasterLayoutPageTemplateEntryERC(
-			layout, masterLayoutPageTemplateEntryERC);
+			layout, masterLayoutPageTemplateEntryERC, null);
 
 		layout.setModifiedDate(new Date());
 		layout.setTypeSettings(typeSettingsUnicodeProperties.toString());
@@ -3326,6 +3360,14 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 		layout.setCss(css);
 		layout.setFaviconFileEntryERC(faviconFileEntryERC);
 		layout.setFaviconFileEntryScopeERC(faviconFileEntryScopeERC);
+
+		if (!Objects.equals(
+				layout.getMasterLayoutPageTemplateEntryERC(),
+				masterLayoutPageTemplateEntryERC)) {
+
+			layout.setMasterLayoutPageTemplateEntryScopeERC(null);
+		}
+
 		layout.setMasterLayoutPageTemplateEntryERC(
 			masterLayoutPageTemplateEntryERC);
 
@@ -3372,6 +3414,28 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 		return layoutPersistence.update(layout);
 	}
 
+	@Override
+	public Layout updateMasterLayoutPageTemplateEntry(
+			long groupId, boolean privateLayout, long layoutId,
+			String masterLayoutPageTemplateEntryERC,
+			String masterLayoutPageTemplateEntryScopeERC)
+		throws PortalException {
+
+		Layout layout = layoutPersistence.findByG_P_L(
+			groupId, privateLayout, layoutId);
+
+		_validateMasterLayoutPageTemplateEntryERC(
+			layout, masterLayoutPageTemplateEntryERC,
+			masterLayoutPageTemplateEntryScopeERC);
+
+		layout.setMasterLayoutPageTemplateEntryERC(
+			masterLayoutPageTemplateEntryERC);
+		layout.setMasterLayoutPageTemplateEntryScopeERC(
+			masterLayoutPageTemplateEntryScopeERC);
+
+		return layoutPersistence.update(layout);
+	}
+
 	/**
 	 * Updates the layout replacing its master layout page template entry
 	 * external reference code
@@ -3390,16 +3454,9 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 			String masterLayoutPageTemplateEntryERC)
 		throws PortalException {
 
-		Layout layout = layoutPersistence.findByG_P_L(
-			groupId, privateLayout, layoutId);
-
-		_validateMasterLayoutPageTemplateEntryERC(
-			layout, masterLayoutPageTemplateEntryERC);
-
-		layout.setMasterLayoutPageTemplateEntryERC(
-			masterLayoutPageTemplateEntryERC);
-
-		return layoutPersistence.update(layout);
+		return layoutLocalService.updateMasterLayoutPageTemplateEntry(
+			groupId, privateLayout, layoutId, masterLayoutPageTemplateEntryERC,
+			null);
 	}
 
 	/**
@@ -4643,7 +4700,8 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 	}
 
 	private void _validateMasterLayoutPageTemplateEntryERC(
-			Layout layout, String masterLayoutPageTemplateEntryERC)
+			Layout layout, String masterLayoutPageTemplateEntryERC,
+			String masterLayoutPageTemplateEntryScopeERC)
 		throws PortalException {
 
 		if (Validator.isNull(masterLayoutPageTemplateEntryERC)) {
@@ -4653,10 +4711,21 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 		Layout layoutPageTemplateEntryLayout =
 			LayoutPageTemplateEntryLayoutProviderUtil.
 				getLayoutPageTemplateEntryLayout(
-					layout.getGroupId(), masterLayoutPageTemplateEntryERC,
-					layout.getPlid());
+					layout.getCompanyId(), layout.getGroupId(),
+					masterLayoutPageTemplateEntryERC,
+					masterLayoutPageTemplateEntryScopeERC, layout.getPlid());
 
 		if (layoutPageTemplateEntryLayout == null) {
+			if (Validator.isNotNull(masterLayoutPageTemplateEntryScopeERC)) {
+				throw new MasterLayoutException(
+					StringBundler.concat(
+						"Unable to find master page with external reference ",
+						"code ", masterLayoutPageTemplateEntryERC,
+						" in a design library with external reference code ",
+						masterLayoutPageTemplateEntryScopeERC,
+						" connected to group ", layout.getGroupId()));
+			}
+
 			return;
 		}
 
