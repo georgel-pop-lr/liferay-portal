@@ -7,6 +7,7 @@ package com.liferay.layout.internal.servlet;
 
 import com.liferay.portal.kernel.servlet.PersistentHttpServletRequestWrapper;
 import com.liferay.portal.kernel.servlet.RequestDispatcherAttributeNames;
+import com.liferay.portal.kernel.util.ProxyUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -26,7 +27,7 @@ public class IsolatedAttributesHttpServletRequest
 	public IsolatedAttributesHttpServletRequest(
 		HttpServletRequest httpServletRequest) {
 
-		super(httpServletRequest);
+		super(_createHttpServletRequest(httpServletRequest));
 	}
 
 	@Override
@@ -99,6 +100,93 @@ public class IsolatedAttributesHttpServletRequest
 
 			_attributes.put(name, value);
 		}
+	}
+
+	private static HttpServletRequest _createHttpServletRequest(
+		HttpServletRequest httpServletRequest) {
+
+		Map<String, Object> dispatcherAttributes = new HashMap<>();
+
+		Enumeration<String> enumeration =
+			httpServletRequest.getAttributeNames();
+
+		while (enumeration.hasMoreElements()) {
+			String name = enumeration.nextElement();
+
+			if (!_isDispatcherAttributeName(name)) {
+				continue;
+			}
+
+			Object value = httpServletRequest.getAttribute(name);
+
+			if (value != null) {
+				dispatcherAttributes.put(name, value);
+			}
+		}
+
+		return ProxyUtil.newDelegateProxyInstance(
+			HttpServletRequest.class.getClassLoader(), HttpServletRequest.class,
+			new Object() {
+
+				public Object getAttribute(String name) {
+					if (_isDispatcherAttributeName(name)) {
+						return dispatcherAttributes.get(name);
+					}
+
+					return httpServletRequest.getAttribute(name);
+				}
+
+				public Enumeration<String> getAttributeNames() {
+					Set<String> names = new HashSet<>(
+						dispatcherAttributes.keySet());
+
+					Enumeration<String> enumeration =
+						httpServletRequest.getAttributeNames();
+
+					while (enumeration.hasMoreElements()) {
+						String name = enumeration.nextElement();
+
+						if (!_isDispatcherAttributeName(name)) {
+							names.add(name);
+						}
+					}
+
+					return Collections.enumeration(names);
+				}
+
+				public void removeAttribute(String name) {
+					if (_isDispatcherAttributeName(name)) {
+						dispatcherAttributes.remove(name);
+					}
+					else {
+						httpServletRequest.removeAttribute(name);
+					}
+				}
+
+				public void setAttribute(String name, Object value) {
+					if (!_isDispatcherAttributeName(name)) {
+						httpServletRequest.setAttribute(name, value);
+					}
+					else if (value == null) {
+						dispatcherAttributes.remove(name);
+					}
+					else {
+						dispatcherAttributes.put(name, value);
+					}
+				}
+
+			},
+			httpServletRequest);
+	}
+
+	private static boolean _isDispatcherAttributeName(String name) {
+		if (name.startsWith("jakarta.servlet.forward.") ||
+			name.startsWith("jakarta.servlet.include.")) {
+
+			return true;
+		}
+
+		return false;
 	}
 
 	private static final Object _nullValue = new Object();
