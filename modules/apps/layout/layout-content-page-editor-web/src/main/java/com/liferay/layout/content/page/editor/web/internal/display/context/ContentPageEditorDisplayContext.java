@@ -2295,6 +2295,15 @@ public class ContentPageEditorDisplayContext {
 				themeDisplay.getScopeGroupId(),
 				layoutPageTemplateEntry.getExternalReferenceCode());
 
+			Group scopeGroup = themeDisplay.getScopeGroup();
+
+			if (DesignLibraryUtil.isDesignLibraryScope(scopeGroup)) {
+				masterUsagesCount += _layoutLocalService.getMasterLayoutsCount(
+					scopeGroup.getCompanyId(),
+					layoutPageTemplateEntry.getExternalReferenceCode(),
+					scopeGroup.getExternalReferenceCode());
+			}
+
 			if (masterUsagesCount > 0) {
 				return true;
 			}
