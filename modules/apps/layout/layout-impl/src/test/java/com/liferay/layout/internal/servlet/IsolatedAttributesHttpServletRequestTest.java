@@ -5,6 +5,7 @@
 
 package com.liferay.layout.internal.servlet;
 
+import com.liferay.portal.kernel.test.TestInfo;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.util.JavaConstants;
 import com.liferay.portal.test.rule.LiferayUnitTestRule;
@@ -103,6 +104,7 @@ public class IsolatedAttributesHttpServletRequestTest {
 	}
 
 	@Test
+	@TestInfo({"LPD-103742", "LPD-105885"})
 	public void testSetAttribute() {
 		_testSetAttribute();
 		_testSetAttributeWithRequestDispatcherAttribute();
@@ -140,6 +142,10 @@ public class IsolatedAttributesHttpServletRequestTest {
 
 		Assert.assertEquals(
 			value,
+			isolatedAttributesHttpServletRequest.getAttribute(
+				JavaConstants.JAKARTA_SERVLET_INCLUDE_REQUEST_URI));
+
+		Assert.assertNull(
 			httpServletRequest.getAttribute(
 				JavaConstants.JAKARTA_SERVLET_INCLUDE_REQUEST_URI));
 	}

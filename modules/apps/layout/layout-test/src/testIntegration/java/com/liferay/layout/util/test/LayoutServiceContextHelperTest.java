@@ -26,6 +26,7 @@ import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.Http;
+import com.liferay.portal.kernel.util.JavaConstants;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.WebKeys;
@@ -33,11 +34,15 @@ import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
 
+import jakarta.portlet.MimeResponse;
+
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -69,8 +74,8 @@ public class LayoutServiceContextHelperTest {
 	@Test
 	@TestInfo(
 		{
-			"LPD-79722", "LPD-99386", "LPD-102690", "LPD-103697", "LPD-105674",
-			"LPD-105885"
+			"LPD-79722", "LPD-99386", "LPD-102690", "LPD-103697", "LPD-103742",
+			"LPD-105674", "LPD-105885"
 		}
 	)
 	public void testGetServiceContextAutoCloseable() throws Exception {
@@ -78,13 +83,15 @@ public class LayoutServiceContextHelperTest {
 		_testGetServiceContextAutoCloseablePortalURL();
 		_testGetServiceContextAutoCloseablePortalURLThemeDisplay();
 		_testGetServiceContextAutoCloseableWithConcurrentSwaps();
+		_testGetServiceContextAutoCloseableWithIncludeAttributes();
 		_testGetServiceContextAutoCloseableWithLocale();
 		_testGetServiceContextAutoCloseableWithRequestAttributes();
 		_testGetServiceContextAutoCloseableWithThemeDisplay();
 	}
 
 	private FutureTask<Void> _getFutureTask(
-		Layout layout, CountDownLatch openCountDownLatch,
+		String includeServletPath, Layout layout,
+		CountDownLatch openCountDownLatch,
 		CountDownLatch otherOpenCountDownLatch, ServiceContext serviceContext) {
 
 		return new FutureTask<>(
@@ -97,13 +104,26 @@ public class LayoutServiceContextHelperTest {
 							_layoutServiceContextHelper.
 								getServiceContextAutoCloseable(layout)) {
 
+						ServiceContext currentServiceContext =
+							ServiceContextThreadLocal.getServiceContext();
+
+						HttpServletRequest httpServletRequest =
+							currentServiceContext.getRequest();
+
+						httpServletRequest.setAttribute(
+							JavaConstants.JAKARTA_SERVLET_INCLUDE_SERVLET_PATH,
+							includeServletPath);
+
 						openCountDownLatch.countDown();
 
 						Assert.assertTrue(
 							otherOpenCountDownLatch.await(1, TimeUnit.MINUTES));
 
-						ServiceContext currentServiceContext =
-							ServiceContextThreadLocal.getServiceContext();
+						Assert.assertEquals(
+							includeServletPath,
+							httpServletRequest.getAttribute(
+								JavaConstants.
+									JAKARTA_SERVLET_INCLUDE_SERVLET_PATH));
 
 						ThemeDisplay themeDisplay =
 							currentServiceContext.getThemeDisplay();
@@ -119,6 +139,36 @@ public class LayoutServiceContextHelperTest {
 
 					return null;
 				}));
+	}
+
+	private HttpServletRequestWrapper _getHttpServletRequestWrapper(
+		HttpServletRequest httpServletRequest, String includeServletPath) {
+
+		return new HttpServletRequestWrapper(httpServletRequest) {
+
+			@Override
+			public Object getAttribute(String name) {
+				if (name.equals(
+						JavaConstants.JAKARTA_SERVLET_INCLUDE_SERVLET_PATH)) {
+
+					return includeServletPath;
+				}
+
+				return super.getAttribute(name);
+			}
+
+			@Override
+			public Enumeration<String> getAttributeNames() {
+				List<String> attributeNames = Collections.list(
+					super.getAttributeNames());
+
+				attributeNames.add(
+					JavaConstants.JAKARTA_SERVLET_INCLUDE_SERVLET_PATH);
+
+				return Collections.enumeration(attributeNames);
+			}
+
+		};
 	}
 
 	private void _testGetServiceContextAutoCloseable() throws Exception {
@@ -276,19 +326,21 @@ public class LayoutServiceContextHelperTest {
 
 		ServiceContext serviceContext = new ServiceContext();
 
+		HttpServletRequest httpServletRequest = new MockHttpServletRequest();
+
 		serviceContext.setCompanyId(group.getCompanyId());
-		serviceContext.setRequest(new MockHttpServletRequest());
+		serviceContext.setRequest(httpServletRequest);
 		serviceContext.setUserId(TestPropsValues.getUserId());
 
 		CountDownLatch openCountDownLatch1 = new CountDownLatch(1);
 		CountDownLatch openCountDownLatch2 = new CountDownLatch(1);
 
 		FutureTask<Void> futureTask1 = _getFutureTask(
-			LayoutTestUtil.addTypeContentLayout(group), openCountDownLatch1,
-			openCountDownLatch2, serviceContext);
+			"/a.jsp", LayoutTestUtil.addTypeContentLayout(group),
+			openCountDownLatch1, openCountDownLatch2, serviceContext);
 		FutureTask<Void> futureTask2 = _getFutureTask(
-			LayoutTestUtil.addTypeContentLayout(group), openCountDownLatch2,
-			openCountDownLatch1, serviceContext);
+			"/b.jsp", LayoutTestUtil.addTypeContentLayout(group),
+			openCountDownLatch2, openCountDownLatch1, serviceContext);
 
 		Thread thread1 = new Thread(
 			futureTask1, "Layout Service Context Helper Test 1");
@@ -300,6 +352,110 @@ public class LayoutServiceContextHelperTest {
 
 		futureTask1.get();
 		futureTask2.get();
+
+		Assert.assertNull(
+			httpServletRequest.getAttribute(
+				JavaConstants.JAKARTA_SERVLET_INCLUDE_SERVLET_PATH));
+	}
+
+	private void _testGetServiceContextAutoCloseableWithIncludeAttributes()
+		throws Exception {
+
+		ServiceContext serviceContext = new ServiceContext();
+
+		HttpServletRequest httpServletRequest = new MockHttpServletRequest();
+
+		httpServletRequest.setAttribute(
+			JavaConstants.JAKARTA_SERVLET_INCLUDE_PATH_INFO, "/foo");
+
+		serviceContext.setRequest(
+			_getHttpServletRequestWrapper(httpServletRequest, "/outer.jsp"));
+
+		ServiceContextThreadLocal.pushServiceContext(serviceContext);
+
+		Layout layout = LayoutTestUtil.addTypeContentLayout(
+			GroupTestUtil.addGroup());
+
+		try (AutoCloseable autoCloseable =
+				_layoutServiceContextHelper.getServiceContextAutoCloseable(
+					layout)) {
+
+			ServiceContext currentServiceContext =
+				ServiceContextThreadLocal.getServiceContext();
+
+			HttpServletRequestWrapper currentHttpServletRequestWrapper =
+				(HttpServletRequestWrapper)currentServiceContext.getRequest();
+
+			Assert.assertEquals(
+				"/foo",
+				currentHttpServletRequestWrapper.getAttribute(
+					JavaConstants.JAKARTA_SERVLET_INCLUDE_PATH_INFO));
+			Assert.assertEquals(
+				"/outer.jsp",
+				currentHttpServletRequestWrapper.getAttribute(
+					JavaConstants.JAKARTA_SERVLET_INCLUDE_SERVLET_PATH));
+
+			currentHttpServletRequestWrapper.removeAttribute(
+				JavaConstants.JAKARTA_SERVLET_INCLUDE_SERVLET_PATH);
+			currentHttpServletRequestWrapper.setAttribute(
+				JavaConstants.JAKARTA_SERVLET_INCLUDE_PATH_INFO, null);
+
+			Assert.assertNull(
+				currentHttpServletRequestWrapper.getAttribute(
+					JavaConstants.JAKARTA_SERVLET_INCLUDE_PATH_INFO));
+			Assert.assertNull(
+				currentHttpServletRequestWrapper.getAttribute(
+					JavaConstants.JAKARTA_SERVLET_INCLUDE_SERVLET_PATH));
+
+			List<String> attributeNames = Collections.list(
+				currentHttpServletRequestWrapper.getAttributeNames());
+
+			Assert.assertFalse(
+				attributeNames.toString(),
+				attributeNames.contains(
+					JavaConstants.JAKARTA_SERVLET_INCLUDE_PATH_INFO));
+			Assert.assertFalse(
+				attributeNames.toString(),
+				attributeNames.contains(
+					JavaConstants.JAKARTA_SERVLET_INCLUDE_SERVLET_PATH));
+
+			currentHttpServletRequestWrapper.setAttribute(
+				JavaConstants.JAKARTA_SERVLET_INCLUDE_SERVLET_PATH,
+				RandomTestUtil.randomString());
+			currentHttpServletRequestWrapper.setAttribute(
+				MimeResponse.MARKUP_HEAD_ELEMENT, "head");
+
+			Assert.assertEquals(
+				"head",
+				httpServletRequest.getAttribute(
+					MimeResponse.MARKUP_HEAD_ELEMENT));
+
+			currentHttpServletRequestWrapper.removeAttribute(
+				MimeResponse.MARKUP_HEAD_ELEMENT);
+			currentHttpServletRequestWrapper.setRequest(
+				_getHttpServletRequestWrapper(
+					(HttpServletRequest)
+						currentHttpServletRequestWrapper.getRequest(),
+					"/b.jsp"));
+
+			Assert.assertEquals(
+				"/b.jsp",
+				currentHttpServletRequestWrapper.getAttribute(
+					JavaConstants.JAKARTA_SERVLET_INCLUDE_SERVLET_PATH));
+		}
+		finally {
+			ServiceContextThreadLocal.popServiceContext();
+		}
+
+		Assert.assertEquals(
+			"/foo",
+			httpServletRequest.getAttribute(
+				JavaConstants.JAKARTA_SERVLET_INCLUDE_PATH_INFO));
+		Assert.assertNull(
+			httpServletRequest.getAttribute(
+				JavaConstants.JAKARTA_SERVLET_INCLUDE_SERVLET_PATH));
+		Assert.assertNull(
+			httpServletRequest.getAttribute(MimeResponse.MARKUP_HEAD_ELEMENT));
 	}
 
 	private void _testGetServiceContextAutoCloseableWithLocale()
