@@ -16,6 +16,7 @@ import com.liferay.portal.kernel.portlet.PortletURLUtil;
 import com.liferay.portal.kernel.portlet.url.builder.PortletURLBuilder;
 import com.liferay.portal.kernel.servlet.taglib.ui.BreadcrumbEntry;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.site.navigation.taglib.servlet.taglib.util.BreadcrumbEntryListBuilder;
 
@@ -30,6 +31,27 @@ import java.util.List;
  * @author Georgel Pop
  */
 public class GroupSelectorBreadcrumbUtil {
+
+	public static void addPortletBreadcrumbEntries(
+			HttpServletRequest httpServletRequest,
+			LiferayPortletResponse liferayPortletResponse,
+			PortletURL portletURL)
+		throws PortletException {
+
+		ThemeDisplay themeDisplay =
+			(ThemeDisplay)httpServletRequest.getAttribute(
+				WebKeys.THEME_DISPLAY);
+
+		for (BreadcrumbEntry breadcrumbEntry :
+				getBreadcrumbEntries(
+					themeDisplay.getScopeGroup(), httpServletRequest,
+					liferayPortletResponse, portletURL)) {
+
+			PortalUtil.addPortletBreadcrumbEntry(
+				httpServletRequest, breadcrumbEntry.getTitle(),
+				breadcrumbEntry.getURL());
+		}
+	}
 
 	public static List<BreadcrumbEntry> getBreadcrumbEntries(
 			Group group, HttpServletRequest httpServletRequest,
