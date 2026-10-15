@@ -4,7 +4,7 @@
  */
 
 import ClayButton from '@clayui/button';
-import ClayDropDown, {ClayDropDownWithItems} from '@clayui/drop-down';
+import {ClayDropDownWithItems} from '@clayui/drop-down';
 import ClayIcon from '@clayui/icon';
 import {LinkOrButton} from '@clayui/shared';
 import classNames from 'classnames';
@@ -119,77 +119,45 @@ const DropDown = ({
 		triggerCreationAction(item, frontendDataSetContext);
 	};
 
-	const trigger = (
-		<DropdownTrigger
-			hideManagementBarInEmptyState={hideManagementBarInEmptyState}
-			inEmptyState={inEmptyState}
-		/>
-	);
-
-	if (primaryItems.some((item) => item.items)) {
-		const getDropDownItems = (
-			items: Array<ICreationActionItem>
-		): Array<TClayDropDownItem> =>
-			items.map((item) => {
-				if (item.items?.length) {
-					return {
-						items: getDropDownItems(item.items),
-						label: item.label,
-						symbolLeft: item.icon,
-						type: EItemActionsType.CONTEXTUAL,
-					};
-				}
-
+	const getDropDownItems = (
+		items: Array<ICreationActionItem>
+	): Array<TClayDropDownItem> =>
+		items.map((item) => {
+			if (item.items?.length) {
 				return {
-					className: item.className,
+					items: getDropDownItems(item.items),
 					label: item.label,
-					onClick: (event) => {
-						event.preventDefault();
-
-						onItemClick(item);
-					},
 					symbolLeft: item.icon,
+					type: EItemActionsType.CONTEXTUAL,
 				};
-			});
+			}
 
-		return (
-			<ClayDropDownWithItems
-				active={active}
-				items={getDropDownItems(primaryItems)}
-				onActiveChange={setActive}
-				trigger={trigger}
-			/>
-		);
-	}
+			return {
+				className: item.className,
+				label: item.label,
+				onClick: (event) => {
+					event.preventDefault();
+
+					onItemClick(item);
+				},
+				symbolLeft: item.icon,
+			};
+		});
 
 	return (
-		<ClayDropDown
+		<ClayDropDownWithItems
 			active={active}
+			items={getDropDownItems(primaryItems)}
 			onActiveChange={setActive}
-			trigger={trigger}
-		>
-			<ClayDropDown.ItemList>
-				{primaryItems.map((item, i) => (
-					<ClayDropDown.Item
-						className={item.className}
-						key={i}
-						onClick={(event) => {
-							event.preventDefault();
-
-							onItemClick(item);
-						}}
-					>
-						{item.icon && (
-							<span className="pr-2">
-								<ClayIcon symbol={item.icon} />
-							</span>
-						)}
-
-						{item.label}
-					</ClayDropDown.Item>
-				))}
-			</ClayDropDown.ItemList>
-		</ClayDropDown>
+			trigger={
+				<DropdownTrigger
+					hideManagementBarInEmptyState={
+						hideManagementBarInEmptyState
+					}
+					inEmptyState={inEmptyState}
+				/>
+			}
+		/>
 	);
 };
 
