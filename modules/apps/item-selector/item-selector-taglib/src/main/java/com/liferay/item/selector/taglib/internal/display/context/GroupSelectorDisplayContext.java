@@ -258,12 +258,23 @@ public class GroupSelectorDisplayContext {
 		return ItemSelectorUtil.getItemSelector();
 	}
 
-	private PortletURL _getItemSelectorURL() {
+	private List<ItemSelectorCriterion> _getItemSelectorCriteria() {
+		if (_itemSelectorCriteria != null) {
+			return _itemSelectorCriteria;
+		}
+
 		ItemSelector itemSelector = _getItemSelector();
 
+		_itemSelectorCriteria = itemSelector.getItemSelectorCriteria(
+			_liferayPortletRequest.getParameterMap());
+
+		return _itemSelectorCriteria;
+	}
+
+	private PortletURL _getItemSelectorURL() {
+		ItemSelector itemSelector = _getItemSelector();
 		List<ItemSelectorCriterion> itemSelectorCriteria =
-			itemSelector.getItemSelectorCriteria(
-				_liferayPortletRequest.getParameterMap());
+			_getItemSelectorCriteria();
 
 		return itemSelector.getItemSelectorURL(
 			RequestBackedPortletURLFactoryUtil.create(_liferayPortletRequest),
@@ -290,11 +301,8 @@ public class GroupSelectorDisplayContext {
 	}
 
 	private boolean _isLegacyAssetItemSelectorCriterion() {
-		ItemSelector itemSelector = _getItemSelector();
-
 		for (ItemSelectorCriterion itemSelectorCriterion :
-				itemSelector.getItemSelectorCriteria(
-					_liferayPortletRequest.getParameterMap())) {
+				_getItemSelectorCriteria()) {
 
 			if (!(itemSelectorCriterion instanceof
 					InfoItemItemSelectorCriterion)) {
@@ -343,6 +351,7 @@ public class GroupSelectorDisplayContext {
 
 	private String _groupType;
 	private Set<String> _groupTypes;
+	private List<ItemSelectorCriterion> _itemSelectorCriteria;
 	private final LiferayPortletRequest _liferayPortletRequest;
 	private Boolean _scopeGroupType;
 	private String _selectedTab;
