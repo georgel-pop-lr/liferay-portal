@@ -4,6 +4,8 @@ The leading underscore that marks a private member in Java does not carry over t
 
 A function that is not exported is already private to its module, so the prefix adds nothing the language does not say.
 
+A private method of a class is not a module scope function, and this rule does not cover it. The codebase is split on it: `modules/apps` declares 28 `private` TypeScript methods with the prefix against 16 without it, and `modules/test/playwright/helpers` declares 10 with it against 1 without it, so follow the file and its directory (rule 001). On LPD-110394 Refactor the design library Playwright specs (https://liferay.atlassian.net/browse/LPD-110394), the liferay review flagged `private async _createAssetLibrary` in `HeadlessAssetLibraryApiHelper.ts`, and the finding was refused.
+
 **Rationale:** the underscore is a Java convention read as "private to the class", and in a module it marks nothing the missing `export` does not already mark, so it only makes a helper look different from the 3,125 around it.
 
-A violation is a new function or function valued constant in a `.ts`, `.tsx`, `.js` or `.jsx` file whose name begins with `_`.
+A violation is a new module scope function or function valued constant in a `.ts`, `.tsx`, `.js` or `.jsx` file whose name begins with `_`. A `private` class method is not one.
