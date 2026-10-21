@@ -4646,23 +4646,23 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 			Layout layout, String masterLayoutPageTemplateEntryERC)
 		throws PortalException {
 
-		if (Validator.isNull(masterLayoutPageTemplateEntryERC)) {
-			return;
-		}
+		if (Validator.isNotNull(masterLayoutPageTemplateEntryERC)) {
+			Layout layoutPageTemplateEntryLayout =
+				LayoutPageTemplateEntryLayoutProviderUtil.
+					getLayoutPageTemplateEntryLayout(
+						layout.getCompanyId(), masterLayoutPageTemplateEntryERC,
+						layout.getGroupId(),
+						layout.getMasterLayoutPageTemplateEntryScopeERC(),
+						layout.getPlid());
 
-		Layout layoutPageTemplateEntryLayout =
-			LayoutPageTemplateEntryLayoutProviderUtil.
-				getLayoutPageTemplateEntryLayout(
-					layout.getGroupId(), masterLayoutPageTemplateEntryERC,
-					layout.getPlid());
+			if (layoutPageTemplateEntryLayout == null) {
+				return;
+			}
 
-		if (layoutPageTemplateEntryLayout == null) {
-			return;
-		}
-
-		if (layoutPageTemplateEntryLayout.getPlid() == layout.getPlid()) {
-			throw new MasterLayoutException(
-				"Master page cannot point to itself");
+			if (layoutPageTemplateEntryLayout.getPlid() == layout.getPlid()) {
+				throw new MasterLayoutException(
+					"Master page cannot point to itself");
+			}
 		}
 	}
 
