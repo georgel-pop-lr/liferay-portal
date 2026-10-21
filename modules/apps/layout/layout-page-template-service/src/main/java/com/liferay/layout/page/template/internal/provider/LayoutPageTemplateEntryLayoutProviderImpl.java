@@ -5,9 +5,14 @@
 
 package com.liferay.layout.page.template.internal.provider;
 
+import com.liferay.design.library.util.DesignLibraryUtil;
+import com.liferay.layout.page.template.constants.LayoutPageTemplateEntryTypeConstants;
 import com.liferay.layout.page.template.kernel.provider.LayoutPageTemplateEntryLayoutProvider;
 import com.liferay.layout.page.template.model.LayoutPageTemplateEntry;
 import com.liferay.layout.page.template.service.LayoutPageTemplateEntryLocalService;
+import com.liferay.petra.string.StringBundler;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.LayoutPrototype;
 import com.liferay.portal.kernel.service.LayoutLocalService;
@@ -25,38 +30,45 @@ public class LayoutPageTemplateEntryLayoutProviderImpl
 	implements LayoutPageTemplateEntryLayoutProvider {
 
 	public Layout getLayoutPageTemplateEntryLayout(
-		long groupId, String externalReferenceCode, long plid) {
+		long companyId, String externalReferenceCode, long groupId,
+		String layoutPageTemplateEntryScopeERC, long plid) {
+
+		long scopeGroupId = groupId;
 
 		LayoutPageTemplateEntry layoutPageTemplateEntry =
 			_layoutPageTemplateEntryLocalService.
-				fetchLayoutPageTemplateEntryByExternalReferenceCode(
-					externalReferenceCode, groupId);
-
-		if (layoutPageTemplateEntry != null) {
-			return _layoutLocalService.fetchLayout(
-				layoutPageTemplateEntry.getPlid());
-		}
-
-		layoutPageTemplateEntry =
-			_layoutPageTemplateEntryLocalService.
 				fetchLayoutPageTemplateEntryByPlid(plid);
 
-		if (layoutPageTemplateEntry == null) {
+		if ((layoutPageTemplateEntry != null) &&
+			(layoutPageTemplateEntry.getType() ==
+				LayoutPageTemplateEntryTypeConstants.WIDGET_PAGE)) {
+
+			scopeGroupId = layoutPageTemplateEntry.getGroupId();
+		}
+
+		Long itemGroupId = ScopeUtil.getItemGroupId(
+			companyId, layoutPageTemplateEntryScopeERC, scopeGroupId);
+
+		if ((itemGroupId == null) ||
+			((itemGroupId != scopeGroupId) &&
+			 !DesignLibraryUtil.isConnectedDesignLibraryGroupId(
+				 itemGroupId, scopeGroupId))) {
+
+			if (_log.isDebugEnabled()) {
+				_log.debug(
+					StringBundler.concat(
+						"Unable to find master page with external reference ",
+						"code ", externalReferenceCode,
+						" in a design library with external reference code ",
+						layoutPageTemplateEntryScopeERC, " connected to group ",
+						scopeGroupId));
+			}
+
 			return null;
 		}
 
-		layoutPageTemplateEntry =
-			_layoutPageTemplateEntryLocalService.
-				fetchLayoutPageTemplateEntryByExternalReferenceCode(
-					externalReferenceCode,
-					layoutPageTemplateEntry.getGroupId());
-
-		if (layoutPageTemplateEntry == null) {
-			return null;
-		}
-
-		return _layoutLocalService.fetchLayout(
-			layoutPageTemplateEntry.getPlid());
+		return _fetchLayoutPageTemplateEntryLayout(
+			itemGroupId, externalReferenceCode);
 	}
 
 	public LayoutPrototype getLayoutPageTemplateEntryLayoutPrototype(
@@ -82,6 +94,25 @@ public class LayoutPageTemplateEntryLayoutProviderImpl
 
 		return null;
 	}
+
+	private Layout _fetchLayoutPageTemplateEntryLayout(
+		long groupId, String externalReferenceCode) {
+
+		LayoutPageTemplateEntry foundLayoutPageTemplateEntry =
+			_layoutPageTemplateEntryLocalService.
+				fetchLayoutPageTemplateEntryByExternalReferenceCode(
+					externalReferenceCode, groupId);
+
+		if (foundLayoutPageTemplateEntry == null) {
+			return null;
+		}
+
+		return _layoutLocalService.fetchLayout(
+			foundLayoutPageTemplateEntry.getPlid());
+	}
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		LayoutPageTemplateEntryLayoutProviderImpl.class);
 
 	@Reference
 	private LayoutLocalService _layoutLocalService;
