@@ -339,15 +339,16 @@ public class VirtualLayout extends LayoutWrapper {
 		UnicodeProperties typeSettingsUnicodeProperties =
 			getTypeSettingsProperties();
 
-		Layout masterLayout =
+		Layout masterLayoutPageTemplateEntry =
 			LayoutPageTemplateEntryLayoutProviderUtil.
 				getLayoutPageTemplateEntryLayout(
-					getSourceGroupId(), getMasterLayoutPageTemplateEntryERC(),
-					getPlid());
+					getCompanyId(), getMasterLayoutPageTemplateEntryERC(),
+					getSourceGroupId(),
+					getMasterLayoutPageTemplateEntryScopeERC(), getPlid());
 
-		if (masterLayout != null) {
+		if (masterLayoutPageTemplateEntry != null) {
 			typeSettingsUnicodeProperties =
-				masterLayout.getTypeSettingsProperties();
+				masterLayoutPageTemplateEntry.getTypeSettingsProperties();
 		}
 
 		return typeSettingsUnicodeProperties.getProperty(

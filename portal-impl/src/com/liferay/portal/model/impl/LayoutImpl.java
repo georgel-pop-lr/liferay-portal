@@ -1603,9 +1603,13 @@ public class LayoutImpl extends LayoutBaseImpl {
 			return null;
 		}
 
+		// look the master page up in the group of its design library
+
 		return LayoutPageTemplateEntryLayoutProviderUtil.
 			getLayoutPageTemplateEntryLayout(
-				getGroupId(), getMasterLayoutPageTemplateEntryERC(), getPlid());
+				getCompanyId(), getMasterLayoutPageTemplateEntryERC(),
+				getGroupId(), getMasterLayoutPageTemplateEntryScopeERC(),
+				getPlid());
 	}
 
 	private ColorScheme _getColorScheme() throws PortalException {
