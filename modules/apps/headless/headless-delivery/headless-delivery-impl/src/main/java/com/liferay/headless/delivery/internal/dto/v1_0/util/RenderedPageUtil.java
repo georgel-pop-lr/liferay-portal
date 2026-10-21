@@ -5,6 +5,7 @@
 
 package com.liferay.headless.delivery.internal.dto.v1_0.util;
 
+import com.liferay.design.library.util.DesignLibraryUtil;
 import com.liferay.headless.delivery.dto.v1_0.RenderedPage;
 import com.liferay.headless.delivery.internal.resource.v1_0.BaseSitePageResourceImpl;
 import com.liferay.layout.page.template.model.LayoutPageTemplateEntry;
@@ -13,6 +14,7 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.kernel.util.ScopeUtil;
 import com.liferay.portal.vulcan.dto.converter.DTOConverterContext;
 import com.liferay.portal.vulcan.util.JaxRsLinkUtil;
 import com.liferay.segments.model.SegmentsExperience;
@@ -37,11 +39,10 @@ public class RenderedPageUtil {
 		LayoutPageTemplateEntry layoutPageTemplateEntry =
 			_getLayoutPageTemplateEntry(
 				layout, layoutPageTemplateEntryLocalService, portal);
+
 		LayoutPageTemplateEntry masterLayoutPageTemplateEntry =
-			layoutPageTemplateEntryLocalService.
-				fetchLayoutPageTemplateEntryByExternalReferenceCode(
-					layout.getMasterLayoutPageTemplateEntryERC(),
-					layout.getGroupId());
+			getMasterLayoutPageTemplateEntry(
+				layout, layoutPageTemplateEntryLocalService);
 
 		return new RenderedPage() {
 			{
@@ -86,6 +87,30 @@ public class RenderedPageUtil {
 					() -> _getJaxRsLink(dtoConverterContext, layout));
 			}
 		};
+	}
+
+	protected static LayoutPageTemplateEntry getMasterLayoutPageTemplateEntry(
+		Layout layout,
+		LayoutPageTemplateEntryLocalService
+			layoutPageTemplateEntryLocalService) {
+
+		Long masterPageOwnerGroupId = ScopeUtil.getItemGroupId(
+			layout.getCompanyId(),
+			layout.getMasterLayoutPageTemplateEntryScopeERC(),
+			layout.getGroupId());
+
+		if ((masterPageOwnerGroupId == null) ||
+			((masterPageOwnerGroupId != layout.getGroupId()) &&
+			 !DesignLibraryUtil.isConnectedDesignLibraryGroupId(
+				 masterPageOwnerGroupId, layout.getGroupId()))) {
+
+			return null;
+		}
+
+		return layoutPageTemplateEntryLocalService.
+			fetchLayoutPageTemplateEntryByExternalReferenceCode(
+				layout.getMasterLayoutPageTemplateEntryERC(),
+				masterPageOwnerGroupId);
 	}
 
 	private static String _getJaxRsLink(
