@@ -35,6 +35,8 @@ public class LayoutPageTemplateEntryLayoutProviderUtilTest {
 
 	@Before
 	public void setUp() {
+		_layout = Mockito.mock(Layout.class);
+
 		_originalLayoutPageTemplateEntryLayoutProviderSnapshot =
 			ReflectionTestUtil.getAndSetFieldValue(
 				LayoutPageTemplateEntryLayoutProviderUtil.class,
@@ -63,13 +65,19 @@ public class LayoutPageTemplateEntryLayoutProviderUtilTest {
 	}
 
 	@Test
-	@TestInfo("LPD-99345")
+	@TestInfo({"LPD-99345", "LPD-108819"})
 	public void testGetLayoutPageTemplateEntryLayout() throws Throwable {
-		long groupId = RandomTestUtil.randomLong();
+		long companyId = RandomTestUtil.randomLong();
 		String externalReferenceCode = RandomTestUtil.randomString();
+		long groupId = RandomTestUtil.randomLong();
+		String layoutPageTemplateEntryScopeERC = RandomTestUtil.randomString();
 		long plid = RandomTestUtil.randomLong();
 
-		Layout layout = Mockito.mock(Layout.class);
+		Mockito.when(
+			_log.isDebugEnabled()
+		).thenReturn(
+			false
+		);
 
 		LayoutPageTemplateEntryLayoutProvider
 			layoutPageTemplateEntryLayoutProvider = Mockito.mock(
@@ -78,9 +86,10 @@ public class LayoutPageTemplateEntryLayoutProviderUtilTest {
 		Mockito.when(
 			layoutPageTemplateEntryLayoutProvider.
 				getLayoutPageTemplateEntryLayout(
-					groupId, externalReferenceCode, plid)
+					companyId, externalReferenceCode, groupId,
+					layoutPageTemplateEntryScopeERC, plid)
 		).thenReturn(
-			layout
+			_layout
 		);
 
 		Mockito.when(
@@ -90,16 +99,18 @@ public class LayoutPageTemplateEntryLayoutProviderUtilTest {
 		);
 
 		Assert.assertSame(
-			layout,
+			_layout,
 			LayoutPageTemplateEntryLayoutProviderUtil.
 				getLayoutPageTemplateEntryLayout(
-					groupId, externalReferenceCode, plid));
+					companyId, externalReferenceCode, groupId,
+					layoutPageTemplateEntryScopeERC, plid));
 
 		_testLogsDebugMessageWhenProviderIsUnavailable(
 			() ->
 				LayoutPageTemplateEntryLayoutProviderUtil.
 					getLayoutPageTemplateEntryLayout(
-						groupId, externalReferenceCode, plid));
+						companyId, externalReferenceCode, groupId,
+						layoutPageTemplateEntryScopeERC, plid));
 	}
 
 	@Test
@@ -179,6 +190,7 @@ public class LayoutPageTemplateEntryLayoutProviderUtilTest {
 
 	private static final Log _log = Mockito.mock(Log.class);
 
+	private Layout _layout;
 	private final Snapshot<LayoutPageTemplateEntryLayoutProvider>
 		_layoutPageTemplateEntryLayoutProviderSnapshot = Mockito.mock(
 			Snapshot.class);
