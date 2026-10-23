@@ -72,6 +72,7 @@ import com.liferay.layout.test.util.ContentLayoutTestUtil;
 import com.liferay.layout.test.util.LayoutFriendlyURLRandomizerBumper;
 import com.liferay.layout.test.util.LayoutTestUtil;
 import com.liferay.oauth2.provider.scope.ScopeChecker;
+import com.liferay.petra.function.UnsafeRunnable;
 import com.liferay.petra.function.transform.TransformUtil;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
@@ -664,6 +665,40 @@ public class SitePageResourceTest extends BaseSitePageResourceTestCase {
 		Assert.assertEquals(masterPageName, renderedPage.getMasterPageName());
 	}
 
+	private void _assertProblemException(
+			String expectedStatus, String expectedType,
+			UnsafeRunnable<Exception> unsafeRunnable)
+		throws Exception {
+
+		try {
+			unsafeRunnable.run();
+
+			Assert.fail();
+		}
+		catch (Problem.ProblemException problemException) {
+			Problem problem = problemException.getProblem();
+
+			Assert.assertEquals(expectedStatus, problem.getStatus());
+			Assert.assertEquals(expectedType, problem.getType());
+		}
+	}
+
+	private void _assertProblemException(
+			String expectedStatus, UnsafeRunnable<Exception> unsafeRunnable)
+		throws Exception {
+
+		try {
+			unsafeRunnable.run();
+
+			Assert.fail();
+		}
+		catch (Problem.ProblemException problemException) {
+			Problem problem = problemException.getProblem();
+
+			Assert.assertEquals(expectedStatus, problem.getStatus());
+		}
+	}
+
 	private String _getRandomFriendlyURL() {
 		String urlTitle = StringUtil.toLowerCase(
 			RandomTestUtil.randomString(
@@ -851,19 +886,13 @@ public class SitePageResourceTest extends BaseSitePageResourceTestCase {
 		SitePage sitePage = sitePageResource.getSiteSitePage(
 			testGroup.getGroupId(), friendlyURL.substring(1));
 
-		Assert.assertNotNull(sitePage);
 		Assert.assertEquals(
 			layout.getName(LocaleUtil.getDefault()), sitePage.getTitle());
 
-		try {
-			sitePageResource.getSiteSitePage(
-				testGroup.getGroupId(), URLEncoder.encode("aaa/bbb"));
-
-			Assert.fail();
-		}
-		catch (Problem.ProblemException problemException) {
-			Assert.assertNotNull(problemException);
-		}
+		_assertProblemException(
+			"400",
+			() -> sitePageResource.getSiteSitePage(
+				testGroup.getGroupId(), URLEncoder.encode("aaa/bbb")));
 	}
 
 	private void _testGetSiteSitePageRenderedPage() throws Exception {
@@ -1199,15 +1228,10 @@ public class SitePageResourceTest extends BaseSitePageResourceTestCase {
 
 		String friendlyURL = layout.getFriendlyURL();
 
-		try {
-			noPermissionsSitePageResource.getSiteSitePage(
-				testGroup.getGroupId(), friendlyURL.substring(1));
-		}
-		catch (Problem.ProblemException problemException) {
-			Problem problem = problemException.getProblem();
-
-			Assert.assertEquals("NOT_FOUND", problem.getStatus());
-		}
+		_assertProblemException(
+			"NOT_FOUND",
+			() -> noPermissionsSitePageResource.getSiteSitePage(
+				testGroup.getGroupId(), friendlyURL.substring(1)));
 	}
 
 	private void _testGetSiteSitePagesPagePageSet() throws Exception {
@@ -1245,18 +1269,9 @@ public class SitePageResourceTest extends BaseSitePageResourceTestCase {
 
 		testPostSiteSitePage_addSitePage(randomSitePage);
 
-		try {
-			testPostSiteSitePage_addSitePage(randomSitePage);
-
-			Assert.fail();
-		}
-		catch (Problem.ProblemException problemException) {
-			Problem problem = problemException.getProblem();
-
-			Assert.assertEquals("BAD_REQUEST", problem.getStatus());
-			Assert.assertEquals(
-				"LayoutFriendlyURLsException", problem.getType());
-		}
+		_assertProblemException(
+			"BAD_REQUEST", "LayoutFriendlyURLsException",
+			() -> testPostSiteSitePage_addSitePage(randomSitePage));
 	}
 
 	private void _testPostSiteSitePageFailureFriendlyURLContainsDoubleSlash()
@@ -1268,18 +1283,9 @@ public class SitePageResourceTest extends BaseSitePageResourceTestCase {
 			RandomTestUtil.randomString() + StringPool.DOUBLE_SLASH +
 				RandomTestUtil.randomString());
 
-		try {
-			testPostSiteSitePage_addSitePage(randomSitePage);
-
-			Assert.fail();
-		}
-		catch (Problem.ProblemException problemException) {
-			Problem problem = problemException.getProblem();
-
-			Assert.assertEquals("BAD_REQUEST", problem.getStatus());
-			Assert.assertEquals(
-				"LayoutFriendlyURLsException", problem.getType());
-		}
+		_assertProblemException(
+			"BAD_REQUEST", "LayoutFriendlyURLsException",
+			() -> testPostSiteSitePage_addSitePage(randomSitePage));
 	}
 
 	private void _testPostSiteSitePageFailureFriendlyURLContainsInvalidCharacters()
@@ -1289,18 +1295,9 @@ public class SitePageResourceTest extends BaseSitePageResourceTestCase {
 
 		randomSitePage.setFriendlyUrlPath("-%.+\\*_");
 
-		try {
-			testPostSiteSitePage_addSitePage(randomSitePage);
-
-			Assert.fail();
-		}
-		catch (Problem.ProblemException problemException) {
-			Problem problem = problemException.getProblem();
-
-			Assert.assertEquals("BAD_REQUEST", problem.getStatus());
-			Assert.assertEquals(
-				"LayoutFriendlyURLsException", problem.getType());
-		}
+		_assertProblemException(
+			"BAD_REQUEST", "LayoutFriendlyURLsException",
+			() -> testPostSiteSitePage_addSitePage(randomSitePage));
 	}
 
 	private void _testPostSiteSitePageFailureFriendlyURLEndsWithSlash()
@@ -1311,18 +1308,9 @@ public class SitePageResourceTest extends BaseSitePageResourceTestCase {
 		randomSitePage.setFriendlyUrlPath(
 			RandomTestUtil.randomString() + StringPool.FORWARD_SLASH);
 
-		try {
-			testPostSiteSitePage_addSitePage(randomSitePage);
-
-			Assert.fail();
-		}
-		catch (Problem.ProblemException problemException) {
-			Problem problem = problemException.getProblem();
-
-			Assert.assertEquals("BAD_REQUEST", problem.getStatus());
-			Assert.assertEquals(
-				"LayoutFriendlyURLsException", problem.getType());
-		}
+		_assertProblemException(
+			"BAD_REQUEST", "LayoutFriendlyURLsException",
+			() -> testPostSiteSitePage_addSitePage(randomSitePage));
 	}
 
 	private void _testPostSiteSitePageFailureFriendlyURLTooLong()
@@ -1334,18 +1322,9 @@ public class SitePageResourceTest extends BaseSitePageResourceTestCase {
 			RandomTestUtil.randomString(
 				LayoutConstants.FRIENDLY_URL_MAX_LENGTH + 1));
 
-		try {
-			testPostSiteSitePage_addSitePage(randomSitePage);
-
-			Assert.fail();
-		}
-		catch (Problem.ProblemException problemException) {
-			Problem problem = problemException.getProblem();
-
-			Assert.assertEquals("BAD_REQUEST", problem.getStatus());
-			Assert.assertEquals(
-				"LayoutFriendlyURLsException", problem.getType());
-		}
+		_assertProblemException(
+			"BAD_REQUEST", "LayoutFriendlyURLsException",
+			() -> testPostSiteSitePage_addSitePage(randomSitePage));
 	}
 
 	private void _testPostSiteSitePageFailureFriendlyURLTooShort()
@@ -1355,18 +1334,9 @@ public class SitePageResourceTest extends BaseSitePageResourceTestCase {
 
 		randomSitePage.setFriendlyUrlPath("a");
 
-		try {
-			testPostSiteSitePage_addSitePage(randomSitePage);
-
-			Assert.fail();
-		}
-		catch (Problem.ProblemException problemException) {
-			Problem problem = problemException.getProblem();
-
-			Assert.assertEquals("BAD_REQUEST", problem.getStatus());
-			Assert.assertEquals(
-				"LayoutFriendlyURLsException", problem.getType());
-		}
+		_assertProblemException(
+			"BAD_REQUEST", "LayoutFriendlyURLsException",
+			() -> testPostSiteSitePage_addSitePage(randomSitePage));
 	}
 
 	private void _testPostSiteSitePageFailureInvalidTitle() throws Exception {
@@ -1377,17 +1347,9 @@ public class SitePageResourceTest extends BaseSitePageResourceTestCase {
 
 		randomSitePage.setTitle(RandomTestUtil.randomString(maxLength + 1));
 
-		try {
-			testPostSiteSitePage_addSitePage(randomSitePage);
-
-			Assert.fail();
-		}
-		catch (Problem.ProblemException problemException) {
-			Problem problem = problemException.getProblem();
-
-			Assert.assertEquals("BAD_REQUEST", problem.getStatus());
-			Assert.assertEquals("LayoutNameException", problem.getType());
-		}
+		_assertProblemException(
+			"BAD_REQUEST", "LayoutNameException",
+			() -> testPostSiteSitePage_addSitePage(randomSitePage));
 	}
 
 	private void _testPostSiteSitePageFailurePageDefinitionSettingsClientExtensions()
@@ -1452,16 +1414,9 @@ public class SitePageResourceTest extends BaseSitePageResourceTestCase {
 
 		randomSitePage.setPagePermissions(inputPagePermissions);
 
-		try {
-			testPostSiteSitePage_addSitePage(randomSitePage);
-
-			Assert.fail();
-		}
-		catch (Problem.ProblemException problemException) {
-			Problem problem = problemException.getProblem();
-
-			Assert.assertEquals("NOT_FOUND", problem.getStatus());
-		}
+		_assertProblemException(
+			"NOT_FOUND",
+			() -> testPostSiteSitePage_addSitePage(randomSitePage));
 	}
 
 	private void _testPostSiteSitePageSuccessCustomFields() throws Exception {
