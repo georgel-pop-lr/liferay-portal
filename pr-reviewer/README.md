@@ -78,6 +78,17 @@ It takes both ends of the range explicitly, so nothing is inferred from a merge 
 
 It copies the diff into a new output directory, runs the model against it, and prints `REPLAY_DIR=` followed by the same JSON. Use it to see whether a change under `rules` moves the verdict, since the diff stays fixed while the rules around it change.
 
+`run_split.sh` splits the review of a range into many sessions that run in parallel. One session that reads the whole diff misses different findings on each run, and it often skips the small files.
+
+```
+./run_split.sh <base> <head> whole [n]    Review the whole diff n times.
+./run_split.sh <base> <head> file         Review each file in its own session.
+./run_split.sh <base> <head> commit       Review each commit in its own session.
+./run_split.sh <base> <head> full         Review the whole diff once and each commit two times.
+```
+
+Each session writes to its own folder under `output/split-<head>-<mode>-<pid>`, and `summary.json` collects the findings of all sessions. `_MAX_PARALLEL` (default 6) sets the number of sessions that run at the same time. A split session cannot see the other files of the pull, so it can report a part as missing when the part is in a different file. The whole-diff session of `full` is there for these cross-file findings and for the `chance` score.
+
 ## The code-review-liferay-pr skill
 
 For interactive use there is a Claude Code skill, `code-review-liferay-pr`, that wraps the reviewer. From a Claude Code session in a `liferay-portal` checkout, run it with a pull request URL.
