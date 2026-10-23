@@ -85,9 +85,10 @@ It copies the diff into a new output directory, runs the model against it, and p
 ./run_split.sh <base> <head> file         Review each file in its own session.
 ./run_split.sh <base> <head> commit       Review each commit in its own session.
 ./run_split.sh <base> <head> full         Review the whole diff once and each commit two times.
+./run_split.sh <base> <head> report <dir>  Write the report of an earlier run again.
 ```
 
-Each session writes to its own folder under `output/split-<head>-<mode>-<pid>`, and `summary.json` collects the findings of all sessions. `_MAX_PARALLEL` (default 6) sets the number of sessions that run at the same time. A split session cannot see the other files of the pull, so it can report a part as missing when the part is in a different file. The whole-diff session of `full` is there for these cross-file findings and for the `chance` score.
+Each session writes to its own folder under `output/split-<date>_<time>-<head>-<mode>`, and `summary.json` collects the findings of all sessions. At the end, the script writes `report.md` with the range, the cost, the time, and the findings of each session. It copies `report.md` and `summary.json` to `reports/<date>_<time>-<head>-<mode>`, which git keeps, so a later investigation can compare the runs. `_MAX_PARALLEL` (default 6) sets the number of sessions that run at the same time. A split session cannot see the other files of the pull, so it can report a part as missing when the part is in a different file. The whole-diff session of `full` is there for these cross-file findings and for the `chance` score.
 
 ## The code-review-liferay-pr skill
 
