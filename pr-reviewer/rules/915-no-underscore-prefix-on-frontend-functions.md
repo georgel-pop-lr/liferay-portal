@@ -1,4 +1,4 @@
-# 913: Do Not Prefix a Frontend Function With an Underscore
+# 915: Do Not Prefix a Frontend Function With an Underscore
 
 The leading underscore that marks a private member in Java does not carry over to JavaScript and TypeScript. A module scope function or arrow function constant in a `.ts` or `.tsx` file takes a plain camelCase name: `modules/apps` declares 3,125 of them without the prefix against 56 with it, and 47 of those 56 sit in three areas, `site`, `frontend-js` and `frontend-data-set`.
 

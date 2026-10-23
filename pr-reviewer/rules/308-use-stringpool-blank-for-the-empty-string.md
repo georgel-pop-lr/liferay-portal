@@ -1,4 +1,4 @@
-# 307: Use StringPool.BLANK for the Empty String
+# 308: Use StringPool.BLANK for the Empty String
 
 Write `StringPool.BLANK` rather than the literal `""`, and import `com.liferay.petra.string.StringPool`. This holds in production code and in tests alike, wherever the empty string is passed as an argument, compared against, or assigned.
 

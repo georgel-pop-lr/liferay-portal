@@ -1,4 +1,4 @@
-# 910: Prefer Clay Over Hand Written Frontend Code
+# 912: Prefer Clay Over Hand Written Frontend Code
 
 Frontend work builds on Clay rather than beside it. Use the Clay component when one fits instead of hand writing the markup, and reuse the shared component or hook the repo already has instead of writing a smaller copy of it. `modules/apps` carries 2,520 `@clayui/*` imports across its 2,003 tsx and jsx files, so a hand rolled equivalent of something Clay ships is the exception that has to argue for itself.
 

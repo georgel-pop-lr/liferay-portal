@@ -1,4 +1,4 @@
-# 407: Repeat the Call Instead of Looping Over a Literal Set
+# 411: Repeat the Call Instead of Looping Over a Literal Set
 
 When the values a loop walks are a fixed set of constants or string literals written at the loop itself, do not loop over them. Write the statement out once per value, and when the repeated body is more than a line or two, extract it into a method and call that method once per value. Keep the loop when the collection comes from somewhere else: a parameter, a field, a service call, or values a call in the method computed.
 

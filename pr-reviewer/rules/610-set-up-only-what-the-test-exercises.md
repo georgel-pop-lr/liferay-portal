@@ -1,4 +1,4 @@
-# 607: Set Up Only What the Test Exercises
+# 610: Set Up Only What the Test Exercises
 
 Keep a test strictly to the method it is named after (rule 603) and to the branch its scenario drives. Every mock, stub, spy, `MockedStatic`, and fixture it adds must sit on the path its assertions reach, and every assertion must be about the result of that method. Before keeping a setup step, trace the code under test from the asserted call: if deleting the step would not change which branch runs or what the assertion sees, delete it. A stub that only restates the mock's default (`thenReturn(false)` on a `boolean` getter, `thenReturn(null)` on an object getter) is deleted too.
 

@@ -1,4 +1,4 @@
-# 505: Inline a Private Helper Used Once
+# 510: Inline a Private Helper Used Once
 
 A private method with exactly one caller, whose body is a single expression or statement, should be inlined at that call site and deleted. Its name only restates what the expression already says, so the reader jumps to the definition to learn nothing and jumps back.
 
@@ -12,7 +12,7 @@ Counted across `modules/apps`, the population is decomposition, not named one li
 
 Rule 001 settles a borderline case. A file whose other private helpers all have two or more callers makes a single caller one the deviation, and a file that already names each scenario in its own helper, as a test class does under rules 601 and 605, makes the single caller form its convention.
 
-Rule 502 answers the same question for a `private static final` constant, rule 503 for a local, and rule 504 for the degenerate method whose whole body is one assignment to a field. This rule covers the case between them, a helper whose body is one expression.
+Rule 502 answers the same question for a `private static final` constant, rule 508 for a local, and rule 509 for the degenerate method whose whole body is one assignment to a field. This rule covers the case between them, a helper whose body is one expression.
 
 A helper whose call is an operand of an operator, such as `+` in a string concatenation, stays when the call it wraps spans more than one line. Inlined, that call becomes a multiline operand, and the source formatter's `OperatorOperandCheck` rejects it with "Create a new variable for the right hand side operand". The local it asks for, named after the call it holds (rule 103) and passed on as a parameter, is then the single use local that `VariableDeclarationAsUsedCheck` rejects, so no shape is left that both checks accept. LPD-109452 Technical Task | Browse sites and Design Libraries in the group selector (https://liferay.atlassian.net/browse/LPD-109452) kept `_getViewGroupSelectorURL` in `DepotApplicationDisplayContext` for this reason: its caller is `"<a href=\"" + HtmlUtil.escape(_getViewGroupSelectorURL()) + "\">"`, and inlining `GroupSelectorBreadcrumbUtil.getGroupSelectorURL(...)` there failed `formatSource` at that line on 2026-10-19.
 

@@ -1,4 +1,4 @@
-# 504: Delete a Private Setter That Wraps One Assignment
+# 509: Delete a Private Setter That Wraps One Assignment
 
 A `private void _setXyz()` whose entire body is one assignment to a field, and which is called from a single place, is dead weight. Inline the assignment at that call site and delete the method.
 

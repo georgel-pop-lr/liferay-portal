@@ -1,4 +1,4 @@
-# 909: Call a Service Through LocalServiceUtil in a JSP
+# 911: Call a Service Through LocalServiceUtil in a JSP
 
 In a JSP, reach a service through its `*LocalServiceUtil` static accessor. Do not have the portlet stash its injected service in a request attribute, as `renderRequest.setAttribute(FooLocalService.class.getName(), _fooLocalService)`, only for the JSP to cast it back out. Fixing it takes both halves: delete the `setAttribute` call in the portlet, and swap the JSP import from the service interface to the Util.
 

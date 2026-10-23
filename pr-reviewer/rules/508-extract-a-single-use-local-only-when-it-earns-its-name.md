@@ -1,4 +1,4 @@
-# 503: Extract a Single Use Local Only When It Earns Its Name
+# 508: Extract a Single Use Local Only When It Earns Its Name
 
 A local used exactly once earns its declaration only when its name states something the expression does not. Otherwise pass the expression inline at its one use site. A nested call that is passed inline as an argument stays inline, however deep it is and however many arguments the outer call takes. Ask for a local in place of a nested call only when a variable in the same scope already holds the value of that call, so that the code can pass the variable and not make the call again.
 

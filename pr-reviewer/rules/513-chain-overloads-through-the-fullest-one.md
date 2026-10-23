@@ -1,4 +1,4 @@
-# 508: Chain Overloads Through the Fullest One
+# 513: Chain Overloads Through the Fullest One
 
 When a class has several overloads of one method that do the same job, exactly one of them does the work, and every other overload calls a sibling, passing its defaults for the parameters it does not take. Two overloads that each write out the same underlying call, with their own copy of the fixed arguments, are one decision written twice.
 
@@ -6,7 +6,7 @@ The fullest overload is the one that carries every parameter any caller varies. 
 
 Counted across `modules/apps`, by grouping the private methods that share a name in one file: in 2,305 production groups every overload but one calls a sibling, against 222 groups where none does and 18 where some do. In test files the split is 458 to 138, with 30 partial. The groups where no overload calls a sibling include overloads that do genuinely different work under one name, so the share of real duplication among them is smaller than the count.
 
-Do not chain overloads that only share a name. When two overloads call different services, or the same service with a different contract (one tolerates a missing entity and the other throws), they are two methods, and forcing one through the other hides the difference. Rule 507 draws the same line for implementations in different classes.
+Do not chain overloads that only share a name. When two overloads call different services, or the same service with a different contract (one tolerates a missing entity and the other throws), they are two methods, and forcing one through the other hides the difference. Rule 512 draws the same line for implementations in different classes.
 
 A shorter overload earns its place by supplying a default. One whose only addition is a field of the same class spares its callers nothing, since each of them can pass the field itself, and it hides which value the call reads. `_getLayoutStructure()` returning `_getLayoutStructure(_draftLayout)` is that shape: delete it and pass `_draftLayout` at each call site, whatever the number of callers, and when a new caller needs another value, give the work to the overload with the parameter rather than adding a no-argument one that fills it in. Counted across `modules/apps` outside Commerce, on `upstream/master` at `24cdfc6d52a83`, among the private overloads whose body is one call to a same-named sibling, 173 supply a literal, a constant, or an expression for the missing parameter and 9 supply only fields.
 

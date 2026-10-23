@@ -1,4 +1,4 @@
-# 911: Author New Frontend Code in TypeScript
+# 913: Author New Frontend Code in TypeScript
 
 A new frontend file is a `.ts` or `.tsx` file, never a `.js` or `.jsx` one. The files added to `modules/apps` in 2026 settle it: 1,336 `.ts` and `.tsx` files against 62 `.js` under `src/main/resources/META-INF/resources`, and 407 against 65 among the test files, with no `.jsx` file added anywhere.
 

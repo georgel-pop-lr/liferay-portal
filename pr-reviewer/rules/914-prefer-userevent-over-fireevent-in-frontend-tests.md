@@ -1,4 +1,4 @@
-# 912: Prefer userEvent Over fireEvent in Frontend Tests
+# 914: Prefer userEvent Over fireEvent in Frontend Tests
 
 Drive a user interaction in a frontend test with `userEvent` from `@testing-library/user-event`, not with `fireEvent`. `userEvent` dispatches the whole sequence of events a real interaction fires, and it respects disabled elements and focus, so it catches a broken handler that a single synthetic `fireEvent` call passes straight through.
 

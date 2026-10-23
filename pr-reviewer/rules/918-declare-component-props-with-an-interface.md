@@ -1,4 +1,4 @@
-# 916: Declare Component Props With an Interface
+# 918: Declare Component Props With an Interface
 
 Declare the props of a React component with `interface`, not with a `type` alias. Across the `.tsx` files under `modules/apps`, Commerce excluded, 951 props declarations use `interface` against 204 that use `type`, and 819 files use only `interface` against 168 that use only `type`.
 

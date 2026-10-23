@@ -1,4 +1,4 @@
-# 109: Name a Factory Helper After the Type It Returns
+# 115: Name a Factory Helper After the Type It Returns
 
 A private helper whose job is to construct and return an object is named `_get` followed by the full simple name of the type it returns: `_getDesignLibraryResourceCreationItem` for a helper returning `DesignLibraryResourceCreationItem`, not `_newCreationItem`, `_buildItem`, or any shortened form of the type.
 

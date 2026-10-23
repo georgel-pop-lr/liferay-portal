@@ -1,4 +1,4 @@
-# 915: Walk One User Flow in One Frontend Test
+# 917: Walk One User Flow in One Frontend Test
 
 When several `it()` blocks render the same component, perform one action each, and check one piece of text each, they are usually the steps of one flow a user walks through. Write that flow as one `it()` that asserts each state on the way: submit the empty form and see the name error, fill the name and see the subtype error, submit again and see the server error, fix it and see the navigation. Reuse the one render and queue the responses with `mockResolvedValueOnce`.
 

@@ -1,4 +1,4 @@
-# 207: Separate Plain Values from Awaited Calls
+# 212: Separate Plain Values from Awaited Calls
 
 This rule is for TypeScript and JavaScript files: Playwright specs and pages, and frontend code. In a run of local declarations, each declaration has one of three types: a plain value (a `const` whose initializer has no `await`), an awaited call (a `const` whose initializer has an `await`), and a `let`. Put a blank line where the type changes. Keep a run of `let` declarations together, with no blank line between them. The dependencies decide the order of the groups, not this rule.
 

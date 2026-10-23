@@ -1,4 +1,4 @@
-# 606: Assert Without a Message
+# 609: Assert Without a Message
 
 Write `Assert.assertEquals(expected, actual)` with no leading message argument, and the same for every other assertion that offers a message overload. JUnit already reports the expected value, the actual value, and the line number, so a hand written message restates what the failure prints and drifts as the test evolves. A label that describes which case is under test belongs in the test method name, per rule 603, or in a comment, not in the assertion.
 

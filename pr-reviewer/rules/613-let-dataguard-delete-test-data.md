@@ -1,4 +1,4 @@
-# 610: Let DataGuard Delete Test Data
+# 613: Let DataGuard Delete Test Data
 
 Do not add cleanup code for test data that DataGuard already deletes. In an integration test, `LiferayIntegrationTestRule` adds `DataGuardTestRule`, and with no `@DataGuard` annotation on the class, `autoDelete` is true (`DataGuard.java:22`, `DataGuardTestRule._autoDelete`). After each test, DataGuard deletes every leftover row through its `PersistedModelLocalService` delete method, and then it asserts that no data is left. So an entity that a test method creates and uses can be a plain local with no cleanup. Use a `@DeleteAfterTestRun` field only for a fixture that `setUp` creates or that more than one test method shares.
 

@@ -1,4 +1,4 @@
-# 918: Give Every Image an Alt
+# 920: Give Every Image an Alt
 
 An image that the pull adds must have an `alt`. This is an accessibility requirement (WCAG 1.1.1, the axe `image-alt` check), not a convention that you count. Without an `alt`, axe flags the image and a screen reader announces the file name.
 

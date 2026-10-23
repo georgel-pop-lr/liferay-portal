@@ -1,4 +1,4 @@
-# 914: Title a Frontend Test After What It Does
+# 916: Title a Frontend Test After What It Does
 
 The title of an `it()` block in a frontend test is a short phrase saying what the test does or checks, such as `it('shows an error when the name is empty')`. It is not the name of the function under test. This is the opposite of rule 603, which names a Java test method after the method it tests.
 
