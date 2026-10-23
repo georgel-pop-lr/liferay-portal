@@ -12,4 +12,14 @@ A violation is an `assertNotNull`, or a similar guard, immediately followed by c
 
 **Example:** commits `fa6b60e`, `30028a0`, and `6213899` removed `assertNotNull` calls whose next line already dereferenced the value or made a stronger assertion (for example reading `configurations.length`).
 
+The shape is always the same: a lookup, an `assertNotNull` on its result, and a specific assertion that dereferences the same result on the next line.
+
+```diff
+ Foo foo = service.findFoo();
+
+-Assert.assertNotNull(foo);
+ Assert.assertEquals("expected", foo.getName());
+ Assert.assertEquals("description", foo.getDescription());
+```
+
 **Example:** commit `50229e9fb13a2` (https://github.com/brianchandotcom/liferay-portal/commit/50229e9fb13a2), on LPD-110411 Technical Task | Delete the child site in GroupItemSelectorProviderImplTest.testGetGroups (https://liferay.atlassian.net/browse/LPD-110411), removed `Assert.assertEquals(groups.toString(), originalGroupsSize, groups.size());` from the line after `int originalGroupsSize = groups.size();`, and Brian Chan merged it in https://github.com/brianchandotcom/liferay-portal/pull/184140.
