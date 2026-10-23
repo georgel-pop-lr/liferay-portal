@@ -135,3 +135,26 @@ The bundled `proxy.py` is a plain tunnel. It funnels the sandbox traffic through
 If a review fails, the raw model output is saved at `output/<run>/sonnet-4.6.raw` and the parsed result at `output/<run>/sonnet-4.6.json`, where `<run>` is the pull request number for `review` and `local-<sha>-<pid>` for a local one. The proxy log is at `/tmp/pr-reviewer-proxy-<pid>.log`. If the reviewer reports that it cannot authenticate, run `claude` once outside the sandbox to refresh your login and rerun `./setup.sh` to recopy the credentials.
 
 If every model fails after 0 seconds with `bwrap: setting up uid map: Permission denied`, the host is blocking unprivileged user namespaces, which the sandbox needs. On recent Ubuntu this is the AppArmor restriction `kernel.apparmor_restrict_unprivileged_userns`. Confirm with `cat /proc/sys/kernel/apparmor_restrict_unprivileged_userns` (a `1` means it is on) and lift it with `sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0`, or install an AppArmor profile for `bwrap`. This affects `review` and `run_local.sh` the same way, since both use the same sandbox.
+
+## Keeping the rules in step with upstream
+
+This branch has its own rules, and it also takes the rules that other teams add upstream. Check the two sources below from time to time, and take a new rule when it is important for our reviews.
+
+- The rules on upstream master: https://github.com/liferay/liferay-portal/tree/master/pr-reviewer/rules
+- The engineering-pr-review skill in the AI toolbox, which adds team rules (`C###`) and amended copies of upstream rules: https://github.com/liferay/liferay-ai-toolbox/tree/main/product-delivery/engineering/skills/engineering-pr-review
+
+To see what upstream changed since the last sync, run this from the repository root:
+
+```bash
+git fetch --no-tags upstream master
+git diff --name-status $(git merge-base HEAD upstream/master) upstream/master -- pr-reviewer
+```
+
+The last sync was on 2026-10-23, from upstream master `aa96b69ec3e8c`. Upstream keeps its numbers. When an upstream rule takes a number that one of our rules has, our rule takes the next free number in the same group. `renumber_rules.py` in the claude-config `Scripts/pr-reviewer` folder renames the files and updates the references. A bare number with no "rule" before it is not changed, so look for those by hand.
+
+On 2026-10-23 these rules of ours took new numbers: 109 to 115, 205-207 to 210-212, 307 to 308, 407 to 411, 503-508 to 508-513, 606-610 to 609-613, and 909-918 to 911-920.
+
+When a file changed on both sides, our text wins where the two contradict, and the upstream additions that agree with ours go in. On 2026-10-23 our text won in three places:
+
+- Rule 201 and rule 203: upstream sorts a block of locals that feeds one call alphabetically. Rule 210 orders it by the argument order of the call.
+- Rule 202: upstream says that the source formatter sorts names case insensitively. Ours says case sensitive, uppercase first, from a count of 2,563 to 12.
