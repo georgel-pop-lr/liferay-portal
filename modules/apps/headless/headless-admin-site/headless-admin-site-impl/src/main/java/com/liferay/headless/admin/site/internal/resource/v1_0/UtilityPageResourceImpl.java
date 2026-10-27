@@ -52,6 +52,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -249,6 +250,20 @@ public class UtilityPageResourceImpl
 					utilityPageExternalReferenceCode, groupId);
 
 		if (layoutUtilityPageEntry == null) {
+			if (utilityPage.getExternalReferenceCode() == null) {
+				utilityPage.setExternalReferenceCode(
+					() -> utilityPageExternalReferenceCode);
+			}
+
+			if (!Objects.equals(
+					utilityPageExternalReferenceCode,
+					utilityPage.getExternalReferenceCode())) {
+
+				throw new IllegalArgumentException(
+					"The external reference code does not match the target " +
+						"utility page's external reference code");
+			}
+
 			return _addLayoutUtilityPageEntry(groupId, utilityPage);
 		}
 

@@ -427,6 +427,20 @@ public class PageTemplateResourceImpl
 					pageTemplateExternalReferenceCode, groupId);
 
 		if (layoutPageTemplateEntry == null) {
+			if (pageTemplate.getExternalReferenceCode() == null) {
+				pageTemplate.setExternalReferenceCode(
+					() -> pageTemplateExternalReferenceCode);
+			}
+
+			if (!Objects.equals(
+					pageTemplateExternalReferenceCode,
+					pageTemplate.getExternalReferenceCode())) {
+
+				throw new IllegalArgumentException(
+					"The external reference code does not match the target " +
+						"page template's external reference code");
+			}
+
 			return _addPageTemplate(groupId, pageTemplate);
 		}
 

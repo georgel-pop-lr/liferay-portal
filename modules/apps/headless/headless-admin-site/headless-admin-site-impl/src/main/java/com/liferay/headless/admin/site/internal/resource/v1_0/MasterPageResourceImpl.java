@@ -459,6 +459,20 @@ public class MasterPageResourceImpl
 					masterPageExternalReferenceCode, groupId);
 
 		if (layoutPageTemplateEntry == null) {
+			if (masterPage.getExternalReferenceCode() == null) {
+				masterPage.setExternalReferenceCode(
+					() -> masterPageExternalReferenceCode);
+			}
+
+			if (!Objects.equals(
+					masterPageExternalReferenceCode,
+					masterPage.getExternalReferenceCode())) {
+
+				throw new IllegalArgumentException(
+					"The external reference code does not match the target " +
+						"master page's external reference code");
+			}
+
 			return _addMasterPage(groupId, masterPage);
 		}
 

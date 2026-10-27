@@ -333,6 +333,21 @@ public class DisplayPageTemplateFolderResourceImpl
 					displayPageTemplateFolderExternalReferenceCode, groupId);
 
 		if (layoutPageTemplateCollection == null) {
+			if (displayPageTemplateFolder.getExternalReferenceCode() == null) {
+				displayPageTemplateFolder.setExternalReferenceCode(
+					() -> displayPageTemplateFolderExternalReferenceCode);
+			}
+
+			if (!Objects.equals(
+					displayPageTemplateFolderExternalReferenceCode,
+					displayPageTemplateFolder.getExternalReferenceCode())) {
+
+				throw new IllegalArgumentException(
+					"The external reference code does not match the target " +
+						"display page template folder's external reference " +
+							"code");
+			}
+
 			return _addDisplayPageTemplateFolder(
 				displayPageTemplateFolder, groupId);
 		}

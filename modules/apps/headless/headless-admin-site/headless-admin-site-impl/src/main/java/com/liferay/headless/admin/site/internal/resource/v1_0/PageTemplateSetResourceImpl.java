@@ -47,6 +47,7 @@ import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.MultivaluedMap;
 
 import java.util.Collections;
+import java.util.Objects;
 import java.util.function.Function;
 
 import org.osgi.service.component.annotations.Component;
@@ -330,6 +331,20 @@ public class PageTemplateSetResourceImpl
 					pageTemplateSetExternalReferenceCode, groupId);
 
 		if (layoutPageTemplateCollection == null) {
+			if (pageTemplateSet.getExternalReferenceCode() == null) {
+				pageTemplateSet.setExternalReferenceCode(
+					() -> pageTemplateSetExternalReferenceCode);
+			}
+
+			if (!Objects.equals(
+					pageTemplateSetExternalReferenceCode,
+					pageTemplateSet.getExternalReferenceCode())) {
+
+				throw new IllegalArgumentException(
+					"The external reference code does not match the target " +
+						"page template set's external reference code");
+			}
+
 			return _toPageTemplateSet(
 				PageTemplateSetUtil.addLayoutPageTemplateCollection(
 					groupId, contextHttpServletRequest, pageTemplateSet));

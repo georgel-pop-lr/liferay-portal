@@ -559,6 +559,20 @@ public class DisplayPageTemplateResourceImpl
 					displayPageTemplateExternalReferenceCode, groupId);
 
 		if (layoutPageTemplateEntry == null) {
+			if (displayPageTemplate.getExternalReferenceCode() == null) {
+				displayPageTemplate.setExternalReferenceCode(
+					() -> displayPageTemplateExternalReferenceCode);
+			}
+
+			if (!Objects.equals(
+					displayPageTemplateExternalReferenceCode,
+					displayPageTemplate.getExternalReferenceCode())) {
+
+				throw new IllegalArgumentException(
+					"The external reference code does not match the target " +
+						"display page template's external reference code");
+			}
+
 			return _addDisplayPageTemplate(
 				displayPageTemplate, groupId,
 				_getLayoutPageTemplateCollectionId(
