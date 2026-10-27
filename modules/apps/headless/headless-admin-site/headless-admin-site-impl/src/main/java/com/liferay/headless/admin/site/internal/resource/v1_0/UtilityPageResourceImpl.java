@@ -15,6 +15,7 @@ import com.liferay.headless.admin.site.dto.v1_0.UtilityPage;
 import com.liferay.headless.admin.site.dto.v1_0.UtilityPageSEOSettings;
 import com.liferay.headless.admin.site.dto.v1_0.UtilityPageSettings;
 import com.liferay.headless.admin.site.dto.v1_0.util.FileEntryUtil;
+import com.liferay.headless.admin.site.dto.v1_0.util.ThumbnailURLReferenceUtil;
 import com.liferay.headless.admin.site.internal.dto.v1_0.util.DTOConverterContextUtil;
 import com.liferay.headless.admin.site.internal.odata.entity.v1_0.UtilityPageEntityModel;
 import com.liferay.headless.admin.site.internal.resource.v1_0.util.LayoutUtil;
@@ -134,6 +135,32 @@ public class UtilityPageResourceImpl
 			}
 
 		};
+	}
+
+	@Override
+	public UtilityPage patchSiteUtilityPage(
+			String siteExternalReferenceCode,
+			String utilityPageExternalReferenceCode, UtilityPage utilityPage)
+		throws Exception {
+
+		if (utilityPage.getThumbnailURLReference() == null) {
+			LayoutUtilityPageEntry layoutUtilityPageEntry =
+				_layoutUtilityPageEntryService.
+					getLayoutUtilityPageEntryByExternalReferenceCode(
+						utilityPageExternalReferenceCode,
+						GroupUtil.getGroupId(
+							true, contextCompany.getCompanyId(),
+							siteExternalReferenceCode));
+
+			utilityPage.setThumbnailURLReference(
+				() ->
+					ThumbnailURLReferenceUtil.getFileEntryThumbnailURLReference(
+						layoutUtilityPageEntry.getPreviewFileEntryId()));
+		}
+
+		return super.patchSiteUtilityPage(
+			siteExternalReferenceCode, utilityPageExternalReferenceCode,
+			utilityPage);
 	}
 
 	@Override

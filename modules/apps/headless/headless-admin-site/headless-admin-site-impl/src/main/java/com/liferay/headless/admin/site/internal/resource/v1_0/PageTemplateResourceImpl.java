@@ -23,6 +23,7 @@ import com.liferay.headless.admin.site.dto.v1_0.WidgetPageSpecification;
 import com.liferay.headless.admin.site.dto.v1_0.WidgetPageTemplate;
 import com.liferay.headless.admin.site.dto.v1_0.WidgetPageTemplateSettings;
 import com.liferay.headless.admin.site.dto.v1_0.util.FileEntryUtil;
+import com.liferay.headless.admin.site.dto.v1_0.util.ThumbnailURLReferenceUtil;
 import com.liferay.headless.admin.site.internal.dto.v1_0.util.DTOConverterContextUtil;
 import com.liferay.headless.admin.site.internal.odata.entity.v1_0.PageTemplateEntityModel;
 import com.liferay.headless.admin.site.internal.resource.v1_0.util.LayoutUtil;
@@ -266,6 +267,32 @@ public class PageTemplateResourceImpl
 						getLayoutPageTemplateCollectionId(),
 					QueryUtil.ALL_POS, QueryUtil.ALL_POS, null),
 				this::_toPageTemplate));
+	}
+
+	@Override
+	public PageTemplate patchSitePageTemplate(
+			String siteExternalReferenceCode,
+			String pageTemplateExternalReferenceCode, PageTemplate pageTemplate)
+		throws Exception {
+
+		if (pageTemplate.getThumbnailURLReference() == null) {
+			LayoutPageTemplateEntry layoutPageTemplateEntry =
+				_layoutPageTemplateEntryService.
+					getLayoutPageTemplateEntryByExternalReferenceCode(
+						pageTemplateExternalReferenceCode,
+						GroupUtil.getGroupId(
+							true, true, contextCompany.getCompanyId(),
+							siteExternalReferenceCode));
+
+			pageTemplate.setThumbnailURLReference(
+				() ->
+					ThumbnailURLReferenceUtil.getFileEntryThumbnailURLReference(
+						layoutPageTemplateEntry.getPreviewFileEntryId()));
+		}
+
+		return super.patchSitePageTemplate(
+			siteExternalReferenceCode, pageTemplateExternalReferenceCode,
+			pageTemplate);
 	}
 
 	@Override

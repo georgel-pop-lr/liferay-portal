@@ -14,6 +14,7 @@ import com.liferay.headless.admin.site.dto.v1_0.ContentPageSpecification;
 import com.liferay.headless.admin.site.dto.v1_0.MasterPage;
 import com.liferay.headless.admin.site.dto.v1_0.PageSpecification;
 import com.liferay.headless.admin.site.dto.v1_0.util.FileEntryUtil;
+import com.liferay.headless.admin.site.dto.v1_0.util.ThumbnailURLReferenceUtil;
 import com.liferay.headless.admin.site.internal.dto.v1_0.util.DTOConverterContextUtil;
 import com.liferay.headless.admin.site.internal.odata.entity.v1_0.MasterPageEntityModel;
 import com.liferay.headless.admin.site.internal.resource.v1_0.util.LayoutUtil;
@@ -273,6 +274,32 @@ public class MasterPageResourceImpl
 		}
 
 		return _toMasterPage(layoutPageTemplateEntry);
+	}
+
+	@Override
+	public MasterPage patchSiteMasterPage(
+			String siteExternalReferenceCode,
+			String masterPageExternalReferenceCode, MasterPage masterPage)
+		throws Exception {
+
+		if (masterPage.getThumbnailURLReference() == null) {
+			LayoutPageTemplateEntry layoutPageTemplateEntry =
+				_layoutPageTemplateEntryService.
+					getLayoutPageTemplateEntryByExternalReferenceCode(
+						masterPageExternalReferenceCode,
+						GroupUtil.getGroupId(
+							true, contextCompany.getCompanyId(),
+							siteExternalReferenceCode));
+
+			masterPage.setThumbnailURLReference(
+				() ->
+					ThumbnailURLReferenceUtil.getFileEntryThumbnailURLReference(
+						layoutPageTemplateEntry.getPreviewFileEntryId()));
+		}
+
+		return super.patchSiteMasterPage(
+			siteExternalReferenceCode, masterPageExternalReferenceCode,
+			masterPage);
 	}
 
 	@Override
