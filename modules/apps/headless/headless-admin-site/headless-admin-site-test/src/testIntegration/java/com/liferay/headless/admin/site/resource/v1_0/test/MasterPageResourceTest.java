@@ -627,7 +627,7 @@ public class MasterPageResourceTest extends BaseMasterPageResourceTestCase {
 
 	@Override
 	@Test
-	@TestInfo({"LPD-86817", "LPD-92443"})
+	@TestInfo({"LPD-86817", "LPD-92443", "LPD-112209"})
 	public void testPutSiteMasterPage() throws Exception {
 		_testPutSiteMasterPage(randomMasterPage());
 
@@ -645,6 +645,7 @@ public class MasterPageResourceTest extends BaseMasterPageResourceTestCase {
 				fileEntry.getExternalReferenceCode(), thumbnailURL));
 
 		_testPutSiteMasterPageWithDropZonePageElement();
+		_testPutSiteMasterPageWithExternalReferenceCode();
 		_testPutSiteMasterPageWithPageSpecifications();
 		_testPutSiteMasterPageWithThumbnail();
 		_testPutSiteMasterPageWithThumbnailURLReferenceExternalReferenceCodeAndFileBase64();
@@ -2288,6 +2289,58 @@ public class MasterPageResourceTest extends BaseMasterPageResourceTestCase {
 			masterPageResource.putSiteMasterPage(
 				testGroup.getExternalReferenceCode(),
 				postMasterPage.getExternalReferenceCode(), masterPage));
+	}
+
+	private void _testPutSiteMasterPageWithExternalReferenceCode()
+		throws Exception {
+
+		String externalReferenceCode = RandomTestUtil.randomString();
+
+		MasterPage masterPage = randomMasterPage();
+
+		masterPage.setExternalReferenceCode((String)null);
+
+		MasterPage putMasterPage = masterPageResource.putSiteMasterPage(
+			testGroup.getExternalReferenceCode(), externalReferenceCode,
+			masterPage);
+
+		Assert.assertEquals(
+			externalReferenceCode, putMasterPage.getExternalReferenceCode());
+
+		_assertProblemException(
+			"BAD_REQUEST",
+			"The external reference code does not match the target master " +
+				"page's external reference code",
+			() -> masterPageResource.putSiteMasterPage(
+				testGroup.getExternalReferenceCode(),
+				RandomTestUtil.randomString(), randomMasterPage()));
+	}
+
+	private void _testPutSiteMasterPageWithLocalStaging() throws Exception {
+		MasterPage masterPage = testPostSiteMasterPage_addMasterPage(
+			randomMasterPage());
+
+		FileEntry fileEntry = FileEntryTestUtil.addPreviewFileEntry(
+			testGroup, _portletFileRepository, getClass());
+		String thumbnailURL = RandomTestUtil.randomString();
+
+		_testPutSiteMasterPage(
+			_getMasterPage(
+				null, masterPage.getExternalReferenceCode(),
+				fileEntry.getExternalReferenceCode(), thumbnailURL));
+
+		_enableLocalStaging();
+
+		_assertStagingGroupMasterPageThumbnail(fileEntry, masterPage);
+
+		_assertProblemException(
+			"BAD_REQUEST", null,
+			() -> masterPageResource.putSiteMasterPage(
+				testGroup.getExternalReferenceCode(),
+				masterPage.getExternalReferenceCode(),
+				_getMasterPage(
+					null, masterPage.getExternalReferenceCode(), null,
+					thumbnailURL)));
 	}
 
 	private void _testPutSiteMasterPageWithPageSpecifications()

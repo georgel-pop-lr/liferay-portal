@@ -910,17 +910,8 @@ public class DisplayPageTemplateResourceTest
 
 	@Override
 	@Test
-	@TestInfo("LPD-92443")
+	@TestInfo({"LPD-92443", "LPD-112209"})
 	public void testPutSiteDisplayPageTemplate() throws Exception {
-		_testPutSiteDisplayPageTemplateContentTypeReference();
-		_testPutSiteDisplayPageTemplateMarkedAsDefault();
-		_testPutSiteDisplayPageTemplateSettings();
-		_testPutSiteDisplayPageTemplateWithSubtype();
-		_testPutSiteDisplayPageTemplateWithThumbnail();
-		_testPutSiteDisplayPageTemplateWithThumbnailURLReferenceExternalReferenceCodeAndFileBase64();
-		_testPutSiteDisplayPageTemplateWithThumbnailURLReferenceFileBase64();
-		_testPutSiteDisplayPageTemplateWithThumbnailURLReferenceURL();
-
 		_testPutSiteDisplayPageTemplate(randomDisplayPageTemplate());
 
 		DisplayPageTemplate displayPageTemplate =
@@ -929,7 +920,16 @@ public class DisplayPageTemplateResourceTest
 
 		_testPutSiteDisplayPageTemplate(displayPageTemplate);
 
+		_testPutSiteDisplayPageTemplateContentTypeReference();
+		_testPutSiteDisplayPageTemplateMarkedAsDefault();
+		_testPutSiteDisplayPageTemplateSettings();
+		_testPutSiteDisplayPageTemplateWithExternalReferenceCode();
 		_testPutSiteDisplayPageTemplateWithPageSpecifications();
+		_testPutSiteDisplayPageTemplateWithSubtype();
+		_testPutSiteDisplayPageTemplateWithThumbnail();
+		_testPutSiteDisplayPageTemplateWithThumbnailURLReferenceExternalReferenceCodeAndFileBase64();
+		_testPutSiteDisplayPageTemplateWithThumbnailURLReferenceFileBase64();
+		_testPutSiteDisplayPageTemplateWithThumbnailURLReferenceURL();
 
 		FileEntry fileEntry = FileEntryTestUtil.addPreviewFileEntry(
 			testGroup, _portletFileRepository, getClass());
@@ -3106,6 +3106,62 @@ public class DisplayPageTemplateResourceTest
 				}
 			},
 			putDisplayPageTemplate.getDisplayPageTemplateSettings());
+	}
+
+	private void _testPutSiteDisplayPageTemplateWithExternalReferenceCode()
+		throws Exception {
+
+		String externalReferenceCode = RandomTestUtil.randomString();
+
+		DisplayPageTemplate displayPageTemplate = randomDisplayPageTemplate();
+
+		displayPageTemplate.setExternalReferenceCode((String)null);
+
+		DisplayPageTemplate putDisplayPageTemplate =
+			displayPageTemplateResource.putSiteDisplayPageTemplate(
+				testGroup.getExternalReferenceCode(), externalReferenceCode,
+				displayPageTemplate);
+
+		Assert.assertEquals(
+			externalReferenceCode,
+			putDisplayPageTemplate.getExternalReferenceCode());
+
+		_assertProblemException(
+			"BAD_REQUEST",
+			"The external reference code does not match the target display " +
+				"page template's external reference code",
+			() -> displayPageTemplateResource.putSiteDisplayPageTemplate(
+				testGroup.getExternalReferenceCode(),
+				RandomTestUtil.randomString(), randomDisplayPageTemplate()));
+	}
+
+	private void _testPutSiteDisplayPageTemplateWithLocalStaging(
+			DisplayPageTemplate displayPageTemplate)
+		throws Exception {
+
+		FileEntry fileEntry = FileEntryTestUtil.addPreviewFileEntry(
+			testGroup, _portletFileRepository, getClass());
+
+		displayPageTemplate.setThumbnailURLReference(
+			() -> ThumbnailURLReferenceUtil.getThumbnailURLReference(
+				fileEntry, null));
+
+		displayPageTemplateResource.putSiteDisplayPageTemplate(
+			testGroup.getExternalReferenceCode(),
+			displayPageTemplate.getExternalReferenceCode(),
+			displayPageTemplate);
+
+		_enableLocalStaging();
+
+		_assertStagingGroupDisplayPageTemplateThumbnail(
+			displayPageTemplate, fileEntry);
+
+		_assertProblemException(
+			"BAD_REQUEST", null,
+			() -> displayPageTemplateResource.putSiteDisplayPageTemplate(
+				testGroup.getExternalReferenceCode(),
+				displayPageTemplate.getExternalReferenceCode(),
+				displayPageTemplate));
 	}
 
 	private void _testPutSiteDisplayPageTemplateWithMissingOptionalReference(

@@ -497,7 +497,7 @@ public class PageTemplateResourceTest extends BasePageTemplateResourceTestCase {
 
 	@Override
 	@Test
-	@TestInfo("LPD-92443")
+	@TestInfo({"LPD-92443", "LPD-112209"})
 	public void testPutSitePageTemplate() throws Exception {
 		ContentPageTemplate contentPageTemplate = _getContentPageTemplate(
 			testGroup);
@@ -553,6 +553,7 @@ public class PageTemplateResourceTest extends BasePageTemplateResourceTestCase {
 				putWidgetPageTemplate.getExternalReferenceCode(),
 				putWidgetPageTemplate));
 
+		_testPutSitePageTemplateWithExternalReferenceCode();
 		_testPutSitePageTemplateWithPageSpecifications();
 		_testPutSitePageTemplateWithPageTemplateSet();
 		_testPutSitePageTemplateWithThumbnail();
@@ -2254,6 +2255,63 @@ public class PageTemplateResourceTest extends BasePageTemplateResourceTestCase {
 
 		_layoutPageTemplateEntryLocalService.deleteLayoutPageTemplateEntry(
 			putPageTemplate.getExternalReferenceCode(), testGroup.getGroupId());
+	}
+
+	private void _testPutSitePageTemplateWithExternalReferenceCode()
+		throws Exception {
+
+		String externalReferenceCode = RandomTestUtil.randomString();
+
+		PageTemplate pageTemplate = randomPageTemplate();
+
+		pageTemplate.setExternalReferenceCode((String)null);
+
+		PageTemplate putPageTemplate = pageTemplateResource.putSitePageTemplate(
+			testGroup.getExternalReferenceCode(), externalReferenceCode,
+			pageTemplate);
+
+		Assert.assertEquals(
+			externalReferenceCode, putPageTemplate.getExternalReferenceCode());
+
+		_assertProblemException(
+			"BAD_REQUEST",
+			"The external reference code does not match the target page " +
+				"template's external reference code",
+			() -> pageTemplateResource.putSitePageTemplate(
+				testGroup.getExternalReferenceCode(),
+				RandomTestUtil.randomString(), randomPageTemplate()));
+	}
+
+	private void _testPutSitePageTemplateWithLocalStaging(
+			ContentPageTemplate contentPageTemplate,
+			WidgetPageTemplate widgetPageTemplate)
+		throws Exception {
+
+		FileEntry fileEntry = FileEntryTestUtil.addPreviewFileEntry(
+			testGroup, _portletFileRepository, getClass());
+
+		contentPageTemplate.setThumbnailURLReference(
+			() -> ThumbnailURLReferenceUtil.getThumbnailURLReference(
+				fileEntry, null));
+
+		pageTemplateResource.putSitePageTemplate(
+			testGroup.getExternalReferenceCode(),
+			contentPageTemplate.getExternalReferenceCode(),
+			contentPageTemplate);
+
+		_enableLocalStaging();
+
+		_assertStagingGroupPageTemplateThumbnail(
+			fileEntry, contentPageTemplate);
+
+		_assertProblemException(
+			"BAD_REQUEST", null,
+			() -> _testPutSitePageTemplate(
+				contentPageTemplate, testGroup.getExternalReferenceCode()));
+		_assertProblemException(
+			"BAD_REQUEST", null,
+			() -> _testPutSitePageTemplate(
+				widgetPageTemplate, testGroup.getExternalReferenceCode()));
 	}
 
 	private void _testPutSitePageTemplateWithPageSpecifications()

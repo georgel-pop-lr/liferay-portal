@@ -462,6 +462,7 @@ public class DisplayPageTemplateFolderResourceTest
 
 	@Override
 	@Test
+	@TestInfo("LPD-112209")
 	public void testPutSiteDisplayPageTemplateFolder() throws Exception {
 		DisplayPageTemplateFolder displayPageTemplateFolder =
 			_testPutSiteDisplayPageTemplateFolder(
@@ -469,6 +470,7 @@ public class DisplayPageTemplateFolderResourceTest
 
 		_assertNoParentDisplayPageTemplateFolder(displayPageTemplateFolder);
 
+		_testPutSiteDisplayPageTemplateFolderWithExternalReferenceCode();
 		_testPutSiteDisplayPageTemplateFolderWithParentDisplayPageTemplateFolder();
 
 		DisplayPageTemplateFolder liveGroupDisplayPageTemplateFolder =
@@ -1074,6 +1076,37 @@ public class DisplayPageTemplateFolderResourceTest
 		assertValid(putDisplayPageTemplateFolder);
 
 		return putDisplayPageTemplateFolder;
+	}
+
+	private void _testPutSiteDisplayPageTemplateFolderWithExternalReferenceCode()
+		throws Exception {
+
+		String externalReferenceCode = RandomTestUtil.randomString();
+
+		DisplayPageTemplateFolder displayPageTemplateFolder =
+			randomDisplayPageTemplateFolder();
+
+		displayPageTemplateFolder.setExternalReferenceCode((String)null);
+
+		DisplayPageTemplateFolder putDisplayPageTemplateFolder =
+			displayPageTemplateFolderResource.putSiteDisplayPageTemplateFolder(
+				testGroup.getExternalReferenceCode(), externalReferenceCode,
+				displayPageTemplateFolder);
+
+		Assert.assertEquals(
+			externalReferenceCode,
+			putDisplayPageTemplateFolder.getExternalReferenceCode());
+
+		_assertProblemException(
+			"BAD_REQUEST",
+			"The external reference code does not match the target display " +
+				"page template folder's external reference code",
+			() ->
+				displayPageTemplateFolderResource.
+					putSiteDisplayPageTemplateFolder(
+						testGroup.getExternalReferenceCode(),
+						RandomTestUtil.randomString(),
+						randomDisplayPageTemplateFolder()));
 	}
 
 	private void _testPutSiteDisplayPageTemplateFolderWithParentDisplayPageTemplateFolder()

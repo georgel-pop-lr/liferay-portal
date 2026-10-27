@@ -439,6 +439,7 @@ public class PageTemplateSetResourceTest
 
 	@Override
 	@Test
+	@TestInfo("LPD-112209")
 	public void testPutSitePageTemplateSet() throws Exception {
 		PageTemplateSet pageTemplateSet = randomPageTemplateSet();
 
@@ -450,13 +451,8 @@ public class PageTemplateSetResourceTest
 		assertEquals(pageTemplateSet, putPageTemplateSet);
 		assertValid(putPageTemplateSet);
 
-		_enableLocalStaging();
-
-		_assertProblemException(
-			"BAD_REQUEST", null,
-			() -> pageTemplateSetResource.putSitePageTemplateSet(
-				testGroup.getExternalReferenceCode(),
-				pageTemplateSet.getExternalReferenceCode(), pageTemplateSet));
+		_testPutSitePageTemplateSetWithExternalReferenceCode();
+		_testPutSitePageTemplateSetWithLocalStaging();
 	}
 
 	@Override
@@ -908,6 +904,49 @@ public class PageTemplateSetResourceTest
 					layoutPageTemplateCollection.
 						getLayoutPageTemplateCollectionId()),
 				role.getRoleId(), ActionKeys.VIEW));
+	}
+
+	private void _testPutSitePageTemplateSetWithExternalReferenceCode()
+		throws Exception {
+
+		String externalReferenceCode = RandomTestUtil.randomString();
+
+		PageTemplateSet pageTemplateSet = randomPageTemplateSet();
+
+		pageTemplateSet.setExternalReferenceCode((String)null);
+
+		PageTemplateSet putPageTemplateSet =
+			pageTemplateSetResource.putSitePageTemplateSet(
+				testGroup.getExternalReferenceCode(), externalReferenceCode,
+				pageTemplateSet);
+
+		Assert.assertEquals(
+			externalReferenceCode,
+			putPageTemplateSet.getExternalReferenceCode());
+
+		_assertProblemException(
+			"BAD_REQUEST",
+			"The external reference code does not match the target page " +
+				"template set's external reference code",
+			() -> pageTemplateSetResource.putSitePageTemplateSet(
+				testGroup.getExternalReferenceCode(),
+				RandomTestUtil.randomString(), randomPageTemplateSet()));
+	}
+
+	private void _testPutSitePageTemplateSetWithLocalStaging()
+		throws Exception {
+
+		PageTemplateSet pageTemplateSet =
+			testGetSitePageTemplateSetsPage_addPageTemplateSet(
+				testGroup.getExternalReferenceCode(), randomPageTemplateSet());
+
+		_enableLocalStaging();
+
+		_assertProblemException(
+			"BAD_REQUEST", null,
+			() -> pageTemplateSetResource.putSitePageTemplateSet(
+				testGroup.getExternalReferenceCode(),
+				pageTemplateSet.getExternalReferenceCode(), pageTemplateSet));
 	}
 
 	@DeleteAfterTestRun

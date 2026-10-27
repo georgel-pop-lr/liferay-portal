@@ -396,7 +396,12 @@ public class UtilityPageResourceTest extends BaseUtilityPageResourceTestCase {
 
 	@Override
 	@Test
-	@TestInfo({"LPD-42587", "LPD-48987", "LPD-86647", "LPD-92443", "LPD-95021"})
+	@TestInfo(
+		{
+			"LPD-42587", "LPD-48987", "LPD-86647", "LPD-92443", "LPD-95021",
+			"LPD-112209"
+		}
+	)
 	public void testPutSiteUtilityPage() throws Exception {
 		_testPutSiteUtilityPage(Boolean.FALSE, randomUtilityPage());
 
@@ -443,6 +448,7 @@ public class UtilityPageResourceTest extends BaseUtilityPageResourceTestCase {
 				null, null, layoutUtilityPageEntry.getExternalReferenceCode()));
 
 		_testPutSiteUtilityPageWithDates();
+		_testPutSiteUtilityPageWithExternalReferenceCode();
 		_testPutSiteUtilityPageWithPageSpecifications();
 		_testPutSiteUtilityPageWithThumbnail();
 		_testPutSiteUtilityPageWithThumbnailURLReferenceExternalReferenceCodeAndFileBase64();
@@ -1578,6 +1584,68 @@ public class UtilityPageResourceTest extends BaseUtilityPageResourceTestCase {
 		Assert.assertEquals(date, putUtilityPage.getDateCreated());
 		Assert.assertEquals(
 			utilityPage.getDateModified(), putUtilityPage.getDateModified());
+	}
+
+	private void _testPutSiteUtilityPageWithExternalReferenceCode()
+		throws Exception {
+
+		String externalReferenceCode = RandomTestUtil.randomString();
+
+		UtilityPage utilityPage = randomUtilityPage();
+
+		utilityPage.setExternalReferenceCode((String)null);
+
+		UtilityPage putUtilityPage = utilityPageResource.putSiteUtilityPage(
+			testGroup.getExternalReferenceCode(), externalReferenceCode,
+			utilityPage);
+
+		Assert.assertEquals(
+			externalReferenceCode, putUtilityPage.getExternalReferenceCode());
+
+		ProblemExceptionTestUtil.assertProblemException(
+			"BAD_REQUEST",
+			"The external reference code does not match the target utility " +
+				"page's external reference code",
+			() -> utilityPageResource.putSiteUtilityPage(
+				testGroup.getExternalReferenceCode(),
+				RandomTestUtil.randomString(), randomUtilityPage()));
+	}
+
+	private void _testPutSiteUtilityPageWithMarkedAsDefault(
+			LayoutUtilityPageEntry layoutUtilityPageEntry)
+		throws Exception {
+
+		Layout layout = _layoutLocalService.getLayout(
+			layoutUtilityPageEntry.getPlid());
+
+		Assert.assertFalse(layout.isPublished());
+
+		ProblemExceptionTestUtil.assertProblemException(
+			"BAD_REQUEST",
+			"A utility page must be published before it is marked as the " +
+				"default utility page",
+			() -> _testPutSiteUtilityPage(
+				Boolean.TRUE,
+				_getUtilityPage(
+					null, Boolean.TRUE,
+					layoutUtilityPageEntry.getExternalReferenceCode())));
+
+		ContentLayoutTestUtil.publishLayout(layout.fetchDraftLayout(), layout);
+
+		_testPutSiteUtilityPage(
+			Boolean.FALSE,
+			_getUtilityPage(
+				FileEntryTestUtil.addPreviewFileEntry(
+					testGroup, _portletFileRepository, getClass()),
+				Boolean.FALSE,
+				layoutUtilityPageEntry.getExternalReferenceCode()));
+		_testPutSiteUtilityPage(
+			Boolean.TRUE,
+			_getUtilityPage(
+				FileEntryTestUtil.addPreviewFileEntry(
+					testGroup, _portletFileRepository, getClass()),
+				Boolean.TRUE,
+				layoutUtilityPageEntry.getExternalReferenceCode()));
 	}
 
 	private void _testPutSiteUtilityPageWithPageSpecifications()
