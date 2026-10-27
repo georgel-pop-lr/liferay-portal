@@ -379,7 +379,7 @@ public class MasterPageResourceTest extends BaseMasterPageResourceTestCase {
 
 	@Override
 	@Test
-	@TestInfo("LPD-92443")
+	@TestInfo({"LPD-92443", "LPD-112208"})
 	public void testPatchSiteMasterPage() throws Exception {
 		MasterPage masterPage = testPostSiteMasterPage_addMasterPage(
 			randomMasterPage());
@@ -421,6 +421,7 @@ public class MasterPageResourceTest extends BaseMasterPageResourceTestCase {
 
 		_testPatchSiteMasterPageWithPageSpecifications();
 		_testPatchSiteMasterPageWithThumbnail();
+		_testPatchSiteMasterPageWithoutThumbnailURLReference();
 
 		_assertProblemException(
 			"NOT_FOUND", null,
@@ -1714,6 +1715,54 @@ public class MasterPageResourceTest extends BaseMasterPageResourceTestCase {
 						" because of restricted host invalid.example.test",
 				problem.getTitle());
 		}
+	}
+
+	private void
+			_testPatchSiteMasterPageWithThumbnailURLReferenceExternalReferenceCode(
+				MasterPage masterPage)
+		throws Exception {
+
+		FileEntry fileEntry = FileEntryTestUtil.addPreviewFileEntry(
+			testGroup, _portletFileRepository, getClass());
+
+		_testPatchSiteMasterPage(
+			Boolean.TRUE,
+			_getMasterPage(
+				null, masterPage.getExternalReferenceCode(),
+				fileEntry.getExternalReferenceCode(),
+				RandomTestUtil.randomString()));
+	}
+
+	private void _testPatchSiteMasterPageWithoutThumbnailURLReference()
+		throws Exception {
+
+		FileEntry fileEntry = FileEntryTestUtil.addPreviewFileEntry(
+			testGroup, _portletFileRepository, getClass());
+
+		MasterPage masterPage = masterPageResource.postSiteMasterPage(
+			testGroup.getExternalReferenceCode(),
+			_randomMasterPage(
+				ThumbnailURLReferenceUtil.getThumbnailURLReference(
+					fileEntry, null)));
+
+		masterPageResource.patchSiteMasterPage(
+			testGroup.getExternalReferenceCode(),
+			masterPage.getExternalReferenceCode(),
+			new MasterPage() {
+				{
+					setName(RandomTestUtil.randomString());
+				}
+			});
+
+		LayoutPageTemplateEntry layoutPageTemplateEntry =
+			_layoutPageTemplateEntryLocalService.
+				getLayoutPageTemplateEntryByExternalReferenceCode(
+					masterPage.getExternalReferenceCode(),
+					testGroup.getGroupId());
+
+		Assert.assertEquals(
+			fileEntry.getFileEntryId(),
+			layoutPageTemplateEntry.getPreviewFileEntryId());
 	}
 
 	private void _testPostDesignLibraryMasterPageCopy() throws Exception {

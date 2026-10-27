@@ -287,7 +287,7 @@ public class PageTemplateResourceTest extends BasePageTemplateResourceTestCase {
 
 	@Override
 	@Test
-	@TestInfo("LPD-92443")
+	@TestInfo({"LPD-92443", "LPD-112208"})
 	public void testPatchSitePageTemplate() throws Exception {
 		ContentPageTemplate contentPageTemplate =
 			(ContentPageTemplate)pageTemplateResource.postSitePageTemplate(
@@ -312,6 +312,7 @@ public class PageTemplateResourceTest extends BasePageTemplateResourceTestCase {
 		_testPatchSitePageTemplateWithPageSpecifications();
 		_testPatchSitePageTemplateWithPageTemplateSet();
 		_testPatchSitePageTemplateWithThumbnail();
+		_testPatchSitePageTemplateWithoutThumbnailURLReference();
 
 		_enableLocalStaging();
 
@@ -1717,6 +1718,43 @@ public class PageTemplateResourceTest extends BasePageTemplateResourceTestCase {
 						" because of restricted host invalid.example.test",
 				problem.getTitle());
 		}
+	}
+
+	private void _testPatchSitePageTemplateWithoutThumbnailURLReference()
+		throws Exception {
+
+		FileEntry fileEntry = FileEntryTestUtil.addPreviewFileEntry(
+			testGroup, _portletFileRepository, getClass());
+
+		PageTemplate pageTemplate = _getContentPageTemplate(testGroup);
+
+		pageTemplate.setThumbnailURLReference(
+			() -> ThumbnailURLReferenceUtil.getThumbnailURLReference(
+				fileEntry, null));
+
+		PageTemplate postPageTemplate =
+			pageTemplateResource.postSitePageTemplate(
+				testGroup.getExternalReferenceCode(), pageTemplate);
+
+		pageTemplateResource.patchSitePageTemplate(
+			testGroup.getExternalReferenceCode(),
+			postPageTemplate.getExternalReferenceCode(),
+			new ContentPageTemplate() {
+				{
+					setName(RandomTestUtil.randomString());
+					setType(Type.CONTENT_PAGE_TEMPLATE);
+				}
+			});
+
+		LayoutPageTemplateEntry layoutPageTemplateEntry =
+			_layoutPageTemplateEntryLocalService.
+				getLayoutPageTemplateEntryByExternalReferenceCode(
+					postPageTemplate.getExternalReferenceCode(),
+					testGroup.getGroupId());
+
+		Assert.assertEquals(
+			fileEntry.getFileEntryId(),
+			layoutPageTemplateEntry.getPreviewFileEntryId());
 	}
 
 	private void _testPostPageTemplateThumbnailURLReferenceProblemException(

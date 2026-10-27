@@ -367,7 +367,7 @@ public class DisplayPageTemplateResourceTest
 
 	@Override
 	@Test
-	@TestInfo("LPD-92443")
+	@TestInfo({"LPD-92443", "LPD-112208"})
 	public void testPatchSiteDisplayPageTemplate() throws Exception {
 		DisplayPageTemplate displayPageTemplate = randomDisplayPageTemplate();
 
@@ -475,6 +475,7 @@ public class DisplayPageTemplateResourceTest
 
 		_testPatchSiteDisplayPageTemplateWithPageSpecifications();
 		_testPatchSiteDisplayPageTemplateWithThumbnail();
+		_testPatchSiteDisplayPageTemplateWithoutThumbnailURLReference();
 
 		_assertProblemException(
 			"NOT_FOUND", null,
@@ -2396,6 +2397,66 @@ public class DisplayPageTemplateResourceTest
 						" because of restricted host invalid.example.test",
 				problem.getTitle());
 		}
+	}
+
+	private void
+			_testPatchSiteDisplayPageTemplateWithThumbnailURLReferenceExternalReferenceCode(
+				DisplayPageTemplate expectedDisplayPageTemplate)
+		throws Exception {
+
+		FileEntry fileEntry = FileEntryTestUtil.addPreviewFileEntry(
+			testGroup, _portletFileRepository, getClass());
+
+		expectedDisplayPageTemplate.setThumbnailURLReference(
+			ThumbnailURLReferenceUtil.getThumbnailURLReference(
+				fileEntry, null));
+
+		_testPatchSiteDisplayPageTemplate(
+			expectedDisplayPageTemplate,
+			new DisplayPageTemplate() {
+				{
+					setMarkedAsDefault(
+						expectedDisplayPageTemplate.getMarkedAsDefault());
+					setThumbnailURLReference(
+						expectedDisplayPageTemplate.getThumbnailURLReference());
+				}
+			});
+	}
+
+	private void _testPatchSiteDisplayPageTemplateWithoutThumbnailURLReference()
+		throws Exception {
+
+		FileEntry fileEntry = FileEntryTestUtil.addPreviewFileEntry(
+			testGroup, _portletFileRepository, getClass());
+
+		DisplayPageTemplate displayPageTemplate = randomDisplayPageTemplate();
+
+		displayPageTemplate.setThumbnailURLReference(
+			() -> ThumbnailURLReferenceUtil.getThumbnailURLReference(
+				fileEntry, null));
+
+		DisplayPageTemplate postDisplayPageTemplate =
+			displayPageTemplateResource.postSiteDisplayPageTemplate(
+				testGroup.getExternalReferenceCode(), displayPageTemplate);
+
+		displayPageTemplateResource.patchSiteDisplayPageTemplate(
+			testGroup.getExternalReferenceCode(),
+			postDisplayPageTemplate.getExternalReferenceCode(),
+			new DisplayPageTemplate() {
+				{
+					setName(RandomTestUtil.randomString());
+				}
+			});
+
+		LayoutPageTemplateEntry layoutPageTemplateEntry =
+			_layoutPageTemplateEntryLocalService.
+				getLayoutPageTemplateEntryByExternalReferenceCode(
+					postDisplayPageTemplate.getExternalReferenceCode(),
+					testGroup.getGroupId());
+
+		Assert.assertEquals(
+			fileEntry.getFileEntryId(),
+			layoutPageTemplateEntry.getPreviewFileEntryId());
 	}
 
 	private void

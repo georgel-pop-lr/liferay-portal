@@ -262,7 +262,7 @@ public class UtilityPageResourceTest extends BaseUtilityPageResourceTestCase {
 
 	@Override
 	@Test
-	@TestInfo("LPD-92443")
+	@TestInfo({"LPD-92443", "LPD-112208"})
 	public void testPatchSiteUtilityPage() throws Exception {
 		LayoutUtilityPageEntry layoutUtilityPageEntry =
 			LayoutUtilityPageEntryTestUtil.getLayoutUtilityPageEntry(
@@ -327,6 +327,7 @@ public class UtilityPageResourceTest extends BaseUtilityPageResourceTestCase {
 
 		_testPatchSiteUtilityPageWithPageSpecifications();
 		_testPatchSiteUtilityPageWithThumbnail();
+		_testPatchSiteUtilityPageWithoutThumbnailURLReference();
 
 		ProblemExceptionTestUtil.assertProblemException(
 			"NOT_FOUND", null,
@@ -1110,6 +1111,77 @@ public class UtilityPageResourceTest extends BaseUtilityPageResourceTestCase {
 						" because of restricted host invalid.example.test",
 				problem.getTitle());
 		}
+	}
+
+	private void _testPatchSiteUtilityPageWithUtilityPageSettings(
+			UtilityPage utilityPage)
+		throws Exception {
+
+		utilityPage.setName(RandomTestUtil::randomString);
+		utilityPage.setUtilityPageSettings(
+			() -> new UtilityPageSettings() {
+				{
+					setSeoSettings(
+						() -> new UtilityPageSEOSettings() {
+							{
+								setDescription_i18n(
+									() -> LocalizedMapUtil.getI18nMap(
+										true,
+										RandomTestUtil.
+											randomLocaleStringMap()));
+								setHtmlTitle_i18n(
+									() -> LocalizedMapUtil.getI18nMap(
+										true,
+										RandomTestUtil.
+											randomLocaleStringMap()));
+							}
+						});
+				}
+			});
+
+		_testPatchSiteUtilityPage(
+			Boolean.TRUE, utilityPage,
+			new UtilityPage() {
+				{
+					setName(utilityPage::getName);
+					setUtilityPageSettings(utilityPage::getUtilityPageSettings);
+				}
+			});
+	}
+
+	private void _testPatchSiteUtilityPageWithoutThumbnailURLReference()
+		throws Exception {
+
+		FileEntry fileEntry = FileEntryTestUtil.addPreviewFileEntry(
+			testGroup, _portletFileRepository, getClass());
+
+		UtilityPage utilityPage = randomUtilityPage();
+
+		utilityPage.setThumbnailURLReference(
+			() -> ThumbnailURLReferenceUtil.getThumbnailURLReference(
+				fileEntry, null));
+
+		UtilityPage postUtilityPage = utilityPageResource.postSiteUtilityPage(
+			testGroup.getExternalReferenceCode(), utilityPage);
+
+		utilityPageResource.patchSiteUtilityPage(
+			testGroup.getExternalReferenceCode(),
+			postUtilityPage.getExternalReferenceCode(),
+			new UtilityPage() {
+				{
+					setName(RandomTestUtil.randomString());
+				}
+			});
+
+		LayoutUtilityPageEntry layoutUtilityPageEntry =
+			_layoutUtilityPageEntryLocalService.
+				getLayoutUtilityPageEntryByExternalReferenceCode(
+					postUtilityPage.getExternalReferenceCode(),
+					testGroup.getGroupId());
+
+		Assert.assertEquals(
+			fileEntry.getFileEntryId(),
+			layoutUtilityPageEntry.getPreviewFileEntryId());
 	}
 
 	private void _testPostSiteUtilityPageWithDuplicateExternalReferenceCode()
