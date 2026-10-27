@@ -125,10 +125,19 @@ public class MasterPageResourceImpl
 			String masterPageExternalReferenceCode)
 		throws Exception {
 
+		long groupId = GroupUtil.getStagingAwareGroupId(
+			contextCompany.getCompanyId(), siteExternalReferenceCode);
+
+		int masterLayoutsCount = _layoutLocalService.getMasterLayoutsCount(
+			groupId, masterPageExternalReferenceCode);
+
+		if (masterLayoutsCount > 0) {
+			throw new RequiredLayoutPageTemplateEntryException(
+				"The master page is used by one or more pages");
+		}
+
 		_layoutPageTemplateEntryService.deleteLayoutPageTemplateEntry(
-			masterPageExternalReferenceCode,
-			GroupUtil.getStagingAwareGroupId(
-				contextCompany.getCompanyId(), siteExternalReferenceCode));
+			masterPageExternalReferenceCode, groupId);
 	}
 
 	@Override
