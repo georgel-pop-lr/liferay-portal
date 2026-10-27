@@ -164,44 +164,10 @@ public class MasterPageResourceTest extends BaseMasterPageResourceTestCase {
 
 	@Override
 	@Test
+	@TestInfo("LPD-112206")
 	public void testDeleteSiteMasterPage() throws Exception {
-		MasterPage postMasterPage = testPostSiteMasterPage_addMasterPage(
-			randomMasterPage());
-
-		Assert.assertNotNull(
-			_layoutPageTemplateEntryLocalService.
-				fetchLayoutPageTemplateEntryByExternalReferenceCode(
-					postMasterPage.getExternalReferenceCode(),
-					testGroup.getGroupId()));
-
-		masterPageResource.deleteSiteMasterPage(
-			testGroup.getExternalReferenceCode(),
-			postMasterPage.getExternalReferenceCode());
-
-		Assert.assertNull(
-			_layoutPageTemplateEntryLocalService.
-				fetchLayoutPageTemplateEntryByExternalReferenceCode(
-					postMasterPage.getExternalReferenceCode(),
-					testGroup.getGroupId()));
-
-		_assertProblemException(
-			"NOT_FOUND", null,
-			() -> masterPageResource.deleteSiteMasterPage(
-				testGroup.getExternalReferenceCode(),
-				postMasterPage.getExternalReferenceCode()));
-
-		MasterPage liveGroupMasterPage =
-			testGetSiteMasterPagesPage_addMasterPage(
-				irrelevantGroup.getExternalReferenceCode(),
-				_randomMasterPage(irrelevantGroup));
-
-		_enableLocalStaging(irrelevantGroup);
-
-		_assertProblemException(
-			"BAD_REQUEST", null,
-			() -> masterPageResource.deleteSiteMasterPage(
-				irrelevantGroup.getExternalReferenceCode(),
-				liveGroupMasterPage.getExternalReferenceCode()));
+		_testDeleteSiteMasterPage();
+		_testDeleteSiteMasterPageInUseProblemException();
 	}
 
 	@Override
@@ -1373,6 +1339,58 @@ public class MasterPageResourceTest extends BaseMasterPageResourceTestCase {
 				fetchLayoutPageTemplateEntryByExternalReferenceCode(
 					masterPage.getExternalReferenceCode(),
 					_designLibraryGroup.getGroupId()));
+	}
+
+	private void _testDeleteSiteMasterPage() throws Exception {
+		MasterPage masterPage = testPostSiteMasterPage_addMasterPage(
+			randomMasterPage());
+
+		Assert.assertNotNull(
+			_layoutPageTemplateEntryLocalService.
+				fetchLayoutPageTemplateEntryByExternalReferenceCode(
+					masterPage.getExternalReferenceCode(),
+					testGroup.getGroupId()));
+
+		masterPageResource.deleteSiteMasterPage(
+			testGroup.getExternalReferenceCode(),
+			masterPage.getExternalReferenceCode());
+
+		Assert.assertNull(
+			_layoutPageTemplateEntryLocalService.
+				fetchLayoutPageTemplateEntryByExternalReferenceCode(
+					masterPage.getExternalReferenceCode(),
+					testGroup.getGroupId()));
+
+		_assertProblemException(
+			"NOT_FOUND", null,
+			() -> masterPageResource.deleteSiteMasterPage(
+				testGroup.getExternalReferenceCode(),
+				masterPage.getExternalReferenceCode()));
+	}
+
+	private void _testDeleteSiteMasterPageInUseProblemException()
+		throws Exception {
+
+		Layout layout = LayoutTestUtil.addTypeContentLayout(testGroup);
+
+		MasterPage masterPage = testPostSiteMasterPage_addMasterPage(
+			randomMasterPage());
+
+		_layoutLocalService.updateMasterLayoutPageTemplateEntryERC(
+			layout.getGroupId(), layout.isPrivateLayout(), layout.getLayoutId(),
+			masterPage.getExternalReferenceCode());
+
+		_assertProblemException(
+			"CONFLICT", "The master page is used by one or more pages",
+			() -> masterPageResource.deleteSiteMasterPage(
+				testGroup.getExternalReferenceCode(),
+				masterPage.getExternalReferenceCode()));
+
+		Assert.assertNotNull(
+			_layoutPageTemplateEntryLocalService.
+				fetchLayoutPageTemplateEntryByExternalReferenceCode(
+					masterPage.getExternalReferenceCode(),
+					testGroup.getGroupId()));
 	}
 
 	private void _testGetDesignLibraryMasterPageActions() throws Exception {
