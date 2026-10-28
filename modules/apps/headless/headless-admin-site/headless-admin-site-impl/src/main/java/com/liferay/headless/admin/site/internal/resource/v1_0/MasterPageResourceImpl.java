@@ -293,12 +293,11 @@ public class MasterPageResourceImpl
 
 		if (masterPage.getThumbnailURLReference() == null) {
 			LayoutPageTemplateEntry layoutPageTemplateEntry =
-				_layoutPageTemplateEntryService.
-					getLayoutPageTemplateEntryByExternalReferenceCode(
-						masterPageExternalReferenceCode,
-						GroupUtil.getGroupId(
-							true, contextCompany.getCompanyId(),
-							siteExternalReferenceCode));
+				_getLayoutPageTemplateEntry(
+					masterPageExternalReferenceCode,
+					GroupUtil.getGroupId(
+						true, contextCompany.getCompanyId(),
+						siteExternalReferenceCode));
 
 			masterPage.setThumbnailURLReference(
 				() ->

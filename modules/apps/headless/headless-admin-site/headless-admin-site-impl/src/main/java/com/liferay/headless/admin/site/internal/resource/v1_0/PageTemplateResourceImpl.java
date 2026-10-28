@@ -277,12 +277,11 @@ public class PageTemplateResourceImpl
 
 		if (pageTemplate.getThumbnailURLReference() == null) {
 			LayoutPageTemplateEntry layoutPageTemplateEntry =
-				_layoutPageTemplateEntryService.
-					getLayoutPageTemplateEntryByExternalReferenceCode(
-						pageTemplateExternalReferenceCode,
-						GroupUtil.getGroupId(
-							true, true, contextCompany.getCompanyId(),
-							siteExternalReferenceCode));
+				_getLayoutPageTemplateEntry(
+					pageTemplateExternalReferenceCode,
+					GroupUtil.getGroupId(
+						true, true, contextCompany.getCompanyId(),
+						siteExternalReferenceCode));
 
 			pageTemplate.setThumbnailURLReference(
 				() ->
@@ -368,26 +367,12 @@ public class PageTemplateResourceImpl
 			String pageTemplateExternalReferenceCode)
 		throws Exception {
 
-		LayoutPageTemplateEntry layoutPageTemplateEntry =
-			_layoutPageTemplateEntryService.
-				getLayoutPageTemplateEntryByExternalReferenceCode(
-					pageTemplateExternalReferenceCode,
-					GroupUtil.getGroupId(
-						true, true, contextCompany.getCompanyId(),
-						siteExternalReferenceCode));
-
-		if (!Objects.equals(
-				LayoutPageTemplateEntryTypeConstants.BASIC,
-				layoutPageTemplateEntry.getType()) &&
-			!Objects.equals(
-				LayoutPageTemplateEntryTypeConstants.WIDGET_PAGE,
-				layoutPageTemplateEntry.getType())) {
-
-			throw new IllegalArgumentException(
-				"The page template must be of type basic or widget");
-		}
-
-		return _toPageTemplate(layoutPageTemplateEntry);
+		return _toPageTemplate(
+			_getLayoutPageTemplateEntry(
+				pageTemplateExternalReferenceCode,
+				GroupUtil.getGroupId(
+					true, true, contextCompany.getCompanyId(),
+					siteExternalReferenceCode)));
 	}
 
 	@Override
@@ -770,6 +755,29 @@ public class PageTemplateResourceImpl
 
 		return _addPageTemplate(
 			groupId, layoutPageTemplateCollectionId, pageTemplate);
+	}
+
+	private LayoutPageTemplateEntry _getLayoutPageTemplateEntry(
+			String externalReferenceCode, long groupId)
+		throws Exception {
+
+		LayoutPageTemplateEntry layoutPageTemplateEntry =
+			_layoutPageTemplateEntryService.
+				getLayoutPageTemplateEntryByExternalReferenceCode(
+					externalReferenceCode, groupId);
+
+		if (!Objects.equals(
+				LayoutPageTemplateEntryTypeConstants.BASIC,
+				layoutPageTemplateEntry.getType()) &&
+			!Objects.equals(
+				LayoutPageTemplateEntryTypeConstants.WIDGET_PAGE,
+				layoutPageTemplateEntry.getType())) {
+
+			throw new IllegalArgumentException(
+				"The page template must be of type basic or widget");
+		}
+
+		return layoutPageTemplateEntry;
 	}
 
 	private long _getLayoutPlid(
