@@ -44,6 +44,7 @@ import com.liferay.layout.page.template.model.LayoutPageTemplateEntry;
 import com.liferay.layout.page.template.service.LayoutPageTemplateCollectionLocalService;
 import com.liferay.layout.page.template.service.LayoutPageTemplateEntryLocalService;
 import com.liferay.layout.page.template.service.LayoutPageTemplateEntryService;
+import com.liferay.layout.page.template.test.util.DisplayPageTemplateTestUtil;
 import com.liferay.petra.function.UnsafeBiConsumer;
 import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.petra.function.UnsafeFunction;
@@ -153,6 +154,7 @@ public class PageTemplateResourceTest extends BasePageTemplateResourceTestCase {
 
 	@Override
 	@Test
+	@TestInfo("LPD-112571")
 	public void testDeleteSitePageTemplate() throws Exception {
 		PageTemplate pageTemplate = testPostSitePageTemplate_addPageTemplate(
 			randomPageTemplate());
@@ -183,6 +185,11 @@ public class PageTemplateResourceTest extends BasePageTemplateResourceTestCase {
 				() -> pageTemplateResource.deleteSitePageTemplate(
 					group.getExternalReferenceCode(),
 					RandomTestUtil.randomString())));
+
+		_testDeleteSitePageTemplateWithCompanyGroup();
+		_testDeleteSitePageTemplateWithDepotEntry();
+		_testDeleteSitePageTemplateWithDisplayPageTemplateExternalReferenceCodeProblemException();
+		_testDeleteSitePageTemplateWithLocalStaging();
 	}
 
 	@Override
@@ -1325,6 +1332,58 @@ public class PageTemplateResourceTest extends BasePageTemplateResourceTestCase {
 			() -> pageTemplateResource.deleteSitePageTemplate(
 				group.getExternalReferenceCode(),
 				pageTemplateExternalReferenceCode));
+	}
+
+	private void _testDeleteSitePageTemplateWithCompanyGroup()
+		throws Exception {
+
+		_withCompanyGroupWidgetPageTemplate(
+			(group, widgetPageTemplate) -> {
+				_postSitePageTemplate(
+					widgetPageTemplate, group.getExternalReferenceCode());
+
+				_testDeleteSitePageTemplate(
+					group, widgetPageTemplate.getExternalReferenceCode());
+			});
+	}
+
+	private void _testDeleteSitePageTemplateWithDepotEntry() throws Exception {
+		_withDepotEntry(
+			group -> _assertProblemException(
+				"BAD_REQUEST", null,
+				() -> pageTemplateResource.deleteSitePageTemplate(
+					group.getExternalReferenceCode(),
+					RandomTestUtil.randomString())));
+	}
+
+	private void _testDeleteSitePageTemplateWithDisplayPageTemplateExternalReferenceCodeProblemException()
+		throws Exception {
+
+		LayoutPageTemplateEntry layoutPageTemplateEntry =
+			DisplayPageTemplateTestUtil.addDisplayPageTemplate(
+				testGroup.getGroupId());
+
+		_assertProblemException(
+			"BAD_REQUEST", "The page template must be of type basic or widget",
+			() -> pageTemplateResource.deleteSitePageTemplate(
+				testGroup.getExternalReferenceCode(),
+				layoutPageTemplateEntry.getExternalReferenceCode()));
+
+		Assert.assertNotNull(
+			_layoutPageTemplateEntryLocalService.fetchLayoutPageTemplateEntry(
+				layoutPageTemplateEntry.getLayoutPageTemplateEntryId()));
+	}
+
+	private void _testDeleteSitePageTemplateWithLocalStaging()
+		throws Exception {
+
+		_enableLocalStaging(irrelevantGroup);
+
+		_assertProblemException(
+			"BAD_REQUEST", null,
+			() -> pageTemplateResource.deleteSitePageTemplate(
+				irrelevantGroup.getExternalReferenceCode(),
+				RandomTestUtil.randomString()));
 	}
 
 	private void _testGetSitePageTemplate(PageTemplate pageTemplate)

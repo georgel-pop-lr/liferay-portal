@@ -36,6 +36,7 @@ import com.liferay.headless.admin.site.resource.v1_0.test.util.ThumbnailURLRefer
 import com.liferay.headless.admin.site.resource.v1_0.test.util.URLFetchSecurityCompanyConfigurationUtil;
 import com.liferay.layout.page.template.model.LayoutPageTemplateEntry;
 import com.liferay.layout.page.template.service.LayoutPageTemplateEntryLocalService;
+import com.liferay.layout.page.template.test.util.DisplayPageTemplateTestUtil;
 import com.liferay.layout.test.util.ContentLayoutTestUtil;
 import com.liferay.layout.test.util.LayoutTestUtil;
 import com.liferay.petra.function.UnsafeRunnable;
@@ -164,10 +165,12 @@ public class MasterPageResourceTest extends BaseMasterPageResourceTestCase {
 
 	@Override
 	@Test
-	@TestInfo("LPD-112206")
+	@TestInfo({"LPD-112206", "LPD-112571"})
 	public void testDeleteSiteMasterPage() throws Exception {
 		_testDeleteSiteMasterPage();
 		_testDeleteSiteMasterPageInUseProblemException();
+		_testDeleteSiteMasterPageWithDisplayPageTemplateExternalReferenceCodeProblemException();
+		_testDeleteSiteMasterPageWithLocalStaging();
 	}
 
 	@Override
@@ -1391,6 +1394,39 @@ public class MasterPageResourceTest extends BaseMasterPageResourceTestCase {
 				fetchLayoutPageTemplateEntryByExternalReferenceCode(
 					masterPage.getExternalReferenceCode(),
 					testGroup.getGroupId()));
+	}
+
+	private void _testDeleteSiteMasterPageWithDisplayPageTemplateExternalReferenceCodeProblemException()
+		throws Exception {
+
+		LayoutPageTemplateEntry layoutPageTemplateEntry =
+			DisplayPageTemplateTestUtil.addDisplayPageTemplate(
+				testGroup.getGroupId());
+
+		_assertProblemException(
+			"BAD_REQUEST",
+			"The external reference code does not point to a master page",
+			() -> masterPageResource.deleteSiteMasterPage(
+				testGroup.getExternalReferenceCode(),
+				layoutPageTemplateEntry.getExternalReferenceCode()));
+
+		Assert.assertNotNull(
+			_layoutPageTemplateEntryLocalService.fetchLayoutPageTemplateEntry(
+				layoutPageTemplateEntry.getLayoutPageTemplateEntryId()));
+	}
+
+	private void _testDeleteSiteMasterPageWithLocalStaging() throws Exception {
+		MasterPage masterPage = testGetSiteMasterPagesPage_addMasterPage(
+			irrelevantGroup.getExternalReferenceCode(),
+			_randomMasterPage(irrelevantGroup));
+
+		_enableLocalStaging(irrelevantGroup);
+
+		_assertProblemException(
+			"BAD_REQUEST", null,
+			() -> masterPageResource.deleteSiteMasterPage(
+				irrelevantGroup.getExternalReferenceCode(),
+				masterPage.getExternalReferenceCode()));
 	}
 
 	private void _testGetDesignLibraryMasterPageActions() throws Exception {

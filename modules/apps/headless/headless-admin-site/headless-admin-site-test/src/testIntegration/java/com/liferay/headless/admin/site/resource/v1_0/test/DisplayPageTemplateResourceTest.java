@@ -193,45 +193,11 @@ public class DisplayPageTemplateResourceTest
 
 	@Override
 	@Test
+	@TestInfo("LPD-112571")
 	public void testDeleteSiteDisplayPageTemplate() throws Exception {
-		DisplayPageTemplate postDisplayPageTemplate =
-			testPostSiteDisplayPageTemplate_addDisplayPageTemplate(
-				randomDisplayPageTemplate());
-
-		Assert.assertNotNull(
-			_layoutPageTemplateEntryLocalService.
-				fetchLayoutPageTemplateEntryByExternalReferenceCode(
-					postDisplayPageTemplate.getExternalReferenceCode(),
-					testGroup.getGroupId()));
-
-		displayPageTemplateResource.deleteSiteDisplayPageTemplate(
-			testGroup.getExternalReferenceCode(),
-			postDisplayPageTemplate.getExternalReferenceCode());
-
-		Assert.assertNull(
-			_layoutPageTemplateEntryLocalService.
-				fetchLayoutPageTemplateEntryByExternalReferenceCode(
-					postDisplayPageTemplate.getExternalReferenceCode(),
-					testGroup.getGroupId()));
-
-		_assertProblemException(
-			"NOT_FOUND", null,
-			() -> displayPageTemplateResource.deleteSiteDisplayPageTemplate(
-				testGroup.getExternalReferenceCode(),
-				postDisplayPageTemplate.getExternalReferenceCode()));
-
-		DisplayPageTemplate liveGroupDisplayPageTemplate =
-			testGetSiteDisplayPageTemplatesPage_addDisplayPageTemplate(
-				irrelevantGroup.getExternalReferenceCode(),
-				randomDisplayPageTemplate());
-
-		_enableLocalStaging(irrelevantGroup);
-
-		_assertProblemException(
-			"BAD_REQUEST", null,
-			() -> displayPageTemplateResource.deleteSiteDisplayPageTemplate(
-				irrelevantGroup.getExternalReferenceCode(),
-				liveGroupDisplayPageTemplate.getExternalReferenceCode()));
+		_testDeleteSiteDisplayPageTemplate();
+		_testDeleteSiteDisplayPageTemplateWithLocalStaging();
+		_testDeleteSiteDisplayPageTemplateWithPageTemplateExternalReferenceCodeProblemException();
 	}
 
 	@Override
@@ -1918,6 +1884,71 @@ public class DisplayPageTemplateResourceTest
 							getExternalReferenceCode(),
 						testGroup.getGroupId()));
 		}
+	}
+
+	private void _testDeleteSiteDisplayPageTemplate() throws Exception {
+		DisplayPageTemplate displayPageTemplate =
+			testDeleteSiteDisplayPageTemplate_addDisplayPageTemplate();
+
+		Assert.assertNotNull(
+			_layoutPageTemplateEntryLocalService.
+				fetchLayoutPageTemplateEntryByExternalReferenceCode(
+					displayPageTemplate.getExternalReferenceCode(),
+					testGroup.getGroupId()));
+
+		displayPageTemplateResource.deleteSiteDisplayPageTemplate(
+			testGroup.getExternalReferenceCode(),
+			displayPageTemplate.getExternalReferenceCode());
+
+		Assert.assertNull(
+			_layoutPageTemplateEntryLocalService.
+				fetchLayoutPageTemplateEntryByExternalReferenceCode(
+					displayPageTemplate.getExternalReferenceCode(),
+					testGroup.getGroupId()));
+
+		_assertProblemException(
+			"NOT_FOUND", null,
+			() -> displayPageTemplateResource.deleteSiteDisplayPageTemplate(
+				testGroup.getExternalReferenceCode(),
+				displayPageTemplate.getExternalReferenceCode()));
+	}
+
+	private void _testDeleteSiteDisplayPageTemplateWithLocalStaging()
+		throws Exception {
+
+		DisplayPageTemplate displayPageTemplate =
+			testGetSiteDisplayPageTemplatesPage_addDisplayPageTemplate(
+				irrelevantGroup.getExternalReferenceCode(),
+				randomDisplayPageTemplate());
+
+		_enableLocalStaging(irrelevantGroup);
+
+		_assertProblemException(
+			"BAD_REQUEST", null,
+			() -> displayPageTemplateResource.deleteSiteDisplayPageTemplate(
+				irrelevantGroup.getExternalReferenceCode(),
+				displayPageTemplate.getExternalReferenceCode()));
+	}
+
+	private void _testDeleteSiteDisplayPageTemplateWithPageTemplateExternalReferenceCodeProblemException()
+		throws Exception {
+
+		LayoutPageTemplateEntry layoutPageTemplateEntry =
+			LayoutPageTemplateEntryTestUtil.getBasicLayoutPageTemplateEntry(
+				ServiceContextTestUtil.getServiceContext(
+					testGroup.getGroupId(), TestPropsValues.getUserId()));
+
+		_assertProblemException(
+			"BAD_REQUEST",
+			"The display page template type does not match the display page " +
+				"type",
+			() -> displayPageTemplateResource.deleteSiteDisplayPageTemplate(
+				testGroup.getExternalReferenceCode(),
+				layoutPageTemplateEntry.getExternalReferenceCode()));
+
+		Assert.assertNotNull(
+			_layoutPageTemplateEntryLocalService.fetchLayoutPageTemplateEntry(
+				layoutPageTemplateEntry.getLayoutPageTemplateEntryId()));
 	}
 
 	private void _testGetDesignLibraryDisplayPageTemplateActions()
