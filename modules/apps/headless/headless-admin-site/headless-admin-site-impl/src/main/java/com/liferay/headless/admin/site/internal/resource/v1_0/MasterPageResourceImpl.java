@@ -128,6 +128,10 @@ public class MasterPageResourceImpl
 		long groupId = GroupUtil.getStagingAwareGroupId(
 			contextCompany.getCompanyId(), siteExternalReferenceCode);
 
+		LayoutPageTemplateEntry layoutPageTemplateEntry =
+			_getLayoutPageTemplateEntry(
+				masterPageExternalReferenceCode, groupId);
+
 		int masterLayoutsCount = _layoutLocalService.getMasterLayoutsCount(
 			groupId, masterPageExternalReferenceCode);
 
@@ -137,7 +141,7 @@ public class MasterPageResourceImpl
 		}
 
 		_layoutPageTemplateEntryService.deleteLayoutPageTemplateEntry(
-			masterPageExternalReferenceCode, groupId);
+			layoutPageTemplateEntry.getLayoutPageTemplateEntryId());
 	}
 
 	@Override

@@ -113,11 +113,15 @@ public class PageTemplateResourceImpl
 			String pageTemplateExternalReferenceCode)
 		throws Exception {
 
+		LayoutPageTemplateEntry layoutPageTemplateEntry =
+			_getLayoutPageTemplateEntry(
+				pageTemplateExternalReferenceCode,
+				GroupUtil.getGroupId(
+					true, false, contextCompany.getCompanyId(),
+					siteExternalReferenceCode));
+
 		_layoutPageTemplateEntryService.deleteLayoutPageTemplateEntry(
-			pageTemplateExternalReferenceCode,
-			GroupUtil.getGroupId(
-				true, false, contextCompany.getCompanyId(),
-				siteExternalReferenceCode));
+			layoutPageTemplateEntry.getLayoutPageTemplateEntryId());
 	}
 
 	@Override
