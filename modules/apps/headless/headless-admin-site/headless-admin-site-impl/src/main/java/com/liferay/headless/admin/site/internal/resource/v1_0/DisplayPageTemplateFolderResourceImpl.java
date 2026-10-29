@@ -82,9 +82,13 @@ public class DisplayPageTemplateFolderResourceImpl
 			String displayPageTemplateFolderExternalReferenceCode)
 		throws Exception {
 
+		LayoutPageTemplateCollection layoutPageTemplateCollection =
+			_getLayoutPageTemplateCollection(
+				displayPageTemplateFolderExternalReferenceCode,
+				_getDesignLibraryGroupId(designLibraryExternalReferenceCode));
+
 		_layoutPageTemplateCollectionService.deleteLayoutPageTemplateCollection(
-			displayPageTemplateFolderExternalReferenceCode,
-			_getDesignLibraryGroupId(designLibraryExternalReferenceCode));
+			layoutPageTemplateCollection.getLayoutPageTemplateCollectionId());
 	}
 
 	@Override
@@ -93,10 +97,14 @@ public class DisplayPageTemplateFolderResourceImpl
 			String displayPageTemplateFolderExternalReferenceCode)
 		throws Exception {
 
+		LayoutPageTemplateCollection layoutPageTemplateCollection =
+			_getLayoutPageTemplateCollection(
+				displayPageTemplateFolderExternalReferenceCode,
+				GroupUtil.getStagingAwareGroupId(
+					contextCompany.getCompanyId(), siteExternalReferenceCode));
+
 		_layoutPageTemplateCollectionService.deleteLayoutPageTemplateCollection(
-			displayPageTemplateFolderExternalReferenceCode,
-			GroupUtil.getStagingAwareGroupId(
-				contextCompany.getCompanyId(), siteExternalReferenceCode));
+			layoutPageTemplateCollection.getLayoutPageTemplateCollectionId());
 	}
 
 	@Override
@@ -107,11 +115,9 @@ public class DisplayPageTemplateFolderResourceImpl
 
 		return _toDesignLibraryDisplayPageTemplateFolder(
 			designLibraryExternalReferenceCode,
-			_layoutPageTemplateCollectionService.
-				getLayoutPageTemplateCollection(
-					displayPageTemplateFolderExternalReferenceCode,
-					_getDesignLibraryGroupId(
-						designLibraryExternalReferenceCode)));
+			_getLayoutPageTemplateCollection(
+				displayPageTemplateFolderExternalReferenceCode,
+				_getDesignLibraryGroupId(designLibraryExternalReferenceCode)));
 	}
 
 	@Override
@@ -282,12 +288,11 @@ public class DisplayPageTemplateFolderResourceImpl
 		throws Exception {
 
 		return _toDisplayPageTemplateFolder(
-			_layoutPageTemplateCollectionService.
-				getLayoutPageTemplateCollection(
-					displayPageTemplateFolderExternalReferenceCode,
-					GroupUtil.getGroupId(
-						true, contextCompany.getCompanyId(),
-						siteExternalReferenceCode)));
+			_getLayoutPageTemplateCollection(
+				displayPageTemplateFolderExternalReferenceCode,
+				GroupUtil.getGroupId(
+					true, contextCompany.getCompanyId(),
+					siteExternalReferenceCode)));
 	}
 
 	@Override
@@ -352,6 +357,8 @@ public class DisplayPageTemplateFolderResourceImpl
 				displayPageTemplateFolder, groupId);
 		}
 
+		_validateDisplayPageTemplateFolder(layoutPageTemplateCollection);
+
 		long parentLayoutPageTemplateCollectionId =
 			DisplayPageTemplateFolderUtil.
 				getParentLayoutPageTemplateCollectionId(
@@ -386,10 +393,9 @@ public class DisplayPageTemplateFolderResourceImpl
 		throws Exception {
 
 		LayoutPageTemplateCollection layoutPageTemplateCollection =
-			_layoutPageTemplateCollectionService.
-				getLayoutPageTemplateCollection(
-					externalReferenceCode,
-					getPermissionCheckerGroupId(groupExternalReferenceCode));
+			_getLayoutPageTemplateCollection(
+				externalReferenceCode,
+				getPermissionCheckerGroupId(groupExternalReferenceCode));
 
 		return layoutPageTemplateCollection.getPrimaryKey();
 	}
@@ -454,6 +460,19 @@ public class DisplayPageTemplateFolderResourceImpl
 							document.get(Field.ENTRY_CLASS_PK)))));
 	}
 
+	private LayoutPageTemplateCollection _getLayoutPageTemplateCollection(
+			String externalReferenceCode, long groupId)
+		throws Exception {
+
+		LayoutPageTemplateCollection layoutPageTemplateCollection =
+			_layoutPageTemplateCollectionService.
+				getLayoutPageTemplateCollection(externalReferenceCode, groupId);
+
+		_validateDisplayPageTemplateFolder(layoutPageTemplateCollection);
+
+		return layoutPageTemplateCollection;
+	}
+
 	private DisplayPageTemplateFolder _toDesignLibraryDisplayPageTemplateFolder(
 			String designLibraryExternalReferenceCode,
 			LayoutPageTemplateCollection layoutPageTemplateCollection)
@@ -509,6 +528,18 @@ public class DisplayPageTemplateFolderResourceImpl
 					getLayoutPageTemplateCollectionId(),
 				contextUriInfo, contextUser),
 			layoutPageTemplateCollection);
+	}
+
+	private void _validateDisplayPageTemplateFolder(
+		LayoutPageTemplateCollection layoutPageTemplateCollection) {
+
+		if (layoutPageTemplateCollection.getType() !=
+				LayoutPageTemplateCollectionTypeConstants.DISPLAY_PAGE) {
+
+			throw new IllegalArgumentException(
+				"The display page template folder type does not match the " +
+					"display page type");
+		}
 	}
 
 	private static final EntityModel _entityModel =

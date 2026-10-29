@@ -77,9 +77,13 @@ public class PageTemplateSetResourceImpl
 			String pageTemplateSetExternalReferenceCode)
 		throws Exception {
 
+		LayoutPageTemplateCollection layoutPageTemplateCollection =
+			_getLayoutPageTemplateCollection(
+				pageTemplateSetExternalReferenceCode,
+				_getDesignLibraryGroupId(designLibraryExternalReferenceCode));
+
 		_layoutPageTemplateCollectionService.deleteLayoutPageTemplateCollection(
-			pageTemplateSetExternalReferenceCode,
-			_getDesignLibraryGroupId(designLibraryExternalReferenceCode));
+			layoutPageTemplateCollection.getLayoutPageTemplateCollectionId());
 	}
 
 	@Override
@@ -88,10 +92,14 @@ public class PageTemplateSetResourceImpl
 			String pageTemplateSetExternalReferenceCode)
 		throws Exception {
 
+		LayoutPageTemplateCollection layoutPageTemplateCollection =
+			_getLayoutPageTemplateCollection(
+				pageTemplateSetExternalReferenceCode,
+				GroupUtil.getStagingAwareGroupId(
+					contextCompany.getCompanyId(), siteExternalReferenceCode));
+
 		_layoutPageTemplateCollectionService.deleteLayoutPageTemplateCollection(
-			pageTemplateSetExternalReferenceCode,
-			GroupUtil.getStagingAwareGroupId(
-				contextCompany.getCompanyId(), siteExternalReferenceCode));
+			layoutPageTemplateCollection.getLayoutPageTemplateCollectionId());
 	}
 
 	@Override
@@ -102,11 +110,9 @@ public class PageTemplateSetResourceImpl
 
 		return _toDesignLibraryPageTemplateSet(
 			designLibraryExternalReferenceCode,
-			_layoutPageTemplateCollectionService.
-				getLayoutPageTemplateCollection(
-					pageTemplateSetExternalReferenceCode,
-					_getDesignLibraryGroupId(
-						designLibraryExternalReferenceCode)));
+			_getLayoutPageTemplateCollection(
+				pageTemplateSetExternalReferenceCode,
+				_getDesignLibraryGroupId(designLibraryExternalReferenceCode)));
 	}
 
 	@Override
@@ -281,12 +287,11 @@ public class PageTemplateSetResourceImpl
 		throws Exception {
 
 		return _toPageTemplateSet(
-			_layoutPageTemplateCollectionService.
-				getLayoutPageTemplateCollection(
-					pageTemplateSetExternalReferenceCode,
-					GroupUtil.getGroupId(
-						true, contextCompany.getCompanyId(),
-						siteExternalReferenceCode)));
+			_getLayoutPageTemplateCollection(
+				pageTemplateSetExternalReferenceCode,
+				GroupUtil.getGroupId(
+					true, contextCompany.getCompanyId(),
+					siteExternalReferenceCode)));
 	}
 
 	@Override
@@ -350,6 +355,8 @@ public class PageTemplateSetResourceImpl
 					groupId, contextHttpServletRequest, pageTemplateSet));
 		}
 
+		_validatePageTemplateSet(layoutPageTemplateCollection);
+
 		return _toPageTemplateSet(
 			_layoutPageTemplateCollectionService.
 				updateLayoutPageTemplateCollection(
@@ -365,10 +372,9 @@ public class PageTemplateSetResourceImpl
 		throws Exception {
 
 		LayoutPageTemplateCollection layoutPageTemplateCollection =
-			_layoutPageTemplateCollectionService.
-				getLayoutPageTemplateCollection(
-					externalReferenceCode,
-					getPermissionCheckerGroupId(groupExternalReferenceCode));
+			_getLayoutPageTemplateCollection(
+				externalReferenceCode,
+				getPermissionCheckerGroupId(groupExternalReferenceCode));
 
 		return layoutPageTemplateCollection.getPrimaryKey();
 	}
@@ -388,6 +394,19 @@ public class PageTemplateSetResourceImpl
 		return GroupUtil.getDepotGroupId(
 			contextCompany.getCompanyId(), designLibraryExternalReferenceCode,
 			DepotConstants.TYPE_DESIGN_LIBRARY);
+	}
+
+	private LayoutPageTemplateCollection _getLayoutPageTemplateCollection(
+			String externalReferenceCode, long groupId)
+		throws Exception {
+
+		LayoutPageTemplateCollection layoutPageTemplateCollection =
+			_layoutPageTemplateCollectionService.
+				getLayoutPageTemplateCollection(externalReferenceCode, groupId);
+
+		_validatePageTemplateSet(layoutPageTemplateCollection);
+
+		return layoutPageTemplateCollection;
 	}
 
 	private Page<PageTemplateSet> _getPageTemplateSetsPage(
@@ -478,6 +497,17 @@ public class PageTemplateSetResourceImpl
 					getLayoutPageTemplateCollectionId(),
 				contextUriInfo, contextUser),
 			layoutPageTemplateCollection);
+	}
+
+	private void _validatePageTemplateSet(
+		LayoutPageTemplateCollection layoutPageTemplateCollection) {
+
+		if (layoutPageTemplateCollection.getType() !=
+				LayoutPageTemplateCollectionTypeConstants.BASIC) {
+
+			throw new IllegalArgumentException(
+				"The page template set must be of type basic");
+		}
 	}
 
 	private static final EntityModel _entityModel =
