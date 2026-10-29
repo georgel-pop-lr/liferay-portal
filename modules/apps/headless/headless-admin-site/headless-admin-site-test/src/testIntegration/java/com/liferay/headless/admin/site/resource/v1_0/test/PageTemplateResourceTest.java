@@ -26,6 +26,7 @@ import com.liferay.headless.admin.site.client.dto.v1_0.WidgetPageTemplate;
 import com.liferay.headless.admin.site.client.dto.v1_0.WidgetPageTemplateSettings;
 import com.liferay.headless.admin.site.client.http.HttpInvoker;
 import com.liferay.headless.admin.site.client.pagination.Page;
+import com.liferay.headless.admin.site.client.permission.Permission;
 import com.liferay.headless.admin.site.client.problem.Problem;
 import com.liferay.headless.admin.site.client.resource.v1_0.PageTemplateResource;
 import com.liferay.headless.admin.site.resource.v1_0.test.util.AssetTestUtil;
@@ -459,6 +460,15 @@ public class PageTemplateResourceTest extends BasePageTemplateResourceTestCase {
 
 		_testPutSitePageTemplateWithLocalStaging(
 			contentPageTemplate, widgetPageTemplate);
+	}
+
+	@Override
+	@Test
+	@TestInfo("LPD-112571")
+	public void testPutSitePageTemplatePermissionsPage() throws Exception {
+		super.testPutSitePageTemplatePermissionsPage();
+
+		_testPutSitePageTemplatePermissionsPageWithDisplayPageTemplateExternalReferenceCodeProblemException();
 	}
 
 	@Override
@@ -2160,6 +2170,21 @@ public class PageTemplateResourceTest extends BasePageTemplateResourceTestCase {
 			_getUpdatedContentPageTemplate(
 				testGroup, contentPageTemplate.getExternalReferenceCode()),
 			testGroup.getExternalReferenceCode());
+	}
+
+	private void _testPutSitePageTemplatePermissionsPageWithDisplayPageTemplateExternalReferenceCodeProblemException()
+		throws Exception {
+
+		LayoutPageTemplateEntry layoutPageTemplateEntry =
+			DisplayPageTemplateTestUtil.addDisplayPageTemplate(
+				testGroup.getGroupId());
+
+		_assertProblemException(
+			"BAD_REQUEST", "The page template must be of type basic or widget",
+			() -> pageTemplateResource.putSitePageTemplatePermissionsPage(
+				testGroup.getExternalReferenceCode(),
+				layoutPageTemplateEntry.getExternalReferenceCode(),
+				new Permission[0]));
 	}
 
 	private void _testPutSitePageTemplateWidgetPageTemplate(

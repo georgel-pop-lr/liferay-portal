@@ -576,6 +576,15 @@ public class MasterPageResourceTest extends BaseMasterPageResourceTestCase {
 	}
 
 	@Override
+	@Test
+	@TestInfo("LPD-112571")
+	public void testPutSiteMasterPagePermissionsPage() throws Exception {
+		super.testPutSiteMasterPagePermissionsPage();
+
+		_testPutSiteMasterPagePermissionsPageWithDisplayPageTemplateExternalReferenceCodeProblemException();
+	}
+
+	@Override
 	protected String[] getAdditionalAssertFieldNames() {
 		return new String[] {
 			"externalReferenceCode", "keywords", "name",
@@ -2357,6 +2366,22 @@ public class MasterPageResourceTest extends BaseMasterPageResourceTestCase {
 
 		assertEquals(masterPage, putMasterPage);
 		assertValid(putMasterPage);
+	}
+
+	private void _testPutSiteMasterPagePermissionsPageWithDisplayPageTemplateExternalReferenceCodeProblemException()
+		throws Exception {
+
+		LayoutPageTemplateEntry layoutPageTemplateEntry =
+			DisplayPageTemplateTestUtil.addDisplayPageTemplate(
+				testGroup.getGroupId());
+
+		_assertProblemException(
+			"BAD_REQUEST",
+			"The external reference code does not point to a master page",
+			() -> masterPageResource.putSiteMasterPagePermissionsPage(
+				testGroup.getExternalReferenceCode(),
+				layoutPageTemplateEntry.getExternalReferenceCode(),
+				new Permission[0]));
 	}
 
 	private void _testPutSiteMasterPageWithDisplayPageTemplateExternalReferenceCodeProblemException()

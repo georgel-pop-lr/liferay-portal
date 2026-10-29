@@ -819,6 +819,17 @@ public class DisplayPageTemplateResourceTest
 	}
 
 	@Override
+	@Test
+	@TestInfo("LPD-112571")
+	public void testPutSiteDisplayPageTemplatePermissionsPage()
+		throws Exception {
+
+		super.testPutSiteDisplayPageTemplatePermissionsPage();
+
+		_testPutSiteDisplayPageTemplatePermissionsPageWithPageTemplateExternalReferenceCodeProblemException();
+	}
+
+	@Override
 	protected String[] getAdditionalAssertFieldNames() {
 		return new String[] {
 			"displayPageTemplateSettings", "externalReferenceCode",
@@ -3098,6 +3109,26 @@ public class DisplayPageTemplateResourceTest
 				putDisplayPageTemplate);
 
 		Assert.assertTrue(putDisplayPageTemplate.getMarkedAsDefault());
+	}
+
+	private void _testPutSiteDisplayPageTemplatePermissionsPageWithPageTemplateExternalReferenceCodeProblemException()
+		throws Exception {
+
+		LayoutPageTemplateEntry layoutPageTemplateEntry =
+			LayoutPageTemplateEntryTestUtil.getBasicLayoutPageTemplateEntry(
+				ServiceContextTestUtil.getServiceContext(
+					testGroup.getGroupId(), TestPropsValues.getUserId()));
+
+		_assertProblemException(
+			"BAD_REQUEST",
+			"The display page template type does not match the display page " +
+				"type",
+			() ->
+				displayPageTemplateResource.
+					putSiteDisplayPageTemplatePermissionsPage(
+						testGroup.getExternalReferenceCode(),
+						layoutPageTemplateEntry.getExternalReferenceCode(),
+						new Permission[0]));
 	}
 
 	private void _testPutSiteDisplayPageTemplateSettings() throws Exception {
