@@ -597,7 +597,7 @@ public class MasterPageResourceTest extends BaseMasterPageResourceTestCase {
 
 	@Override
 	@Test
-	@TestInfo({"LPD-86817", "LPD-92443", "LPD-112209"})
+	@TestInfo({"LPD-86817", "LPD-92443", "LPD-112209", "LPD-112571"})
 	public void testPutSiteMasterPage() throws Exception {
 		_testPutSiteMasterPage(randomMasterPage());
 
@@ -614,6 +614,7 @@ public class MasterPageResourceTest extends BaseMasterPageResourceTestCase {
 				null, masterPage.getExternalReferenceCode(),
 				fileEntry.getExternalReferenceCode(), thumbnailURL));
 
+		_testPutSiteMasterPageWithDisplayPageTemplateExternalReferenceCodeProblemException();
 		_testPutSiteMasterPageWithDropZonePageElement();
 		_testPutSiteMasterPageWithExternalReferenceCode();
 		_testPutSiteMasterPageWithPageSpecifications();
@@ -2368,6 +2369,30 @@ public class MasterPageResourceTest extends BaseMasterPageResourceTestCase {
 
 		assertEquals(masterPage, putMasterPage);
 		assertValid(putMasterPage);
+	}
+
+	private void _testPutSiteMasterPageWithDisplayPageTemplateExternalReferenceCodeProblemException()
+		throws Exception {
+
+		LayoutPageTemplateEntry layoutPageTemplateEntry =
+			DisplayPageTemplateTestUtil.addDisplayPageTemplate(
+				testGroup.getGroupId());
+
+		_assertProblemException(
+			"BAD_REQUEST",
+			"The external reference code does not point to a master page",
+			() -> masterPageResource.putSiteMasterPage(
+				testGroup.getExternalReferenceCode(),
+				layoutPageTemplateEntry.getExternalReferenceCode(),
+				randomMasterPage()));
+
+		LayoutPageTemplateEntry persistedLayoutPageTemplateEntry =
+			_layoutPageTemplateEntryLocalService.getLayoutPageTemplateEntry(
+				layoutPageTemplateEntry.getLayoutPageTemplateEntryId());
+
+		Assert.assertEquals(
+			layoutPageTemplateEntry.getName(),
+			persistedLayoutPageTemplateEntry.getName());
 	}
 
 	private void _testPutSiteMasterPageWithDropZonePageElement()

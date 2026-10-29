@@ -505,7 +505,7 @@ public class PageTemplateResourceTest extends BasePageTemplateResourceTestCase {
 
 	@Override
 	@Test
-	@TestInfo({"LPD-92443", "LPD-112209"})
+	@TestInfo({"LPD-92443", "LPD-112209", "LPD-112571"})
 	public void testPutSitePageTemplate() throws Exception {
 		ContentPageTemplate contentPageTemplate = _getContentPageTemplate(
 			testGroup);
@@ -561,6 +561,9 @@ public class PageTemplateResourceTest extends BasePageTemplateResourceTestCase {
 				putWidgetPageTemplate.getExternalReferenceCode(),
 				putWidgetPageTemplate));
 
+		_testPutSitePageTemplateWithCompanyGroup();
+		_testPutSitePageTemplateWithDepotEntry();
+		_testPutSitePageTemplateWithDisplayPageTemplateExternalReferenceCodeProblemException();
 		_testPutSitePageTemplateWithExternalReferenceCode();
 		_testPutSitePageTemplateWithPageSpecifications();
 		_testPutSitePageTemplateWithPageTemplateSet();
@@ -2352,6 +2355,99 @@ public class PageTemplateResourceTest extends BasePageTemplateResourceTestCase {
 
 		_layoutPageTemplateEntryLocalService.deleteLayoutPageTemplateEntry(
 			putPageTemplate.getExternalReferenceCode(), testGroup.getGroupId());
+	}
+
+	private void
+			_testPutSitePageTemplateWidgetPageTemplateWithoutPageTemplateSettings(
+				WidgetPageTemplate widgetPageTemplate)
+		throws Exception {
+
+		WidgetPageTemplate expectedWidgetPageTemplate =
+			_getUpdatedWidgetPageTemplate(
+				testGroup, widgetPageTemplate.getExternalReferenceCode());
+		WidgetPageTemplate putWidgetPageTemplate = new WidgetPageTemplate();
+
+		BeanTestUtil.copyProperties(
+			expectedWidgetPageTemplate, putWidgetPageTemplate);
+
+		expectedWidgetPageTemplate.setPageTemplateSettings(
+			() -> new WidgetPageTemplateSettings() {
+				{
+					setLayoutTemplateId(PropsValues.DEFAULT_LAYOUT_TEMPLATE_ID);
+					setNavigationSettings(
+						new NavigationSettings() {
+							{
+								setTargetType(TargetType.SPECIFIC_FRAME);
+							}
+						});
+					setType(Type.WIDGET_PAGE_TEMPLATE_SETTINGS);
+				}
+			});
+
+		putWidgetPageTemplate.setPageTemplateSettings(() -> null);
+
+		assertEquals(
+			expectedWidgetPageTemplate,
+			pageTemplateResource.putSitePageTemplate(
+				testGroup.getExternalReferenceCode(),
+				putWidgetPageTemplate.getExternalReferenceCode(),
+				putWidgetPageTemplate));
+	}
+
+	private void _testPutSitePageTemplateWithCompanyGroup() throws Exception {
+		_withCompanyGroupWidgetPageTemplate(
+			(group, widgetPageTemplate) -> {
+				_testPutSitePageTemplateWidgetPageTemplate(
+					group, widgetPageTemplate);
+
+				_assertProblemException(
+					"BAD_REQUEST", null,
+					() -> {
+						ContentPageTemplate contentPageTemplate =
+							_getContentPageTemplate(group);
+
+						pageTemplateResource.putSitePageTemplate(
+							group.getExternalReferenceCode(),
+							contentPageTemplate.getExternalReferenceCode(),
+							contentPageTemplate);
+					});
+			});
+	}
+
+	private void _testPutSitePageTemplateWithDepotEntry() throws Exception {
+		_withDepotEntry(
+			group -> _assertProblemException(
+				"BAD_REQUEST", null,
+				() -> {
+					PageTemplate pageTemplate = _getPageTemplate(group);
+
+					pageTemplateResource.putSitePageTemplate(
+						group.getExternalReferenceCode(),
+						pageTemplate.getExternalReferenceCode(), pageTemplate);
+				}));
+	}
+
+	private void _testPutSitePageTemplateWithDisplayPageTemplateExternalReferenceCodeProblemException()
+		throws Exception {
+
+		LayoutPageTemplateEntry layoutPageTemplateEntry =
+			DisplayPageTemplateTestUtil.addDisplayPageTemplate(
+				testGroup.getGroupId());
+
+		_assertProblemException(
+			"BAD_REQUEST", "The page template must be of type basic or widget",
+			() -> pageTemplateResource.putSitePageTemplate(
+				testGroup.getExternalReferenceCode(),
+				layoutPageTemplateEntry.getExternalReferenceCode(),
+				randomPageTemplate()));
+
+		LayoutPageTemplateEntry persistedLayoutPageTemplateEntry =
+			_layoutPageTemplateEntryLocalService.getLayoutPageTemplateEntry(
+				layoutPageTemplateEntry.getLayoutPageTemplateEntryId());
+
+		Assert.assertEquals(
+			layoutPageTemplateEntry.getName(),
+			persistedLayoutPageTemplateEntry.getName());
 	}
 
 	private void _testPutSitePageTemplateWithExternalReferenceCode()
