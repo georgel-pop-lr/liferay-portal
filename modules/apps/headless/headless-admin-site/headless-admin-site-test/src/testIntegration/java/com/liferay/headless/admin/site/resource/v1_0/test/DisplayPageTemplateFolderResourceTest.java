@@ -117,6 +117,7 @@ public class DisplayPageTemplateFolderResourceTest
 
 	@Override
 	@Test
+	@TestInfo("LPD-112571")
 	public void testDeleteSiteDisplayPageTemplateFolder() throws Exception {
 		DisplayPageTemplateFolder postDisplayPageTemplateFolder =
 			testGetSiteDisplayPageTemplateFoldersPage_addDisplayPageTemplateFolder(
@@ -148,6 +149,9 @@ public class DisplayPageTemplateFolderResourceTest
 						irrelevantGroup.getExternalReferenceCode(),
 						liveGroupDisplayPageTemplateFolder.
 							getExternalReferenceCode()));
+
+		_testDeleteSiteDisplayPageTemplateFolderWithLocalStaging();
+		_testDeleteSiteDisplayPageTemplateFolderWithPageTemplateSetExternalReferenceCodeProblemException();
 	}
 
 	@Override
@@ -225,10 +229,12 @@ public class DisplayPageTemplateFolderResourceTest
 		super.testGetDesignLibraryDisplayPageTemplateFoldersPage();
 	}
 
-	@Ignore
 	@Override
 	@Test
+	@TestInfo("LPD-112571")
 	public void testGetSiteDisplayPageTemplateFolder() throws Exception {
+		_testGetSiteDisplayPageTemplateFolderWithPageTemplateSetExternalReferenceCodeProblemException();
+
 		DisplayPageTemplateFolder postDisplayPageTemplateFolder =
 			testGetSiteDisplayPageTemplateFoldersPage_addDisplayPageTemplateFolder(
 				testGroup.getExternalReferenceCode(),
@@ -462,7 +468,7 @@ public class DisplayPageTemplateFolderResourceTest
 
 	@Override
 	@Test
-	@TestInfo("LPD-112209")
+	@TestInfo({"LPD-112209", "LPD-112571"})
 	public void testPutSiteDisplayPageTemplateFolder() throws Exception {
 		DisplayPageTemplateFolder displayPageTemplateFolder =
 			_testPutSiteDisplayPageTemplateFolder(
@@ -470,6 +476,7 @@ public class DisplayPageTemplateFolderResourceTest
 
 		_assertNoParentDisplayPageTemplateFolder(displayPageTemplateFolder);
 
+		_testPutSiteDisplayPageTemplateFolderWithPageTemplateSetExternalReferenceCodeProblemException();
 		_testPutSiteDisplayPageTemplateFolderWithExternalReferenceCode();
 		_testPutSiteDisplayPageTemplateFolderWithParentDisplayPageTemplateFolder();
 
@@ -891,6 +898,107 @@ public class DisplayPageTemplateFolderResourceTest
 						RandomTestUtil.randomString()));
 	}
 
+	private void _testDeleteSiteDisplayPageTemplateFolderWithLocalStaging()
+		throws Exception {
+
+		DisplayPageTemplateFolder displayPageTemplateFolder =
+			testGetSiteDisplayPageTemplateFoldersPage_addDisplayPageTemplateFolder(
+				irrelevantGroup.getExternalReferenceCode(),
+				randomDisplayPageTemplateFolder());
+
+		_enableLocalStaging(irrelevantGroup);
+
+		_assertProblemException(
+			"BAD_REQUEST", null,
+			() ->
+				displayPageTemplateFolderResource.
+					deleteSiteDisplayPageTemplateFolder(
+						irrelevantGroup.getExternalReferenceCode(),
+						displayPageTemplateFolder.getExternalReferenceCode()));
+	}
+
+	private void _testDeleteSiteDisplayPageTemplateFolderWithPageTemplateSetExternalReferenceCodeProblemException()
+		throws Exception {
+
+		LayoutPageTemplateCollection layoutPageTemplateCollection =
+			LayoutPageTemplateTestUtil.addLayoutPageTemplateCollection(
+				testGroup.getGroupId(),
+				LayoutPageTemplateCollectionTypeConstants.BASIC);
+
+		_assertProblemException(
+			"BAD_REQUEST",
+			"The display page template folder type does not match the " +
+				"display page type",
+			() ->
+				displayPageTemplateFolderResource.
+					deleteSiteDisplayPageTemplateFolder(
+						testGroup.getExternalReferenceCode(),
+						layoutPageTemplateCollection.
+							getExternalReferenceCode()));
+
+		Assert.assertNotNull(
+			_layoutPageTemplateCollectionLocalService.
+				fetchLayoutPageTemplateCollection(
+					layoutPageTemplateCollection.
+						getLayoutPageTemplateCollectionId()));
+	}
+
+	private void _testGetSiteDisplayPageTemplateFolderWithLocalStaging(
+			DisplayPageTemplateFolder displayPageTemplateFolder)
+		throws Exception {
+
+		_enableLocalStaging();
+
+		assertEquals(
+			displayPageTemplateFolder,
+			displayPageTemplateFolderResource.getSiteDisplayPageTemplateFolder(
+				testGroup.getExternalReferenceCode(),
+				displayPageTemplateFolder.getExternalReferenceCode()));
+	}
+
+	private void _testGetSiteDisplayPageTemplateFolderWithPageTemplateSetExternalReferenceCodeProblemException()
+		throws Exception {
+
+		LayoutPageTemplateCollection layoutPageTemplateCollection =
+			LayoutPageTemplateTestUtil.addLayoutPageTemplateCollection(
+				testGroup.getGroupId(),
+				LayoutPageTemplateCollectionTypeConstants.BASIC);
+
+		_assertProblemException(
+			"BAD_REQUEST",
+			"The display page template folder type does not match the " +
+				"display page type",
+			() ->
+				displayPageTemplateFolderResource.
+					getSiteDisplayPageTemplateFolder(
+						testGroup.getExternalReferenceCode(),
+						layoutPageTemplateCollection.
+							getExternalReferenceCode()));
+	}
+
+	private void
+			_testGetSiteDisplayPageTemplateFolderWithParentDisplayPageTemplateFolder(
+				DisplayPageTemplateFolder displayPageTemplateFolder)
+		throws Exception {
+
+		LayoutPageTemplateCollection layoutPageTemplateCollection =
+			_layoutPageTemplateCollectionService.
+				getLayoutPageTemplateCollection(
+					displayPageTemplateFolder.getExternalReferenceCode(),
+					testGroup.getGroupId());
+		List<LayoutPageTemplateCollection> parentLayoutPageTemplateCollections =
+			new ArrayList<>();
+
+		_assertParentDisplayPageTemplateFolder(
+			_layoutPageTemplateCollectionService.
+				moveLayoutPageTemplateCollection(
+					layoutPageTemplateCollection.
+						getLayoutPageTemplateCollectionId(),
+					_getParentLayoutPageTemplateCollectionId(
+						5, parentLayoutPageTemplateCollections)),
+			parentLayoutPageTemplateCollections);
+	}
+
 	private void _testPatchSiteDisplayPageTemplateFolder(
 			String displayPageTemplateFolderExternalReferenceCode,
 			String parentDisplayPageTemplateFolderExternalReferenceCode)
@@ -1107,6 +1215,56 @@ public class DisplayPageTemplateFolderResourceTest
 						testGroup.getExternalReferenceCode(),
 						RandomTestUtil.randomString(),
 						randomDisplayPageTemplateFolder()));
+	}
+
+	private void _testPutSiteDisplayPageTemplateFolderWithLocalStaging()
+		throws Exception {
+
+		DisplayPageTemplateFolder displayPageTemplateFolder =
+			testGetSiteDisplayPageTemplateFoldersPage_addDisplayPageTemplateFolder(
+				testGroup.getExternalReferenceCode(),
+				randomDisplayPageTemplateFolder());
+
+		_enableLocalStaging();
+
+		_assertProblemException(
+			"BAD_REQUEST", null,
+			() ->
+				displayPageTemplateFolderResource.
+					putSiteDisplayPageTemplateFolder(
+						testGroup.getExternalReferenceCode(),
+						displayPageTemplateFolder.getExternalReferenceCode(),
+						displayPageTemplateFolder));
+	}
+
+	private void _testPutSiteDisplayPageTemplateFolderWithPageTemplateSetExternalReferenceCodeProblemException()
+		throws Exception {
+
+		LayoutPageTemplateCollection layoutPageTemplateCollection =
+			LayoutPageTemplateTestUtil.addLayoutPageTemplateCollection(
+				testGroup.getGroupId(),
+				LayoutPageTemplateCollectionTypeConstants.BASIC);
+
+		_assertProblemException(
+			"BAD_REQUEST",
+			"The display page template folder type does not match the " +
+				"display page type",
+			() ->
+				displayPageTemplateFolderResource.
+					putSiteDisplayPageTemplateFolder(
+						testGroup.getExternalReferenceCode(),
+						layoutPageTemplateCollection.getExternalReferenceCode(),
+						randomDisplayPageTemplateFolder()));
+
+		LayoutPageTemplateCollection persistedLayoutPageTemplateCollection =
+			_layoutPageTemplateCollectionLocalService.
+				getLayoutPageTemplateCollection(
+					layoutPageTemplateCollection.
+						getLayoutPageTemplateCollectionId());
+
+		Assert.assertEquals(
+			layoutPageTemplateCollection.getName(),
+			persistedLayoutPageTemplateCollection.getName());
 	}
 
 	private void _testPutSiteDisplayPageTemplateFolderWithParentDisplayPageTemplateFolder()

@@ -118,6 +118,7 @@ public class PageTemplateSetResourceTest
 
 	@Override
 	@Test
+	@TestInfo("LPD-112571")
 	public void testDeleteSitePageTemplateSet() throws Exception {
 		PageTemplateSet pageTemplateSet =
 			testGetSitePageTemplateSetsPage_addPageTemplateSet(
@@ -145,6 +146,9 @@ public class PageTemplateSetResourceTest
 			() -> pageTemplateSetResource.deleteSitePageTemplateSet(
 				irrelevantGroup.getExternalReferenceCode(),
 				liveGroupPageTemplateSet.getExternalReferenceCode()));
+
+		_testDeleteSitePageTemplateSetWithDisplayPageTemplateFolderExternalReferenceCodeProblemException();
+		_testDeleteSitePageTemplateSetWithLocalStaging();
 	}
 
 	@Override
@@ -195,7 +199,10 @@ public class PageTemplateSetResourceTest
 
 	@Override
 	@Test
+	@TestInfo("LPD-112571")
 	public void testGetSitePageTemplateSet() throws Exception {
+		_testGetSitePageTemplateSetWithDisplayPageTemplateFolderExternalReferenceCodeProblemException();
+
 		PageTemplateSet pageTemplateSet =
 			testGetSitePageTemplateSetsPage_addPageTemplateSet(
 				testGroup.getExternalReferenceCode(), randomPageTemplateSet());
@@ -439,7 +446,7 @@ public class PageTemplateSetResourceTest
 
 	@Override
 	@Test
-	@TestInfo("LPD-112209")
+	@TestInfo({"LPD-112209", "LPD-112571"})
 	public void testPutSitePageTemplateSet() throws Exception {
 		PageTemplateSet pageTemplateSet = randomPageTemplateSet();
 
@@ -451,6 +458,7 @@ public class PageTemplateSetResourceTest
 		assertEquals(pageTemplateSet, putPageTemplateSet);
 		assertValid(putPageTemplateSet);
 
+		_testPutSitePageTemplateSetWithDisplayPageTemplateFolderExternalReferenceCodeProblemException();
 		_testPutSitePageTemplateSetWithExternalReferenceCode();
 		_testPutSitePageTemplateSetWithLocalStaging();
 	}
@@ -743,6 +751,44 @@ public class PageTemplateSetResourceTest
 				RandomTestUtil.randomString()));
 	}
 
+	private void _testDeleteSitePageTemplateSetWithDisplayPageTemplateFolderExternalReferenceCodeProblemException()
+		throws Exception {
+
+		LayoutPageTemplateCollection layoutPageTemplateCollection =
+			LayoutPageTemplateTestUtil.addLayoutPageTemplateCollection(
+				testGroup.getGroupId(),
+				LayoutPageTemplateCollectionTypeConstants.DISPLAY_PAGE);
+
+		_assertProblemException(
+			"BAD_REQUEST", "The page template set must be of type basic",
+			() -> pageTemplateSetResource.deleteSitePageTemplateSet(
+				testGroup.getExternalReferenceCode(),
+				layoutPageTemplateCollection.getExternalReferenceCode()));
+
+		Assert.assertNotNull(
+			_layoutPageTemplateCollectionLocalService.
+				fetchLayoutPageTemplateCollection(
+					layoutPageTemplateCollection.
+						getLayoutPageTemplateCollectionId()));
+	}
+
+	private void _testDeleteSitePageTemplateSetWithLocalStaging()
+		throws Exception {
+
+		PageTemplateSet pageTemplateSet =
+			testGetSitePageTemplateSetsPage_addPageTemplateSet(
+				irrelevantGroup.getExternalReferenceCode(),
+				randomPageTemplateSet());
+
+		_enableLocalStaging(irrelevantGroup);
+
+		_assertProblemException(
+			"BAD_REQUEST", null,
+			() -> pageTemplateSetResource.deleteSitePageTemplateSet(
+				irrelevantGroup.getExternalReferenceCode(),
+				pageTemplateSet.getExternalReferenceCode()));
+	}
+
 	private void _testGetDesignLibraryPageTemplateSetActions()
 		throws Exception {
 
@@ -851,6 +897,21 @@ public class PageTemplateSetResourceTest
 		assertValid(getPageTemplateSet);
 	}
 
+	private void _testGetSitePageTemplateSetWithDisplayPageTemplateFolderExternalReferenceCodeProblemException()
+		throws Exception {
+
+		LayoutPageTemplateCollection layoutPageTemplateCollection =
+			LayoutPageTemplateTestUtil.addLayoutPageTemplateCollection(
+				testGroup.getGroupId(),
+				LayoutPageTemplateCollectionTypeConstants.DISPLAY_PAGE);
+
+		_assertProblemException(
+			"BAD_REQUEST", "The page template set must be of type basic",
+			() -> pageTemplateSetResource.getSitePageTemplateSet(
+				testGroup.getExternalReferenceCode(),
+				layoutPageTemplateCollection.getExternalReferenceCode()));
+	}
+
 	private PageTemplateSet _testPostSitePageTemplateSet(
 			PageTemplateSet pageTemplateSet)
 		throws Exception {
@@ -904,6 +965,44 @@ public class PageTemplateSetResourceTest
 					layoutPageTemplateCollection.
 						getLayoutPageTemplateCollectionId()),
 				role.getRoleId(), ActionKeys.VIEW));
+	}
+
+	private void _testPutSitePageTemplateSet() throws Exception {
+		PageTemplateSet pageTemplateSet = randomPageTemplateSet();
+
+		PageTemplateSet putPageTemplateSet =
+			pageTemplateSetResource.putSitePageTemplateSet(
+				testGroup.getExternalReferenceCode(),
+				pageTemplateSet.getExternalReferenceCode(), pageTemplateSet);
+
+		assertEquals(pageTemplateSet, putPageTemplateSet);
+		assertValid(putPageTemplateSet);
+	}
+
+	private void _testPutSitePageTemplateSetWithDisplayPageTemplateFolderExternalReferenceCodeProblemException()
+		throws Exception {
+
+		LayoutPageTemplateCollection layoutPageTemplateCollection =
+			LayoutPageTemplateTestUtil.addLayoutPageTemplateCollection(
+				testGroup.getGroupId(),
+				LayoutPageTemplateCollectionTypeConstants.DISPLAY_PAGE);
+
+		_assertProblemException(
+			"BAD_REQUEST", "The page template set must be of type basic",
+			() -> pageTemplateSetResource.putSitePageTemplateSet(
+				testGroup.getExternalReferenceCode(),
+				layoutPageTemplateCollection.getExternalReferenceCode(),
+				randomPageTemplateSet()));
+
+		LayoutPageTemplateCollection persistedLayoutPageTemplateCollection =
+			_layoutPageTemplateCollectionLocalService.
+				getLayoutPageTemplateCollection(
+					layoutPageTemplateCollection.
+						getLayoutPageTemplateCollectionId());
+
+		Assert.assertEquals(
+			layoutPageTemplateCollection.getName(),
+			persistedLayoutPageTemplateCollection.getName());
 	}
 
 	private void _testPutSitePageTemplateSetWithExternalReferenceCode()
