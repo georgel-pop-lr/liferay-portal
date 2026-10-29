@@ -4,6 +4,7 @@
  */
 
 import ClayButton from '@clayui/button';
+import ClayLoadingIndicator from '@clayui/loading-indicator';
 import ClayModal from '@clayui/modal';
 import React from 'react';
 
@@ -62,15 +63,16 @@ export default function AddDisplayPageTemplateDesignLibraryModalContent({
 						</ClayButton>
 
 						<ClayButton
+							disabled={loading}
 							displayType="primary"
 							onClick={handleSubmit}
 						>
 							{loading && (
 								<span className="inline-item inline-item-before">
-									<span
-										aria-hidden="true"
-										className="loading-animation"
-									></span>
+									<ClayLoadingIndicator
+										displayType="secondary"
+										size="sm"
+									/>
 								</span>
 							)}
 
