@@ -721,10 +721,9 @@ public class DisplayPageTemplateResourceImpl
 		throws Exception {
 
 		LayoutPageTemplateEntry layoutPageTemplateEntry =
-			_layoutPageTemplateEntryService.
-				getLayoutPageTemplateEntryByExternalReferenceCode(
-					externalReferenceCode,
-					getPermissionCheckerGroupId(groupExternalReferenceCode));
+			_getLayoutPageTemplateEntry(
+				externalReferenceCode,
+				getPermissionCheckerGroupId(groupExternalReferenceCode));
 
 		return layoutPageTemplateEntry.getPrimaryKey();
 	}
