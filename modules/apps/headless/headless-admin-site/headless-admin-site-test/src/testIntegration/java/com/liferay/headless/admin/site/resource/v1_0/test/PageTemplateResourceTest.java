@@ -447,6 +447,7 @@ public class PageTemplateResourceTest extends BasePageTemplateResourceTestCase {
 		_testPutSitePageTemplateWidgetPageTemplateWithoutPageTemplateSettings(
 			widgetPageTemplate);
 
+		_testPutSitePageTemplateContentPageTemplateWithWidgetPageTemplateProblemException();
 		_testPutSitePageTemplateWithCompanyGroup();
 		_testPutSitePageTemplateWithDepotEntry();
 		_testPutSitePageTemplateWithDisplayPageTemplateExternalReferenceCodeProblemException();
@@ -2170,6 +2171,21 @@ public class PageTemplateResourceTest extends BasePageTemplateResourceTestCase {
 			_getUpdatedContentPageTemplate(
 				testGroup, contentPageTemplate.getExternalReferenceCode()),
 			testGroup.getExternalReferenceCode());
+	}
+
+	private void _testPutSitePageTemplateContentPageTemplateWithWidgetPageTemplateProblemException()
+		throws Exception {
+
+		PageTemplate pageTemplate = pageTemplateResource.postSitePageTemplate(
+			testGroup.getExternalReferenceCode(),
+			_getContentPageTemplate(testGroup));
+
+		_assertProblemException(
+			"BAD_REQUEST", "The page template must be of type basic or widget",
+			() -> pageTemplateResource.putSitePageTemplate(
+				testGroup.getExternalReferenceCode(),
+				pageTemplate.getExternalReferenceCode(),
+				_getWidgetPageTemplate(testGroup)));
 	}
 
 	private void _testPutSitePageTemplatePermissionsPageWithDisplayPageTemplateExternalReferenceCodeProblemException()
