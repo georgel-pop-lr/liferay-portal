@@ -119,36 +119,7 @@ public class DisplayPageTemplateFolderResourceTest
 	@Test
 	@TestInfo("LPD-112571")
 	public void testDeleteSiteDisplayPageTemplateFolder() throws Exception {
-		DisplayPageTemplateFolder postDisplayPageTemplateFolder =
-			testGetSiteDisplayPageTemplateFoldersPage_addDisplayPageTemplateFolder(
-				testGroup.getExternalReferenceCode(),
-				randomDisplayPageTemplateFolder());
-
-		displayPageTemplateFolderResource.deleteSiteDisplayPageTemplateFolder(
-			testGroup.getExternalReferenceCode(),
-			postDisplayPageTemplateFolder.getExternalReferenceCode());
-
-		Assert.assertNull(
-			_layoutPageTemplateCollectionService.
-				fetchLayoutPageTemplateCollection(
-					postDisplayPageTemplateFolder.getExternalReferenceCode(),
-					testGroup.getGroupId()));
-
-		DisplayPageTemplateFolder liveGroupDisplayPageTemplateFolder =
-			testGetSiteDisplayPageTemplateFoldersPage_addDisplayPageTemplateFolder(
-				irrelevantGroup.getExternalReferenceCode(),
-				randomDisplayPageTemplateFolder());
-
-		_enableLocalStaging(irrelevantGroup);
-
-		_assertProblemException(
-			"BAD_REQUEST", null,
-			() ->
-				displayPageTemplateFolderResource.
-					deleteSiteDisplayPageTemplateFolder(
-						irrelevantGroup.getExternalReferenceCode(),
-						liveGroupDisplayPageTemplateFolder.
-							getExternalReferenceCode()));
+		super.testDeleteSiteDisplayPageTemplateFolder();
 
 		_testDeleteSiteDisplayPageTemplateFolderWithLocalStaging();
 		_testDeleteSiteDisplayPageTemplateFolderWithPageTemplateSetExternalReferenceCodeProblemException();
@@ -233,47 +204,20 @@ public class DisplayPageTemplateFolderResourceTest
 	@Test
 	@TestInfo("LPD-112571")
 	public void testGetSiteDisplayPageTemplateFolder() throws Exception {
+		super.testGetSiteDisplayPageTemplateFolder();
+
 		_testGetSiteDisplayPageTemplateFolderWithPageTemplateSetExternalReferenceCodeProblemException();
 
-		DisplayPageTemplateFolder postDisplayPageTemplateFolder =
+		DisplayPageTemplateFolder displayPageTemplateFolder =
 			testGetSiteDisplayPageTemplateFoldersPage_addDisplayPageTemplateFolder(
 				testGroup.getExternalReferenceCode(),
 				randomDisplayPageTemplateFolder());
 
-		DisplayPageTemplateFolder getDisplayPageTemplateFolder =
-			displayPageTemplateFolderResource.getSiteDisplayPageTemplateFolder(
-				testGroup.getExternalReferenceCode(),
-				postDisplayPageTemplateFolder.getExternalReferenceCode());
+		_testGetSiteDisplayPageTemplateFolderWithParentDisplayPageTemplateFolder(
+			displayPageTemplateFolder);
 
-		assertEquals(
-			postDisplayPageTemplateFolder, getDisplayPageTemplateFolder);
-		assertValid(getDisplayPageTemplateFolder);
-
-		LayoutPageTemplateCollection layoutPageTemplateCollection =
-			_layoutPageTemplateCollectionService.
-				getLayoutPageTemplateCollection(
-					getDisplayPageTemplateFolder.getExternalReferenceCode(),
-					testGroup.getGroupId());
-
-		List<LayoutPageTemplateCollection> parentLayoutPageTemplateCollections =
-			new ArrayList<>();
-
-		_assertParentDisplayPageTemplateFolder(
-			_layoutPageTemplateCollectionService.
-				moveLayoutPageTemplateCollection(
-					layoutPageTemplateCollection.
-						getLayoutPageTemplateCollectionId(),
-					_getParentLayoutPageTemplateCollectionId(
-						5, parentLayoutPageTemplateCollections)),
-			parentLayoutPageTemplateCollections);
-
-		_enableLocalStaging();
-
-		assertEquals(
-			postDisplayPageTemplateFolder,
-			displayPageTemplateFolderResource.getSiteDisplayPageTemplateFolder(
-				testGroup.getExternalReferenceCode(),
-				postDisplayPageTemplateFolder.getExternalReferenceCode()));
+		_testGetSiteDisplayPageTemplateFolderWithLocalStaging(
+			displayPageTemplateFolder);
 	}
 
 	@Ignore
@@ -470,35 +414,12 @@ public class DisplayPageTemplateFolderResourceTest
 	@Test
 	@TestInfo({"LPD-112209", "LPD-112571"})
 	public void testPutSiteDisplayPageTemplateFolder() throws Exception {
-		DisplayPageTemplateFolder displayPageTemplateFolder =
-			_testPutSiteDisplayPageTemplateFolder(
-				randomDisplayPageTemplateFolder(), null);
-
-		_assertNoParentDisplayPageTemplateFolder(displayPageTemplateFolder);
-
-		_testPutSiteDisplayPageTemplateFolderWithPageTemplateSetExternalReferenceCodeProblemException();
+		_testPutSiteDisplayPageTemplateFolder();
 		_testPutSiteDisplayPageTemplateFolderWithExternalReferenceCode();
+		_testPutSiteDisplayPageTemplateFolderWithPageTemplateSetExternalReferenceCodeProblemException();
 		_testPutSiteDisplayPageTemplateFolderWithParentDisplayPageTemplateFolder();
 
-		DisplayPageTemplateFolder liveGroupDisplayPageTemplateFolder =
-			_testPutSiteDisplayPageTemplateFolder(
-				randomDisplayPageTemplateFolder(),
-				displayPageTemplateFolder.getExternalReferenceCode());
-
-		_assertParentDisplayPageTemplateFolder(
-			liveGroupDisplayPageTemplateFolder, displayPageTemplateFolder);
-
-		_enableLocalStaging();
-
-		_assertProblemException(
-			"BAD_REQUEST", null,
-			() ->
-				displayPageTemplateFolderResource.
-					putSiteDisplayPageTemplateFolder(
-						testGroup.getExternalReferenceCode(),
-						liveGroupDisplayPageTemplateFolder.
-							getExternalReferenceCode(),
-						liveGroupDisplayPageTemplateFolder));
+		_testPutSiteDisplayPageTemplateFolderWithLocalStaging();
 	}
 
 	@Override
@@ -1156,6 +1077,23 @@ public class DisplayPageTemplateFolderResourceTest
 					layoutPageTemplateCollection.
 						getLayoutPageTemplateCollectionId()),
 				role.getRoleId(), ActionKeys.VIEW));
+	}
+
+	private void _testPutSiteDisplayPageTemplateFolder() throws Exception {
+		DisplayPageTemplateFolder parentDisplayPageTemplateFolder =
+			_testPutSiteDisplayPageTemplateFolder(
+				randomDisplayPageTemplateFolder(), null);
+
+		_assertNoParentDisplayPageTemplateFolder(
+			parentDisplayPageTemplateFolder);
+
+		DisplayPageTemplateFolder displayPageTemplateFolder =
+			_testPutSiteDisplayPageTemplateFolder(
+				randomDisplayPageTemplateFolder(),
+				parentDisplayPageTemplateFolder.getExternalReferenceCode());
+
+		_assertParentDisplayPageTemplateFolder(
+			displayPageTemplateFolder, parentDisplayPageTemplateFolder);
 	}
 
 	private DisplayPageTemplateFolder _testPutSiteDisplayPageTemplateFolder(

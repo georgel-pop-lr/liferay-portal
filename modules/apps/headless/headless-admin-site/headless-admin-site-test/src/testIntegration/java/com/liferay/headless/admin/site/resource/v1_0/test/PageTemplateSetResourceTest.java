@@ -120,32 +120,7 @@ public class PageTemplateSetResourceTest
 	@Test
 	@TestInfo("LPD-112571")
 	public void testDeleteSitePageTemplateSet() throws Exception {
-		PageTemplateSet pageTemplateSet =
-			testGetSitePageTemplateSetsPage_addPageTemplateSet(
-				testGroup.getExternalReferenceCode(), randomPageTemplateSet());
-
-		pageTemplateSetResource.deleteSitePageTemplateSet(
-			testGroup.getExternalReferenceCode(),
-			pageTemplateSet.getExternalReferenceCode());
-
-		Assert.assertNull(
-			_layoutPageTemplateCollectionLocalService.
-				fetchLayoutPageTemplateCollectionByExternalReferenceCode(
-					pageTemplateSet.getExternalReferenceCode(),
-					testGroup.getGroupId()));
-
-		PageTemplateSet liveGroupPageTemplateSet =
-			testGetSitePageTemplateSetsPage_addPageTemplateSet(
-				irrelevantGroup.getExternalReferenceCode(),
-				randomPageTemplateSet());
-
-		_enableLocalStaging(irrelevantGroup);
-
-		_assertProblemException(
-			"BAD_REQUEST", null,
-			() -> pageTemplateSetResource.deleteSitePageTemplateSet(
-				irrelevantGroup.getExternalReferenceCode(),
-				liveGroupPageTemplateSet.getExternalReferenceCode()));
+		super.testDeleteSitePageTemplateSet();
 
 		_testDeleteSitePageTemplateSetWithDisplayPageTemplateFolderExternalReferenceCodeProblemException();
 		_testDeleteSitePageTemplateSetWithLocalStaging();
@@ -201,13 +176,13 @@ public class PageTemplateSetResourceTest
 	@Test
 	@TestInfo("LPD-112571")
 	public void testGetSitePageTemplateSet() throws Exception {
+		super.testGetSitePageTemplateSet();
+
 		_testGetSitePageTemplateSetWithDisplayPageTemplateFolderExternalReferenceCodeProblemException();
 
 		PageTemplateSet pageTemplateSet =
 			testGetSitePageTemplateSetsPage_addPageTemplateSet(
 				testGroup.getExternalReferenceCode(), randomPageTemplateSet());
-
-		_testGetSitePageTemplateSet(pageTemplateSet);
 
 		_enableLocalStaging();
 
@@ -448,16 +423,7 @@ public class PageTemplateSetResourceTest
 	@Test
 	@TestInfo({"LPD-112209", "LPD-112571"})
 	public void testPutSitePageTemplateSet() throws Exception {
-		PageTemplateSet pageTemplateSet = randomPageTemplateSet();
-
-		PageTemplateSet putPageTemplateSet =
-			pageTemplateSetResource.putSitePageTemplateSet(
-				testGroup.getExternalReferenceCode(),
-				pageTemplateSet.getExternalReferenceCode(), pageTemplateSet);
-
-		assertEquals(pageTemplateSet, putPageTemplateSet);
-		assertValid(putPageTemplateSet);
-
+		_testPutSitePageTemplateSet();
 		_testPutSitePageTemplateSetWithDisplayPageTemplateFolderExternalReferenceCodeProblemException();
 		_testPutSitePageTemplateSetWithExternalReferenceCode();
 		_testPutSitePageTemplateSetWithLocalStaging();

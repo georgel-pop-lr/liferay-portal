@@ -273,67 +273,15 @@ public class UtilityPageResourceTest extends BaseUtilityPageResourceTestCase {
 			testGroup.getExternalReferenceCode(),
 			layoutUtilityPageEntry.getExternalReferenceCode());
 
-		_testPatchSiteUtilityPage(
-			Boolean.FALSE, utilityPage,
-			new UtilityPage() {
-				{
-					setMarkedAsDefault(Boolean.FALSE);
-				}
-			});
+		_testPatchSiteUtilityPage(utilityPage);
+		_testPatchSiteUtilityPageWithMarkedAsDefault(
+			layoutUtilityPageEntry, utilityPage);
+		_testPatchSiteUtilityPageWithUtilityPageSettings(utilityPage);
 
-		Layout layout = _layoutLocalService.getLayout(
-			layoutUtilityPageEntry.getPlid());
-
-		ContentLayoutTestUtil.publishLayout(layout.fetchDraftLayout(), layout);
-
-		_testPatchSiteUtilityPage(
-			Boolean.TRUE, utilityPage,
-			new UtilityPage() {
-				{
-					setMarkedAsDefault(Boolean.TRUE);
-				}
-			});
-
-		utilityPage.setName(RandomTestUtil::randomString);
-		utilityPage.setUtilityPageSettings(
-			() -> new UtilityPageSettings() {
-				{
-					setSeoSettings(
-						() -> new UtilityPageSEOSettings() {
-							{
-								setDescription_i18n(
-									() -> LocalizedMapUtil.getI18nMap(
-										true,
-										RandomTestUtil.
-											randomLocaleStringMap()));
-								setHtmlTitle_i18n(
-									() -> LocalizedMapUtil.getI18nMap(
-										true,
-										RandomTestUtil.
-											randomLocaleStringMap()));
-							}
-						});
-				}
-			});
-
-		_testPatchSiteUtilityPage(
-			Boolean.TRUE, utilityPage,
-			new UtilityPage() {
-				{
-					setName(utilityPage::getName);
-					setUtilityPageSettings(utilityPage::getUtilityPageSettings);
-				}
-			});
-
+		_testPatchSiteUtilityPageWithNonexistingUtilityPage();
 		_testPatchSiteUtilityPageWithPageSpecifications();
 		_testPatchSiteUtilityPageWithThumbnail();
 		_testPatchSiteUtilityPageWithoutThumbnailURLReference();
-
-		ProblemExceptionTestUtil.assertProblemException(
-			"NOT_FOUND", null,
-			() -> utilityPageResource.patchSiteUtilityPage(
-				testGroup.getExternalReferenceCode(),
-				RandomTestUtil.randomString(), randomUtilityPage()));
 	}
 
 	@Override
@@ -411,37 +359,7 @@ public class UtilityPageResourceTest extends BaseUtilityPageResourceTestCase {
 				ServiceContextTestUtil.getServiceContext(
 					testGroup.getGroupId(), TestPropsValues.getUserId()));
 
-		Layout layout = _layoutLocalService.getLayout(
-			layoutUtilityPageEntry.getPlid());
-
-		Assert.assertFalse(layout.isPublished());
-
-		ProblemExceptionTestUtil.assertProblemException(
-			"BAD_REQUEST",
-			"A utility page must be published before it is marked as the " +
-				"default utility page",
-			() -> _testPutSiteUtilityPage(
-				Boolean.TRUE,
-				_getUtilityPage(
-					null, Boolean.TRUE,
-					layoutUtilityPageEntry.getExternalReferenceCode())));
-
-		ContentLayoutTestUtil.publishLayout(layout.fetchDraftLayout(), layout);
-
-		_testPutSiteUtilityPage(
-			Boolean.FALSE,
-			_getUtilityPage(
-				FileEntryTestUtil.addPreviewFileEntry(
-					testGroup, _portletFileRepository, getClass()),
-				Boolean.FALSE,
-				layoutUtilityPageEntry.getExternalReferenceCode()));
-		_testPutSiteUtilityPage(
-			Boolean.TRUE,
-			_getUtilityPage(
-				FileEntryTestUtil.addPreviewFileEntry(
-					testGroup, _portletFileRepository, getClass()),
-				Boolean.TRUE,
-				layoutUtilityPageEntry.getExternalReferenceCode()));
+		_testPutSiteUtilityPageWithMarkedAsDefault(layoutUtilityPageEntry);
 
 		_testPutSiteUtilityPage(
 			Boolean.FALSE,
@@ -943,6 +861,47 @@ public class UtilityPageResourceTest extends BaseUtilityPageResourceTestCase {
 		Assert.assertEquals(
 			expectedUtilityPage.getThumbnailURLReference(),
 			patchUtilityPage.getThumbnailURLReference());
+	}
+
+	private void _testPatchSiteUtilityPage(UtilityPage utilityPage)
+		throws Exception {
+
+		_testPatchSiteUtilityPage(
+			Boolean.FALSE, utilityPage,
+			new UtilityPage() {
+				{
+					setMarkedAsDefault(Boolean.FALSE);
+				}
+			});
+	}
+
+	private void _testPatchSiteUtilityPageWithMarkedAsDefault(
+			LayoutUtilityPageEntry layoutUtilityPageEntry,
+			UtilityPage utilityPage)
+		throws Exception {
+
+		Layout layout = _layoutLocalService.getLayout(
+			layoutUtilityPageEntry.getPlid());
+
+		ContentLayoutTestUtil.publishLayout(layout.fetchDraftLayout(), layout);
+
+		_testPatchSiteUtilityPage(
+			Boolean.TRUE, utilityPage,
+			new UtilityPage() {
+				{
+					setMarkedAsDefault(Boolean.TRUE);
+				}
+			});
+	}
+
+	private void _testPatchSiteUtilityPageWithNonexistingUtilityPage()
+		throws Exception {
+
+		ProblemExceptionTestUtil.assertProblemException(
+			"NOT_FOUND", null,
+			() -> utilityPageResource.patchSiteUtilityPage(
+				testGroup.getExternalReferenceCode(),
+				RandomTestUtil.randomString(), randomUtilityPage()));
 	}
 
 	private void _testPatchSiteUtilityPageWithPageSpecifications()

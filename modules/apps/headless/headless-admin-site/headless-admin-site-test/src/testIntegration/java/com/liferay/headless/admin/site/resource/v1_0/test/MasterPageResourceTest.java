@@ -356,31 +356,10 @@ public class MasterPageResourceTest extends BaseMasterPageResourceTestCase {
 		_updateLayoutPageTemplateEntryStatus(
 			masterPage.getExternalReferenceCode());
 
-		String thumbnailURL = RandomTestUtil.randomString();
-
-		_testPatchSiteMasterPage(
-			Boolean.TRUE,
-			_getMasterPage(
-				Boolean.TRUE, masterPage.getExternalReferenceCode(), null,
-				thumbnailURL));
-
-		FileEntry fileEntry = FileEntryTestUtil.addPreviewFileEntry(
-			testGroup, _portletFileRepository, getClass());
-
-		_testPatchSiteMasterPage(
-			Boolean.TRUE,
-			_getMasterPage(
-				null, masterPage.getExternalReferenceCode(),
-				fileEntry.getExternalReferenceCode(), thumbnailURL));
-
-		fileEntry = FileEntryTestUtil.addPreviewFileEntry(
-			testGroup, _portletFileRepository, getClass());
-
-		_testPatchSiteMasterPage(
-			Boolean.FALSE,
-			_getMasterPage(
-				Boolean.FALSE, masterPage.getExternalReferenceCode(),
-				fileEntry.getExternalReferenceCode(), thumbnailURL));
+		_testPatchSiteMasterPage(masterPage);
+		_testPatchSiteMasterPageWithThumbnailURLReferenceExternalReferenceCode(
+			masterPage);
+		_testPatchSiteMasterPageWithMarkedAsDefault(masterPage);
 
 		_testPatchSiteMasterPage(
 			Boolean.FALSE,
@@ -388,29 +367,12 @@ public class MasterPageResourceTest extends BaseMasterPageResourceTestCase {
 				Boolean.FALSE, masterPage.getExternalReferenceCode(),
 				StringPool.BLANK, StringPool.BLANK));
 
+		_testPatchSiteMasterPageWithNonexistingMasterPage();
 		_testPatchSiteMasterPageWithPageSpecifications();
 		_testPatchSiteMasterPageWithThumbnail();
 		_testPatchSiteMasterPageWithoutThumbnailURLReference();
 
-		_assertProblemException(
-			"NOT_FOUND", null,
-			() -> masterPageResource.patchSiteMasterPage(
-				testGroup.getExternalReferenceCode(),
-				RandomTestUtil.randomString(), randomMasterPage()));
-
-		MasterPage liveGroupMasterPage = testPostSiteMasterPage_addMasterPage(
-			randomMasterPage());
-
-		_enableLocalStaging();
-
-		_assertProblemException(
-			"BAD_REQUEST", null,
-			() -> masterPageResource.patchSiteMasterPage(
-				testGroup.getExternalReferenceCode(),
-				liveGroupMasterPage.getExternalReferenceCode(),
-				_getMasterPage(
-					null, liveGroupMasterPage.getExternalReferenceCode(), null,
-					thumbnailURL)));
+		_testPatchSiteMasterPageWithLocalStaging(masterPage);
 	}
 
 	@Override
@@ -601,19 +563,6 @@ public class MasterPageResourceTest extends BaseMasterPageResourceTestCase {
 	public void testPutSiteMasterPage() throws Exception {
 		_testPutSiteMasterPage(randomMasterPage());
 
-		MasterPage masterPage = testPostSiteMasterPage_addMasterPage(
-			randomMasterPage());
-
-		FileEntry fileEntry = FileEntryTestUtil.addPreviewFileEntry(
-			testGroup, _portletFileRepository, getClass());
-
-		String thumbnailURL = RandomTestUtil.randomString();
-
-		_testPutSiteMasterPage(
-			_getMasterPage(
-				null, masterPage.getExternalReferenceCode(),
-				fileEntry.getExternalReferenceCode(), thumbnailURL));
-
 		_testPutSiteMasterPageWithDisplayPageTemplateExternalReferenceCodeProblemException();
 		_testPutSiteMasterPageWithDropZonePageElement();
 		_testPutSiteMasterPageWithExternalReferenceCode();
@@ -623,18 +572,7 @@ public class MasterPageResourceTest extends BaseMasterPageResourceTestCase {
 		_testPutSiteMasterPageWithThumbnailURLReferenceFileBase64();
 		_testPutSiteMasterPageWithThumbnailURLReferenceURL();
 
-		_enableLocalStaging();
-
-		_assertStagingGroupMasterPageThumbnail(fileEntry, masterPage);
-
-		_assertProblemException(
-			"BAD_REQUEST", null,
-			() -> masterPageResource.putSiteMasterPage(
-				testGroup.getExternalReferenceCode(),
-				masterPage.getExternalReferenceCode(),
-				_getMasterPage(
-					null, masterPage.getExternalReferenceCode(), null,
-					thumbnailURL)));
+		_testPutSiteMasterPageWithLocalStaging();
 	}
 
 	@Override
@@ -1600,6 +1538,56 @@ public class MasterPageResourceTest extends BaseMasterPageResourceTestCase {
 
 		Assert.assertEquals(
 			expectedMarkedAsDefault, patchMasterPage.getMarkedAsDefault());
+	}
+
+	private void _testPatchSiteMasterPage(MasterPage masterPage)
+		throws Exception {
+
+		_testPatchSiteMasterPage(
+			Boolean.TRUE,
+			_getMasterPage(
+				Boolean.TRUE, masterPage.getExternalReferenceCode(), null,
+				RandomTestUtil.randomString()));
+	}
+
+	private void _testPatchSiteMasterPageWithLocalStaging(MasterPage masterPage)
+		throws Exception {
+
+		_enableLocalStaging();
+
+		_assertProblemException(
+			"BAD_REQUEST", null,
+			() -> masterPageResource.patchSiteMasterPage(
+				testGroup.getExternalReferenceCode(),
+				masterPage.getExternalReferenceCode(),
+				_getMasterPage(
+					null, masterPage.getExternalReferenceCode(), null,
+					RandomTestUtil.randomString())));
+	}
+
+	private void _testPatchSiteMasterPageWithMarkedAsDefault(
+			MasterPage masterPage)
+		throws Exception {
+
+		FileEntry fileEntry = FileEntryTestUtil.addPreviewFileEntry(
+			testGroup, _portletFileRepository, getClass());
+
+		_testPatchSiteMasterPage(
+			Boolean.FALSE,
+			_getMasterPage(
+				Boolean.FALSE, masterPage.getExternalReferenceCode(),
+				fileEntry.getExternalReferenceCode(),
+				RandomTestUtil.randomString()));
+	}
+
+	private void _testPatchSiteMasterPageWithNonexistingMasterPage()
+		throws Exception {
+
+		_assertProblemException(
+			"NOT_FOUND", null,
+			() -> masterPageResource.patchSiteMasterPage(
+				testGroup.getExternalReferenceCode(),
+				RandomTestUtil.randomString(), randomMasterPage()));
 	}
 
 	private void _testPatchSiteMasterPageWithPageSpecifications()
