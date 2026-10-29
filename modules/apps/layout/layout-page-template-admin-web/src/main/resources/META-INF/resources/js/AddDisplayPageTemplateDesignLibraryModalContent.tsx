@@ -3,14 +3,9 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-import ClayButton from '@clayui/button';
-import ClayLoadingIndicator from '@clayui/loading-indicator';
-import ClayModal from '@clayui/modal';
 import React from 'react';
 
-import ContentTypeModalForm from './components/ContentTypeModalForm';
-import {MODAL_TYPES} from './constants/modalTypes';
-import useAddDesignLibraryResource from './hooks/useAddDesignLibraryResource';
+import AddDesignLibraryResourceModalContent from './components/AddDesignLibraryResourceModalContent';
 import {MappingType} from './types/MappingTypes';
 
 interface Props {
@@ -26,61 +21,13 @@ export default function AddDisplayPageTemplateDesignLibraryModalContent({
 	mappingTypes,
 	namespace,
 }: Props) {
-	const {error, formRef, handleSubmit, loading} = useAddDesignLibraryResource(
-		{
-			closeModal,
-			formSubmitURL: addDisplayPageURL,
-			namespace,
-		}
-	);
-
 	return (
-		<>
-			<ClayModal.Header>
-				{Liferay.Language.get('new-display-page-template')}
-			</ClayModal.Header>
-
-			<ClayModal.Body>
-				<ContentTypeModalForm
-					displayPageName=""
-					error={error}
-					formRef={formRef}
-					mappingTypes={mappingTypes}
-					namespace={namespace}
-					onSubmit={handleSubmit}
-					type={MODAL_TYPES.create}
-				/>
-			</ClayModal.Body>
-
-			<ClayModal.Footer
-				last={
-					<ClayButton.Group spaced>
-						<ClayButton
-							displayType="secondary"
-							onClick={closeModal}
-						>
-							{Liferay.Language.get('cancel')}
-						</ClayButton>
-
-						<ClayButton
-							disabled={loading}
-							displayType="primary"
-							onClick={handleSubmit}
-						>
-							{loading && (
-								<span className="inline-item inline-item-before">
-									<ClayLoadingIndicator
-										displayType="secondary"
-										size="sm"
-									/>
-								</span>
-							)}
-
-							{Liferay.Language.get('save')}
-						</ClayButton>
-					</ClayButton.Group>
-				}
-			/>
-		</>
+		<AddDesignLibraryResourceModalContent
+			closeModal={closeModal}
+			formSubmitURL={addDisplayPageURL}
+			mappingTypes={mappingTypes}
+			namespace={namespace}
+			title={Liferay.Language.get('new-display-page-template')}
+		/>
 	);
 }
