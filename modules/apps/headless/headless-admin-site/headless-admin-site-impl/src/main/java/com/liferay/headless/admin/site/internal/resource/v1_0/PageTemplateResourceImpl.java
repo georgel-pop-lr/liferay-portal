@@ -460,14 +460,14 @@ public class PageTemplateResourceImpl
 			return _addPageTemplate(groupId, pageTemplate);
 		}
 
-		if ((Objects.equals(
+		if (!(Objects.equals(
 				layoutPageTemplateEntry.getType(),
 				LayoutPageTemplateEntryTypeConstants.BASIC) &&
-			 !(pageTemplate instanceof ContentPageTemplate)) ||
-			(Objects.equals(
+			  (pageTemplate instanceof ContentPageTemplate)) &&
+			!(Objects.equals(
 				layoutPageTemplateEntry.getType(),
 				LayoutPageTemplateEntryTypeConstants.WIDGET_PAGE) &&
-			 !(pageTemplate instanceof WidgetPageTemplate))) {
+			  (pageTemplate instanceof WidgetPageTemplate))) {
 
 			throw new IllegalArgumentException(
 				"The page template must be of type basic or widget");

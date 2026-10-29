@@ -489,6 +489,8 @@ public class MasterPageResourceImpl
 			return _addMasterPage(groupId, masterPage);
 		}
 
+		_validateMasterPage(layoutPageTemplateEntry);
+
 		ServiceContext serviceContext = _getServiceContext(groupId, masterPage);
 
 		long previewFileEntryId = FileEntryUtil.getPreviewFileEntryId(
