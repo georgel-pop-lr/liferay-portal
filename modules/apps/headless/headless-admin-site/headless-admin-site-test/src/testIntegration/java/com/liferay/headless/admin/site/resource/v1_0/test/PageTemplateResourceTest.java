@@ -412,8 +412,8 @@ public class PageTemplateResourceTest extends BasePageTemplateResourceTestCase {
 			widgetPageTemplate.getExternalReferenceCode());
 
 		layoutPageTemplateEntry =
-			LayoutPageTemplateEntryTestUtil.
-				getDisplayPageLayoutPageTemplateEntry(serviceContext);
+			DisplayPageTemplateTestUtil.addDisplayPageTemplate(
+				testGroup.getGroupId());
 
 		_assertPostSitePageTemplatePageSpecificationProblemException(
 			layoutPageTemplateEntry.getExternalReferenceCode());

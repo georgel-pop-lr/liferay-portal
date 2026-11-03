@@ -517,8 +517,8 @@ public class MasterPageResourceTest extends BaseMasterPageResourceTestCase {
 
 		_assertPostSiteMasterPagePageSpecificationProblemException(
 			"The external reference code does not point to a master page",
-			LayoutPageTemplateEntryTestUtil.
-				getDisplayPageLayoutPageTemplateEntry(serviceContext));
+			DisplayPageTemplateTestUtil.addDisplayPageTemplate(
+				testGroup.getGroupId()));
 
 		_assertProblemException(
 			"NOT_FOUND", null,
