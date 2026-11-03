@@ -467,21 +467,10 @@ public class DisplayPageTemplateResourceImpl
 		throws Exception {
 
 		LayoutPageTemplateEntry layoutPageTemplateEntry =
-			_layoutPageTemplateEntryService.
-				fetchLayoutPageTemplateEntryByExternalReferenceCode(
-					pageTemplateExternalReferenceCode,
-					GroupUtil.getStagingAwareGroupId(
-						contextCompany.getCompanyId(),
-						siteExternalReferenceCode));
-
-		if (!Objects.equals(
-				LayoutPageTemplateEntryTypeConstants.DISPLAY_PAGE,
-				layoutPageTemplateEntry.getType())) {
-
-			throw new IllegalArgumentException(
-				"The display page template type does not match the display " +
-					"page type");
-		}
+			_getLayoutPageTemplateEntry(
+				pageTemplateExternalReferenceCode,
+				GroupUtil.getStagingAwareGroupId(
+					contextCompany.getCompanyId(), siteExternalReferenceCode));
 
 		return (ContentPageSpecification)_pageSpecificationDTOConverter.toDTO(
 			DTOConverterContextUtil.getDTOConverterContext(

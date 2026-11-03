@@ -307,7 +307,7 @@ public class PageTemplateResourceImpl
 
 		LayoutPageTemplateEntry layoutPageTemplateEntry =
 			_layoutPageTemplateEntryService.
-				fetchLayoutPageTemplateEntryByExternalReferenceCode(
+				getLayoutPageTemplateEntryByExternalReferenceCode(
 					pageTemplateExternalReferenceCode,
 					GroupUtil.getStagingAwareGroupId(
 						contextCompany.getCompanyId(),
