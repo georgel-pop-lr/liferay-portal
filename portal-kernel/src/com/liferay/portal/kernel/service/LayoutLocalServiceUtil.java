@@ -1824,6 +1824,17 @@ public class LayoutLocalServiceUtil {
 			groupId, privateLayout, layoutId, themeId, colorSchemeId, css);
 	}
 
+	public static Layout updateMasterLayoutPageTemplateEntry(
+			long groupId, boolean privateLayout, long layoutId,
+			String masterLayoutPageTemplateEntryERC,
+			String masterLayoutPageTemplateEntryScopeERC)
+		throws PortalException {
+
+		return getService().updateMasterLayoutPageTemplateEntry(
+			groupId, privateLayout, layoutId, masterLayoutPageTemplateEntryERC,
+			masterLayoutPageTemplateEntryScopeERC);
+	}
+
 	/**
 	 * Updates the layout replacing its master layout page template entry
 	 * external reference code
@@ -2105,4 +2116,4 @@ public class LayoutLocalServiceUtil {
 	private static volatile LayoutLocalService _service;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:76729484
+// LIFERAY-SERVICE-BUILDER-HASH:1961837423
