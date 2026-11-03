@@ -730,6 +730,19 @@ public class DisplayPageTemplateResourceTest
 				"type",
 			LayoutPageTemplateEntryTestUtil.getMasterLayoutPageTemplateEntry(
 				serviceContext, WorkflowConstants.STATUS_DRAFT));
+
+		_assertProblemException(
+			"NOT_FOUND", null,
+			() ->
+				displayPageTemplateResource.
+					postSiteDisplayPageTemplatePageSpecification(
+						testGroup.getExternalReferenceCode(),
+						RandomTestUtil.randomString(),
+						new ContentPageSpecification() {
+							{
+								setType(() -> Type.CONTENT_PAGE_SPECIFICATION);
+							}
+						}));
 	}
 
 	@Override

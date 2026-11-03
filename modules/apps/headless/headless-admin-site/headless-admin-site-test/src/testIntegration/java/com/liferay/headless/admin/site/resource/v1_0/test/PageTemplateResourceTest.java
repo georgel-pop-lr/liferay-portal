@@ -424,6 +424,17 @@ public class PageTemplateResourceTest extends BasePageTemplateResourceTestCase {
 
 		_assertPostSitePageTemplatePageSpecificationProblemException(
 			layoutPageTemplateEntry.getExternalReferenceCode());
+
+		_assertProblemException(
+			"NOT_FOUND", null,
+			() -> pageTemplateResource.postSitePageTemplatePageSpecification(
+				testGroup.getExternalReferenceCode(),
+				RandomTestUtil.randomString(),
+				new ContentPageSpecification() {
+					{
+						setType(Type.CONTENT_PAGE_SPECIFICATION);
+					}
+				}));
 	}
 
 	@Override
