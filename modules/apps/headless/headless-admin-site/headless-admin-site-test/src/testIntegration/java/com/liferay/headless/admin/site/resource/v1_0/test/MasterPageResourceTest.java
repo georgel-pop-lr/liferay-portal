@@ -2686,10 +2686,10 @@ public class MasterPageResourceTest extends BaseMasterPageResourceTestCase {
 	private void _testPutSiteMasterPageWithThumbnailURLReferenceExternalReferenceCodeAndFileBase64()
 		throws Exception {
 
-		MasterPage postMasterPage = testPostSiteMasterPage_addMasterPage(
+		MasterPage masterPage = testPostSiteMasterPage_addMasterPage(
 			randomMasterPage());
 
-		Assert.assertNull(postMasterPage.getThumbnailURLReference());
+		Assert.assertNull(masterPage.getThumbnailURLReference());
 
 		FileEntry fileEntry = FileEntryTestUtil.addPreviewFileEntry(
 			testGroup, _portletFileRepository, getClass());
@@ -2703,7 +2703,7 @@ public class MasterPageResourceTest extends BaseMasterPageResourceTestCase {
 		thumbnailURLReference.setFileBase64(_thumbnail2Base64);
 
 		_putSiteMasterPageAndAssertThumbnailURLReference(
-			_thumbnail1Bytes, externalReferenceCode, postMasterPage,
+			_thumbnail1Bytes, externalReferenceCode, masterPage,
 			thumbnailURLReference);
 	}
 
