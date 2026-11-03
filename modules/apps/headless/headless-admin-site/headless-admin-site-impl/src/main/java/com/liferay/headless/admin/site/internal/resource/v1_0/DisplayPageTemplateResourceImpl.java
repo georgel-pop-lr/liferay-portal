@@ -121,11 +121,13 @@ public class DisplayPageTemplateResourceImpl
 			String displayPageTemplateExternalReferenceCode)
 		throws Exception {
 
-		_layoutPageTemplateEntryService.deleteLayoutPageTemplateEntry(
+		LayoutPageTemplateEntry layoutPageTemplateEntry =
 			_getLayoutPageTemplateEntry(
 				displayPageTemplateExternalReferenceCode,
-				_getDesignLibraryGroupId(designLibraryExternalReferenceCode)
-			).getLayoutPageTemplateEntryId());
+				_getDesignLibraryGroupId(designLibraryExternalReferenceCode));
+
+		_layoutPageTemplateEntryService.deleteLayoutPageTemplateEntry(
+			layoutPageTemplateEntry.getLayoutPageTemplateEntryId());
 	}
 
 	@Override
