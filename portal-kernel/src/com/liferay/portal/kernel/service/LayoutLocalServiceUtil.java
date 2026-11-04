@@ -1397,6 +1397,15 @@ public class LayoutLocalServiceUtil {
 			groupId, masterLayoutPageTemplateEntryERC);
 	}
 
+	public static int getMasterLayoutsCount(
+		long companyId, String masterLayoutPageTemplateEntryERC,
+		String masterLayoutPageTemplateEntryScopeERC) {
+
+		return getService().getMasterLayoutsCount(
+			companyId, masterLayoutPageTemplateEntryERC,
+			masterLayoutPageTemplateEntryScopeERC);
+	}
+
 	/**
 	 * Returns the layout ID to use for the next layout.
 	 *
@@ -2156,4 +2165,4 @@ public class LayoutLocalServiceUtil {
 	private static volatile LayoutLocalService _service;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-368504883
+// LIFERAY-SERVICE-BUILDER-HASH:1029998156

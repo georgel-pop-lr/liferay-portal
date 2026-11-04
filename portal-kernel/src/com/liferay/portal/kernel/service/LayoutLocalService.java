@@ -1171,6 +1171,11 @@ public interface LayoutLocalService
 	public int getMasterLayoutsCount(
 		long groupId, String masterLayoutPageTemplateEntryERC);
 
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public int getMasterLayoutsCount(
+		long companyId, String masterLayoutPageTemplateEntryERC,
+		String masterLayoutPageTemplateEntryScopeERC);
+
 	/**
 	 * Returns the layout ID to use for the next layout.
 	 *
@@ -1745,4 +1750,4 @@ public interface LayoutLocalService
 		throws E;
 
 }
-// LIFERAY-SERVICE-BUILDER-HASH:-1167632332
+// LIFERAY-SERVICE-BUILDER-HASH:244842589
