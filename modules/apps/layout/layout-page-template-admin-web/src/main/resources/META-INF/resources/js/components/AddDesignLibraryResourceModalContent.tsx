@@ -6,12 +6,14 @@
 import ClayButton from '@clayui/button';
 import ClayLoadingIndicator from '@clayui/loading-indicator';
 import ClayModal from '@clayui/modal';
-import React from 'react';
+import {openToast} from 'frontend-js-components-web';
+import {fetch, navigate} from 'frontend-js-web';
+import React, {useRef, useState} from 'react';
 
 import {MODAL_TYPES} from '../constants/modalTypes';
-import useAddDesignLibraryResource from '../hooks/useAddDesignLibraryResource';
 import {MappingType} from '../types/MappingTypes';
-import ContentTypeModalForm from './ContentTypeModalForm';
+import {ValidationError} from '../types/ValidationError';
+import ContentTypeModalForm, {validateForm} from './ContentTypeModalForm';
 
 interface Props {
 	closeModal: () => void;
@@ -28,13 +30,54 @@ export default function AddDesignLibraryResourceModalContent({
 	namespace,
 	title,
 }: Props) {
-	const {error, formRef, handleSubmit, loading} = useAddDesignLibraryResource(
-		{
-			closeModal,
-			formSubmitURL,
-			namespace,
+	const [error, setError] = useState<ValidationError>({});
+	const [loading, setLoading] = useState(false);
+
+	const formRef = useRef<HTMLFormElement>(null);
+
+	const handleSubmit = async (event: React.SyntheticEvent) => {
+		event.preventDefault();
+
+		const form = formRef.current!;
+
+		const validationError = validateForm(form, namespace);
+
+		if (Object.keys(validationError).length) {
+			setError(validationError);
+
+			return;
 		}
-	);
+
+		setLoading(true);
+
+		try {
+			const response = await fetch(formSubmitURL, {
+				body: new FormData(form),
+				method: 'POST',
+			});
+
+			const {error, redirectURL} = await response.json();
+
+			if (error) {
+				setError(typeof error === 'string' ? {name: error} : error);
+				setLoading(false);
+
+				return;
+			}
+
+			if (redirectURL) {
+				navigate(redirectURL, {beforeScreenFlip: closeModal});
+			}
+		}
+		catch {
+			setLoading(false);
+
+			openToast({
+				message: Liferay.Language.get('an-unexpected-error-occurred'),
+				type: 'danger',
+			});
+		}
+	};
 
 	return (
 		<>
