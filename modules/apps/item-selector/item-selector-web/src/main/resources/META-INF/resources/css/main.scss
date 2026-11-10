@@ -8,4 +8,12 @@
 	.item-selector .entry-selector {
 		cursor: pointer;
 	}
+
+	.item-selector .entry .card-type-asset:focus-visible {
+		border-radius: $card-border-radius;
+		box-shadow:
+			0 0 0 0.125rem $white,
+			0 0 0 0.25rem $primary-l0;
+		outline: 0;
+	}
 }

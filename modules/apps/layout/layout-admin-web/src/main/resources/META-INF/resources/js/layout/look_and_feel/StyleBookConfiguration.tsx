@@ -199,6 +199,13 @@ export default function StyleBookConfiguration({
 					<ClayInput
 						id={`${portletNamespace}styleBookEntry`}
 						onClick={handleChangeStyleBook}
+						onKeyDown={(event) => {
+							if (event.key === 'Enter') {
+								event.preventDefault();
+
+								handleChangeStyleBook();
+							}
+						}}
 						readOnly
 						value={styleBookEntry.name}
 					/>
