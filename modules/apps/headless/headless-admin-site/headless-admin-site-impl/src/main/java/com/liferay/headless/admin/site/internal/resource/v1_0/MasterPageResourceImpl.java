@@ -103,20 +103,7 @@ public class MasterPageResourceImpl
 		long groupId = _getDesignLibraryGroupId(
 			designLibraryExternalReferenceCode);
 
-		LayoutPageTemplateEntry layoutPageTemplateEntry =
-			_getLayoutPageTemplateEntry(
-				masterPageExternalReferenceCode, groupId);
-
-		int masterLayoutsCount = _layoutLocalService.getMasterLayoutsCount(
-			groupId, masterPageExternalReferenceCode);
-
-		if (masterLayoutsCount > 0) {
-			throw new RequiredLayoutPageTemplateEntryException(
-				"The master page is used by one or more pages");
-		}
-
-		_layoutPageTemplateEntryService.deleteLayoutPageTemplateEntry(
-			layoutPageTemplateEntry.getLayoutPageTemplateEntryId());
+		_deleteMasterPage(groupId, masterPageExternalReferenceCode);
 	}
 
 	@Override
@@ -128,20 +115,7 @@ public class MasterPageResourceImpl
 		long groupId = GroupUtil.getStagingAwareGroupId(
 			contextCompany.getCompanyId(), siteExternalReferenceCode);
 
-		LayoutPageTemplateEntry layoutPageTemplateEntry =
-			_getLayoutPageTemplateEntry(
-				masterPageExternalReferenceCode, groupId);
-
-		int masterLayoutsCount = _layoutLocalService.getMasterLayoutsCount(
-			groupId, masterPageExternalReferenceCode);
-
-		if (masterLayoutsCount > 0) {
-			throw new RequiredLayoutPageTemplateEntryException(
-				"The master page is used by one or more pages");
-		}
-
-		_layoutPageTemplateEntryService.deleteLayoutPageTemplateEntry(
-			layoutPageTemplateEntry.getLayoutPageTemplateEntryId());
+		_deleteMasterPage(groupId, masterPageExternalReferenceCode);
 	}
 
 	@Override
@@ -688,6 +662,26 @@ public class MasterPageResourceImpl
 				ServiceContextUtil.createServiceContext(
 					groupId, contextHttpServletRequest,
 					contextUser.getUserId())));
+	}
+
+	private void _deleteMasterPage(
+			long groupId, String masterPageExternalReferenceCode)
+		throws Exception {
+
+		LayoutPageTemplateEntry layoutPageTemplateEntry =
+			_getLayoutPageTemplateEntry(
+				masterPageExternalReferenceCode, groupId);
+
+		int masterLayoutsCount = _layoutLocalService.getMasterLayoutsCount(
+			groupId, masterPageExternalReferenceCode);
+
+		if (masterLayoutsCount > 0) {
+			throw new RequiredLayoutPageTemplateEntryException(
+				"The master page is used by one or more pages");
+		}
+
+		_layoutPageTemplateEntryService.deleteLayoutPageTemplateEntry(
+			layoutPageTemplateEntry.getLayoutPageTemplateEntryId());
 	}
 
 	private long _getDesignLibraryGroupId(
