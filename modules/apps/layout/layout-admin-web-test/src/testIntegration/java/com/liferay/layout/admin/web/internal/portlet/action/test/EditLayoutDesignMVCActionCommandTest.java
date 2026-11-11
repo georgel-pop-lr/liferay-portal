@@ -16,7 +16,9 @@ import com.liferay.layout.page.template.constants.LayoutPageTemplateEntryTypeCon
 import com.liferay.layout.page.template.model.LayoutPageTemplateEntry;
 import com.liferay.layout.page.template.service.LayoutPageTemplateEntryLocalService;
 import com.liferay.layout.page.template.test.util.DisplayPageTemplateTestUtil;
+import com.liferay.layout.page.template.test.util.LayoutPageTemplateTestUtil;
 import com.liferay.layout.test.util.ContentLayoutTestUtil;
+import com.liferay.layout.test.util.DesignLibraryTestUtil;
 import com.liferay.layout.test.util.LayoutTestUtil;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.LayoutNameException;
@@ -40,6 +42,7 @@ import com.liferay.portal.kernel.test.portlet.MockActionRequest;
 import com.liferay.portal.kernel.test.portlet.MockActionResponse;
 import com.liferay.portal.kernel.test.portlet.MockLiferayPortletActionRequest;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
+import com.liferay.portal.kernel.test.util.FeatureFlagTestUtil;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
@@ -58,6 +61,7 @@ import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.test.log.LogCapture;
 import com.liferay.portal.test.log.LogEntry;
 import com.liferay.portal.test.log.LoggerTestUtil;
+import com.liferay.portal.test.rule.FeatureFlag;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
@@ -339,6 +343,87 @@ public class EditLayoutDesignMVCActionCommandTest {
 						KEY_DESIGN_CONFIGURATION_MODIFIED)));
 	}
 
+	@FeatureFlag("LPD-57283")
+	@Test
+	@TestInfo("LPD-109973")
+	public void testUpdateLayoutWithDesignLibraryMasterLayout()
+		throws Exception {
+
+		FeatureFlagTestUtil.invokeFeatureFlagListeners(
+			_group.getCompanyId(), true, "LPD-57283");
+
+		Group designLibraryGroup = DesignLibraryTestUtil.addDesignLibraryGroup(
+			_group.getGroupId(), true);
+
+		LayoutPageTemplateEntry masterLayoutPageTemplateEntry =
+			LayoutPageTemplateTestUtil.addLayoutPageTemplateEntry(
+				designLibraryGroup.getGroupId(),
+				LayoutPageTemplateEntryTypeConstants.MASTER_LAYOUT,
+				WorkflowConstants.STATUS_APPROVED);
+
+		Layout layout = LayoutTestUtil.addTypeContentLayout(_group);
+
+		Layout draftLayout = layout.fetchDraftLayout();
+
+		_updateLayout(
+			draftLayout,
+			masterLayoutPageTemplateEntry.getExternalReferenceCode(),
+			designLibraryGroup.getExternalReferenceCode());
+
+		draftLayout = _layoutLocalService.getLayout(draftLayout.getPlid());
+
+		_assertMasterLayout(
+			designLibraryGroup, draftLayout, masterLayoutPageTemplateEntry);
+
+		_updateLayout(draftLayout, new MockMultipartHttpServletRequest());
+
+		draftLayout = _layoutLocalService.getLayout(draftLayout.getPlid());
+
+		Assert.assertEquals(
+			designLibraryGroup.getExternalReferenceCode(),
+			draftLayout.getMasterLayoutPageTemplateEntryScopeERC());
+		Assert.assertEquals(
+			masterLayoutPageTemplateEntry.getPlid(),
+			draftLayout.getMasterLayoutPlid());
+
+		masterLayoutPageTemplateEntry =
+			LayoutPageTemplateTestUtil.addLayoutPageTemplateEntry(
+				designLibraryGroup.getGroupId(),
+				LayoutPageTemplateEntryTypeConstants.MASTER_LAYOUT,
+				WorkflowConstants.STATUS_APPROVED);
+
+		_updateLayout(
+			draftLayout,
+			masterLayoutPageTemplateEntry.getExternalReferenceCode(),
+			designLibraryGroup.getExternalReferenceCode());
+
+		draftLayout = _layoutLocalService.getLayout(draftLayout.getPlid());
+
+		_assertMasterLayout(
+			designLibraryGroup, draftLayout, masterLayoutPageTemplateEntry);
+
+		Group disconnectedDesignLibraryGroup =
+			DesignLibraryTestUtil.addDesignLibraryGroup(
+				_group.getGroupId(), false);
+
+		LayoutPageTemplateEntry disconnectedMasterLayoutPageTemplateEntry =
+			LayoutPageTemplateTestUtil.addLayoutPageTemplateEntry(
+				disconnectedDesignLibraryGroup.getGroupId(),
+				LayoutPageTemplateEntryTypeConstants.MASTER_LAYOUT,
+				WorkflowConstants.STATUS_APPROVED);
+
+		_updateLayout(
+			draftLayout,
+			disconnectedMasterLayoutPageTemplateEntry.
+				getExternalReferenceCode(),
+			disconnectedDesignLibraryGroup.getExternalReferenceCode());
+
+		draftLayout = _layoutLocalService.getLayout(draftLayout.getPlid());
+
+		_assertMasterLayout(
+			designLibraryGroup, draftLayout, masterLayoutPageTemplateEntry);
+	}
+
 	@Test
 	@TestInfo("LPD-107747")
 	public void testUpdateLayoutWithIconWithoutPermissions() throws Exception {
@@ -389,6 +474,21 @@ public class EditLayoutDesignMVCActionCommandTest {
 							mockMultipartHttpServletRequest, null, null),
 						null, RandomTestUtil.randomString())));
 		}
+	}
+
+	private void _assertMasterLayout(
+		Group group, Layout layout,
+		LayoutPageTemplateEntry masterLayoutPageTemplateEntry) {
+
+		Assert.assertEquals(
+			masterLayoutPageTemplateEntry.getExternalReferenceCode(),
+			layout.getMasterLayoutPageTemplateEntryERC());
+		Assert.assertEquals(
+			group.getExternalReferenceCode(),
+			layout.getMasterLayoutPageTemplateEntryScopeERC());
+		Assert.assertEquals(
+			masterLayoutPageTemplateEntry.getPlid(),
+			layout.getMasterLayoutPlid());
 	}
 
 	private MockActionRequest _getMockActionRequest(Layout layout)
@@ -497,6 +597,45 @@ public class EditLayoutDesignMVCActionCommandTest {
 		Assert.assertEquals(
 			draftLayout.getStyleBookEntryERC(),
 			updatedDraftLayout.getStyleBookEntryERC());
+	}
+
+	private void _updateLayout(
+			Layout layout,
+			MockMultipartHttpServletRequest mockMultipartHttpServletRequest)
+		throws Exception {
+
+		mockMultipartHttpServletRequest.setContentType(
+			"multipart/form-data;boundary=" + System.currentTimeMillis());
+
+		ReflectionTestUtil.invoke(
+			_mvcActionCommand, "_updateLayout",
+			new Class<?>[] {
+				ActionRequest.class, ActionResponse.class,
+				UploadPortletRequest.class
+			},
+			_getMockActionRequest(layout), new MockActionResponse(),
+			UploadTestUtil.createUploadPortletRequest(
+				UploadTestUtil.createUploadServletRequest(
+					mockMultipartHttpServletRequest, null, null),
+				null, RandomTestUtil.randomString()));
+	}
+
+	private void _updateLayout(
+			Layout layout, String masterLayoutPageTemplateEntryERC,
+			String masterLayoutPageTemplateEntryScopeERC)
+		throws Exception {
+
+		MockMultipartHttpServletRequest mockMultipartHttpServletRequest =
+			new MockMultipartHttpServletRequest();
+
+		mockMultipartHttpServletRequest.addParameter(
+			"masterLayoutPageTemplateEntryERC",
+			masterLayoutPageTemplateEntryERC);
+		mockMultipartHttpServletRequest.addParameter(
+			"masterLayoutPageTemplateEntryScopeERC",
+			masterLayoutPageTemplateEntryScopeERC);
+
+		_updateLayout(layout, mockMultipartHttpServletRequest);
 	}
 
 	@Inject
