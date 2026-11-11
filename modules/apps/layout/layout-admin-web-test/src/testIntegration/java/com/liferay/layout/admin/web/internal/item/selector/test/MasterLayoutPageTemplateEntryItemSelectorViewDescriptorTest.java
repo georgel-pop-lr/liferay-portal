@@ -84,9 +84,36 @@ public class MasterLayoutPageTemplateEntryItemSelectorViewDescriptorTest {
 	}
 
 	@Test
+	@TestInfo("LPD-108824")
+	public void testGetItemDescriptor() throws Exception {
+		Group designLibraryGroup = DesignLibraryTestUtil.addDesignLibraryGroup(
+			_group.getGroupId(), true);
+
+		LayoutPageTemplateEntry layoutPageTemplateEntry =
+			LayoutPageTemplateTestUtil.addLayoutPageTemplateEntry(
+				designLibraryGroup.getGroupId(),
+				LayoutPageTemplateEntryTypeConstants.MASTER_LAYOUT,
+				WorkflowConstants.STATUS_APPROVED);
+
+		_layoutPageTemplateEntryLocalService.updateLayoutPageTemplateEntry(
+			layoutPageTemplateEntry.getLayoutPageTemplateEntryId(), true);
+
+		Object itemDescriptor = ReflectionTestUtil.invoke(
+			_getMasterLayoutPageTemplateEntryItemSelectorViewDescriptor(
+				designLibraryGroup, _group.getGroupId()),
+			"getItemDescriptor", new Class<?>[] {LayoutPageTemplateEntry.class},
+			layoutPageTemplateEntry);
+
+		Assert.assertTrue(
+			ReflectionTestUtil.getFieldValue(
+				itemDescriptor, "_defaultTemplate"));
+	}
+
+	@Test
 	@TestInfo("LPD-109972")
 	public void testGetSearchContainer() throws Exception {
 		_testGetSearchContainer();
+		_testGetSearchContainerWithDesignLibraryDefaultMasterLayout();
 		_testGetSearchContainerWithLayoutPrototypeGroup();
 	}
 
@@ -106,6 +133,22 @@ public class MasterLayoutPageTemplateEntryItemSelectorViewDescriptorTest {
 				_getMasterLayoutPageTemplateEntryItemSelectorViewDescriptor(
 					_group, _group.getGroupId()),
 				"isShowBreadcrumb", new Class<?>[0]));
+	}
+
+	private List<String> _getDefaultTemplateNames(Group group)
+		throws Exception {
+
+		SearchContainer<LayoutPageTemplateEntry> searchContainer =
+			ReflectionTestUtil.invoke(
+				_getMasterLayoutPageTemplateEntryItemSelectorViewDescriptor(
+					group, _group.getGroupId()),
+				"getSearchContainer", new Class<?>[0]);
+
+		return TransformUtil.transform(
+			ListUtil.filter(
+				searchContainer.getResults(),
+				LayoutPageTemplateEntry::isDefaultTemplate),
+			LayoutPageTemplateEntry::getName);
 	}
 
 	private Object _getMasterLayoutPageTemplateEntryItemSelectorViewDescriptor(
@@ -186,6 +229,28 @@ public class MasterLayoutPageTemplateEntryItemSelectorViewDescriptorTest {
 			_getNames(designLibraryGroup));
 		Assert.assertEquals(
 			Collections.emptyList(), _getNames(disconnectedDesignLibraryGroup));
+	}
+
+	private void _testGetSearchContainerWithDesignLibraryDefaultMasterLayout()
+		throws Exception {
+
+		Assert.assertEquals(
+			Arrays.asList("Blank"), _getDefaultTemplateNames(_group));
+
+		Group designLibraryGroup = DesignLibraryTestUtil.addDesignLibraryGroup(
+			_group.getGroupId(), true);
+
+		LayoutPageTemplateEntry layoutPageTemplateEntry =
+			LayoutPageTemplateTestUtil.addLayoutPageTemplateEntry(
+				designLibraryGroup.getGroupId(),
+				LayoutPageTemplateEntryTypeConstants.MASTER_LAYOUT,
+				WorkflowConstants.STATUS_APPROVED);
+
+		_layoutPageTemplateEntryLocalService.updateLayoutPageTemplateEntry(
+			layoutPageTemplateEntry.getLayoutPageTemplateEntryId(), true);
+
+		Assert.assertEquals(
+			Collections.emptyList(), _getDefaultTemplateNames(_group));
 	}
 
 	private void _testGetSearchContainerWithLayoutPrototypeGroup()
