@@ -6,9 +6,65 @@
 import {ClayButtonWithIcon} from '@clayui/button';
 import ClayForm, {ClayInput} from '@clayui/form';
 import ClayIcon from '@clayui/icon';
+import ClayLabel from '@clayui/label';
 import ClayLink from '@clayui/link';
+import ClaySticker from '@clayui/sticker';
 import {openSelectionModal} from 'frontend-js-components-web';
-import React, {useEffect, useState} from 'react';
+import {sub} from 'frontend-js-web';
+import React, {useState} from 'react';
+
+const DesignLibraryNameLabel = ({value}) => (
+	<ClayLabel
+		aria-label={sub(
+			Liferay.Language.get('master-from-x-design-library'),
+			value
+		)}
+		displayType="content-5"
+		inverse
+		large
+		withClose={false}
+	>
+		<ClayLabel.ItemBefore>
+			<ClaySticker className="bg-white rounded" size="xs">
+				<ClayIcon symbol="books-brush" />
+			</ClaySticker>
+		</ClayLabel.ItemBefore>
+
+		<ClayLabel.ItemExpand>{value}</ClayLabel.ItemExpand>
+	</ClayLabel>
+);
+
+function updateLookAndFeelVisibility(erc, portletNamespace) {
+	const customCSS = document.getElementById(`${portletNamespace}customCSS`);
+
+	if (customCSS) {
+		if (!erc) {
+			customCSS.classList.remove('hide');
+		}
+		else {
+			customCSS.classList.add('hide');
+		}
+	}
+
+	const themeContainer = document.getElementById(
+		`${portletNamespace}themeContainer`
+	);
+
+	if (themeContainer) {
+		const sheet = themeContainer.closest('.sheet');
+
+		if (!erc) {
+			sheet.classList.remove('hide');
+
+			sheet.removeAttribute('aria-hidden');
+		}
+		else {
+			sheet.classList.add('hide');
+
+			sheet.setAttribute('aria-hidden', 'true');
+		}
+	}
+}
 
 export default function MasterLayoutConfiguration({
 	changeMasterLayoutURL,
@@ -16,11 +72,15 @@ export default function MasterLayoutConfiguration({
 	isReadOnly,
 	masterLayoutName,
 	masterLayoutPageTemplateEntryERC,
+	masterLayoutPageTemplateEntryScopeERC,
+	masterLayoutPageTemplateEntryScopeLabel,
 	portletNamespace,
 }) {
 	const [masterLayout, setMasterLayout] = useState({
 		erc: masterLayoutPageTemplateEntryERC,
 		name: masterLayoutName,
+		scopeERC: masterLayoutPageTemplateEntryScopeERC,
+		scopeLabel: masterLayoutPageTemplateEntryScopeLabel,
 	});
 
 	const handleChangeMasterButtonClick = () => {
@@ -37,7 +97,16 @@ export default function MasterLayoutConfiguration({
 					setMasterLayout({
 						erc: itemValue.masterLayoutPageTemplateEntryERC,
 						name: itemValue.name,
+						scopeERC:
+							itemValue.masterLayoutPageTemplateEntryScopeERC,
+						scopeLabel:
+							itemValue.masterLayoutPageTemplateEntryScopeLabel,
 					});
+
+					updateLookAndFeelVisibility(
+						itemValue.masterLayoutPageTemplateEntryERC,
+						portletNamespace
+					);
 				}
 			},
 			selectEventName: `${portletNamespace}selectMasterLayout`,
@@ -45,40 +114,6 @@ export default function MasterLayoutConfiguration({
 			url: changeMasterLayoutURL,
 		});
 	};
-
-	useEffect(() => {
-		const customCSS = document.getElementById(
-			`${portletNamespace}customCSS`
-		);
-
-		if (customCSS) {
-			if (!masterLayout.erc) {
-				customCSS.classList.remove('hide');
-			}
-			else {
-				customCSS.classList.add('hide');
-			}
-		}
-
-		const themeContainer = document.getElementById(
-			`${portletNamespace}themeContainer`
-		);
-
-		if (themeContainer) {
-			const sheet = themeContainer.closest('.sheet');
-
-			if (!masterLayout.erc) {
-				sheet.classList.remove('hide');
-
-				sheet.removeAttribute('aria-hidden');
-			}
-			else {
-				sheet.classList.add('hide');
-
-				sheet.setAttribute('aria-hidden', 'true');
-			}
-		}
-	}, [masterLayout.erc, portletNamespace]);
 
 	return (
 		<>
@@ -88,21 +123,34 @@ export default function MasterLayoutConfiguration({
 				value={masterLayout.erc}
 			/>
 
+			<input
+				name={`${portletNamespace}masterLayoutPageTemplateEntryScopeERC`}
+				type="hidden"
+				value={masterLayout.scopeERC}
+			/>
+
 			<label htmlFor={`${portletNamespace}masterLayout`}>
 				{Liferay.Language.get('master')}
 			</label>
 
-			{editMasterLayoutURL && masterLayout.erc ? (
-				<div className="d-flex">
-					<ClayForm.Group className="c-mb-0 flex-grow-1">
-						<ClayInput
-							id={`${portletNamespace}masterLayout`}
-							onClick={handleChangeMasterButtonClick}
-							readOnly
-							value={masterLayout.name}
-						/>
-					</ClayForm.Group>
+			<div className="d-flex">
+				<ClayForm.Group className="c-mb-0 flex-grow-1">
+					<ClayInput
+						id={`${portletNamespace}masterLayout`}
+						onClick={handleChangeMasterButtonClick}
+						onKeyDown={(event) => {
+							if (event.key === 'Enter') {
+								event.preventDefault();
 
+								handleChangeMasterButtonClick();
+							}
+						}}
+						readOnly
+						value={masterLayout.name}
+					/>
+				</ClayForm.Group>
+
+				{editMasterLayoutURL && masterLayout.erc && (
 					<ClayLink
 						aria-label={Liferay.Language.get('edit-master')}
 						button={{monospaced: true}}
@@ -113,35 +161,21 @@ export default function MasterLayoutConfiguration({
 					>
 						<ClayIcon symbol="pencil" />
 					</ClayLink>
+				)}
 
-					<ClayButtonWithIcon
-						aria-label={Liferay.Language.get('change-master')}
-						className="c-ml-2"
-						disabled={isReadOnly}
-						displayType="secondary"
-						onClick={handleChangeMasterButtonClick}
-						symbol="change"
-					/>
-				</div>
-			) : (
-				<div className="d-flex">
-					<ClayForm.Group className="c-mb-0 flex-grow-1">
-						<ClayInput
-							id={`${portletNamespace}masterLayout`}
-							onClick={handleChangeMasterButtonClick}
-							readOnly
-							value={masterLayout.name}
-						/>
-					</ClayForm.Group>
+				<ClayButtonWithIcon
+					aria-label={Liferay.Language.get('change-master')}
+					className="c-ml-2"
+					disabled={isReadOnly}
+					displayType="secondary"
+					onClick={handleChangeMasterButtonClick}
+					symbol="change"
+				/>
+			</div>
 
-					<ClayButtonWithIcon
-						aria-label={Liferay.Language.get('change-master')}
-						className="c-ml-2"
-						disabled={isReadOnly}
-						displayType="secondary"
-						onClick={handleChangeMasterButtonClick}
-						symbol="change"
-					/>
+			{masterLayout.scopeLabel && (
+				<div className="mt-2">
+					<DesignLibraryNameLabel value={masterLayout.scopeLabel} />
 				</div>
 			)}
 		</>
