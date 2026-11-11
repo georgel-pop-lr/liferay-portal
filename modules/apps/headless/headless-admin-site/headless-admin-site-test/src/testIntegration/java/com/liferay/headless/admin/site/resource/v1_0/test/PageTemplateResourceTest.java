@@ -622,7 +622,7 @@ public class PageTemplateResourceTest extends BasePageTemplateResourceTestCase {
 				pageTemplateExternalReferenceCode,
 				new ContentPageSpecification() {
 					{
-						setType(() -> Type.CONTENT_PAGE_SPECIFICATION);
+						setType(Type.CONTENT_PAGE_SPECIFICATION);
 					}
 				}));
 	}
@@ -1580,7 +1580,7 @@ public class PageTemplateResourceTest extends BasePageTemplateResourceTestCase {
 									() -> StringPool.BLANK);
 							}
 						});
-					setType(() -> Type.CONTENT_PAGE_TEMPLATE);
+					setType(Type.CONTENT_PAGE_TEMPLATE);
 				}
 			};
 		}
@@ -1594,7 +1594,7 @@ public class PageTemplateResourceTest extends BasePageTemplateResourceTestCase {
 									() -> StringPool.BLANK);
 							}
 						});
-					setType(() -> Type.WIDGET_PAGE_TEMPLATE);
+					setType(Type.WIDGET_PAGE_TEMPLATE);
 				}
 			};
 		}
