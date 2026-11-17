@@ -135,20 +135,28 @@ public class MasterLayoutPageTemplateEntryItemSelectorViewDescriptorTest {
 				"isShowBreadcrumb", new Class<?>[0]));
 	}
 
-	private List<String> _getDefaultTemplateNames(Group group)
+	private List<String> _getDefaultTemplateNames(
+			Group group, long refererGroupId)
+		throws Exception {
+
+		return TransformUtil.transform(
+			ListUtil.filter(
+				_getLayoutPageTemplateEntries(group, refererGroupId),
+				LayoutPageTemplateEntry::isDefaultTemplate),
+			LayoutPageTemplateEntry::getName);
+	}
+
+	private List<LayoutPageTemplateEntry> _getLayoutPageTemplateEntries(
+			Group group, long refererGroupId)
 		throws Exception {
 
 		SearchContainer<LayoutPageTemplateEntry> searchContainer =
 			ReflectionTestUtil.invoke(
 				_getMasterLayoutPageTemplateEntryItemSelectorViewDescriptor(
-					group, _group.getGroupId()),
+					group, refererGroupId),
 				"getSearchContainer", new Class<?>[0]);
 
-		return TransformUtil.transform(
-			ListUtil.filter(
-				searchContainer.getResults(),
-				LayoutPageTemplateEntry::isDefaultTemplate),
-			LayoutPageTemplateEntry::getName);
+		return searchContainer.getResults();
 	}
 
 	private Object _getMasterLayoutPageTemplateEntryItemSelectorViewDescriptor(
@@ -186,14 +194,9 @@ public class MasterLayoutPageTemplateEntryItemSelectorViewDescriptorTest {
 	}
 
 	private List<String> _getNames(Group group) throws Exception {
-		SearchContainer<LayoutPageTemplateEntry> searchContainer =
-			ReflectionTestUtil.invoke(
-				_getMasterLayoutPageTemplateEntryItemSelectorViewDescriptor(
-					group, _group.getGroupId()),
-				"getSearchContainer", new Class<?>[0]);
-
 		return TransformUtil.transform(
-			searchContainer.getResults(), LayoutPageTemplateEntry::getName);
+			_getLayoutPageTemplateEntries(group, _group.getGroupId()),
+			LayoutPageTemplateEntry::getName);
 	}
 
 	private void _testGetSearchContainer() throws Exception {
@@ -235,7 +238,8 @@ public class MasterLayoutPageTemplateEntryItemSelectorViewDescriptorTest {
 		throws Exception {
 
 		Assert.assertEquals(
-			Arrays.asList("Blank"), _getDefaultTemplateNames(_group));
+			Arrays.asList("Blank"),
+			_getDefaultTemplateNames(_group, _group.getGroupId()));
 
 		Group designLibraryGroup = DesignLibraryTestUtil.addDesignLibraryGroup(
 			_group.getGroupId(), true);
@@ -250,7 +254,8 @@ public class MasterLayoutPageTemplateEntryItemSelectorViewDescriptorTest {
 			layoutPageTemplateEntry.getLayoutPageTemplateEntryId(), true);
 
 		Assert.assertEquals(
-			Collections.emptyList(), _getDefaultTemplateNames(_group));
+			Collections.emptyList(),
+			_getDefaultTemplateNames(_group, _group.getGroupId()));
 	}
 
 	private void _testGetSearchContainerWithLayoutPrototypeGroup()
@@ -275,19 +280,9 @@ public class MasterLayoutPageTemplateEntryItemSelectorViewDescriptorTest {
 			_layoutPrototypeLocalService.getLayoutPrototype(
 				widgetPageLayoutPageTemplateEntry.getLayoutPrototypeId());
 
-		SearchContainer<LayoutPageTemplateEntry> searchContainer =
-			ReflectionTestUtil.invoke(
-				_getMasterLayoutPageTemplateEntryItemSelectorViewDescriptor(
-					layoutPrototype.getGroup(), 0),
-				"getSearchContainer", new Class<?>[0]);
-
 		Assert.assertEquals(
 			Arrays.asList(layoutPageTemplateEntry.getName()),
-			TransformUtil.transform(
-				ListUtil.filter(
-					searchContainer.getResults(),
-					LayoutPageTemplateEntry::isDefaultTemplate),
-				LayoutPageTemplateEntry::getName));
+			_getDefaultTemplateNames(layoutPrototype.getGroup(), 0));
 	}
 
 	@DeleteAfterTestRun
