@@ -93,6 +93,24 @@ const STYLE_BOOK_VIEWS: IFrontendDataSetProps['views'] = [
 	},
 ];
 
+interface IStyleBookDesignLibraryNameLabelProps {
+	value: string;
+}
+
+function StyleBookDesignLibraryNameLabel({
+	value,
+}: IStyleBookDesignLibraryNameLabelProps) {
+	return (
+		<DesignLibraryNameLabel
+			ariaLabel={sub(
+				Liferay.Language.get('style-book-from-x-design-library'),
+				value
+			)}
+			value={value}
+		/>
+	);
+}
+
 export default function StyleBookConfiguration({
 	changeStyleBookURL,
 	isReadOnly,
@@ -206,13 +224,7 @@ export default function StyleBookConfiguration({
 
 			{styleBookEntry.scope?.label && (
 				<div className="mt-2">
-					<DesignLibraryNameLabel
-						ariaLabel={sub(
-							Liferay.Language.get(
-								'style-book-from-x-design-library'
-							),
-							styleBookEntry.scope.label
-						)}
+					<StyleBookDesignLibraryNameLabel
 						value={styleBookEntry.scope.label}
 					/>
 				</div>
@@ -231,13 +243,7 @@ export default function StyleBookConfiguration({
 										value: Scope | null;
 									}) =>
 										value?.label ? (
-											<DesignLibraryNameLabel
-												ariaLabel={sub(
-													Liferay.Language.get(
-														'style-book-from-x-design-library'
-													),
-													value.label
-												)}
+											<StyleBookDesignLibraryNameLabel
 												value={value.label}
 											/>
 										) : null,
